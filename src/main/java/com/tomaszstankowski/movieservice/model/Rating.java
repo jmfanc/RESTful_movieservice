@@ -15,14 +15,28 @@ import java.util.UUID;
 @EqualsAndHashCode(of = "id")
 @Entity(name = "RATINGS")
 public class Rating implements Serializable {
+
     @Id
     private final UUID id = UUID.randomUUID();
-    private final short rating;
-    private final Date date;
+
+    private short rating;
+
+    private Date date = new Date();
+
     @ManyToOne
     @JoinColumn(name = "SHOW_ID", nullable = false)
-    private final Show show;
+    private Show show;
+
     @ManyToOne
-    @JoinColumn(name = "LOGIN", nullable = false)
-    private final User user;
+    @JoinColumn(name = "USER_LOGIN", nullable = false)
+    private User user;
+
+    public Rating() {
+    }
+
+    public Rating(short rating, Show show, User user) {
+        this.rating = rating;
+        this.show = show;
+        this.user = user;
+    }
 }

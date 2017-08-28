@@ -14,13 +14,27 @@ import java.util.UUID;
 @EqualsAndHashCode(of = "id")
 @Entity(name = "PERFORMANCES")
 public class Performance implements Serializable {
+
     @Id
     private final UUID id = UUID.randomUUID();
+
+    private String role;
+
     @ManyToOne
     @JoinColumn(name = "ACTOR_ID", nullable = false)
-    private final Actor actor;
+    private Actor actor;
+
     @ManyToOne
     @JoinColumn(name = "SHOW_ID", nullable = false)
-    private final Show show;
-    private String role;
+    private Show show;
+
+    public Performance() {
+    }
+
+    public Performance(String role, Actor actor, Show show) {
+        this.role = role;
+        this.actor = actor;
+        this.show = show;
+    }
+
 }
