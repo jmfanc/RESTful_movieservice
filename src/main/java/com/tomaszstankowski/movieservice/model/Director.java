@@ -1,5 +1,6 @@
 package com.tomaszstankowski.movieservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -16,6 +17,7 @@ import java.util.List;
 public class Director extends Person {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "director")
+    @JsonIgnore
     private List<Show> shows = new ArrayList<>();
 
     public Director() {

@@ -2,15 +2,17 @@ package com.tomaszstankowski.movieservice.controller.user;
 
 import com.tomaszstankowski.movieservice.model.User;
 import com.tomaszstankowski.movieservice.repository.UserRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
-@RequestMapping(path = "/user")
+@RequestMapping(path = "/users")
 public class UserController {
     private final UserRepository repository;
 
@@ -26,6 +28,11 @@ public class UserController {
         return user;
     }
 
+    @GetMapping
+    public List<User> getUsersByName(@Param("name") String name) {
+        return repository.findUsersByNameContains(name);
+    }
+
     @PostMapping(path = "/add")
     ResponseEntity<?> addUser(@RequestBody User body) {
         validateUser(body);
@@ -39,7 +46,7 @@ public class UserController {
         );
         repository.save(user);
         URI location = ServletUriComponentsBuilder
-                .fromPath("/user/{login}")
+                .fromPath("/users/{login}")
                 .buildAndExpand(user.getLogin()).toUri();
         return ResponseEntity.created(location).build();
     }

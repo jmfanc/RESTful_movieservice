@@ -1,5 +1,6 @@
 package com.tomaszstankowski.movieservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -19,6 +20,7 @@ public class Actor extends Person implements Serializable {
     private short height;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "actor")
+    @JsonIgnore
     private List<Performance> performances = new ArrayList<>();
 
     public Actor() {

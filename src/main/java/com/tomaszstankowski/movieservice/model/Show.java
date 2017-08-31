@@ -1,6 +1,7 @@
 package com.tomaszstankowski.movieservice.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -36,13 +37,15 @@ public abstract class Show {
     private List<Genre> genres = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "show")
+    @JsonIgnore
     private List<Performance> performances = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "show")
+    @JsonIgnore
     private List<Rating> ratings = new ArrayList<>();
 
     @ManyToOne
-    @JoinColumn(name = "DIRECTOR_ID", nullable = false)
+    @JoinColumn(name = "DIRECTOR_ID")
     private Director director;
 
     public Show() {
