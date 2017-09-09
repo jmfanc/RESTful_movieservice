@@ -6,10 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Data
 @EqualsAndHashCode(of = "id")
@@ -18,7 +15,8 @@ import java.util.UUID;
 public abstract class Show {
 
     @Id
-    private final UUID id = UUID.randomUUID();
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
     private String title;
 
@@ -26,36 +24,45 @@ public abstract class Show {
 
     @Column(name = "RELEASE_DATE")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @Temporal(TemporalType.DATE)
     private Date releaseDate;
 
     private String location;
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "SHOWS_GENRES",
             joinColumns = @JoinColumn(name = "SHOW_ID", referencedColumnName = "ID"),
             inverseJoinColumns = @JoinColumn(name = "GENRE_NAME", referencedColumnName = "NAME"))
-    private List<Genre> genres = new ArrayList<>();
+    private Set<Genre> genres = new HashSet<>();
+
+    public void addGenre(Genre genre) {
+        genre.getShows().add(this);
+        genres.add(genre);
+    }
+
+    public void removeGenre(Genre genre) {
+        genre.getShows().remove(this);
+        genres.remove(genre);
+    }
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "show")
     @JsonIgnore
-    private List<Performance> performances = new ArrayList<>();
+    private List<Participation> participations = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "show")
     @JsonIgnore
     private List<Rating> ratings = new ArrayList<>();
 
-    @ManyToOne
-    @JoinColumn(name = "DIRECTOR_ID")
-    private Director director;
-
     public Show() {
     }
 
-    public Show(String title, String description, Date releaseDate, String location, Director director) {
+    public Show(String title,
+                String description,
+                Date releaseDate,
+                String location) {
         this.title = title;
         this.description = description;
         this.releaseDate = releaseDate;
         this.location = location;
-        this.director = director;
     }
 }

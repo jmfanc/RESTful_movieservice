@@ -7,302 +7,292 @@
       <Visible>1</Visible>
     </schema>
     <schema id="3" parent="1" name="information_schema"/>
-    <table id="4" parent="2" name="actors"/>
-    <table id="5" parent="2" name="directors"/>
-    <table id="6" parent="2" name="genres"/>
-    <table id="7" parent="2" name="movies"/>
-    <table id="8" parent="2" name="people"/>
-    <table id="9" parent="2" name="performances"/>
-    <table id="10" parent="2" name="ratings"/>
-    <table id="11" parent="2" name="series"/>
-    <table id="12" parent="2" name="shows"/>
-    <table id="13" parent="2" name="shows_genres"/>
-    <table id="14" parent="2" name="users"/>
-    <column id="15" parent="4" name="height">
-      <Position>1</Position>
-      <DataType>smallint(6)|0</DataType>
-      <NotNull>1</NotNull>
-    </column>
-    <column id="16" parent="4" name="id">
-      <Position>2</Position>
-      <DataType>binary(255)|0</DataType>
-      <NotNull>1</NotNull>
-    </column>
-    <key id="17" parent="4" name="PRIMARY">
-      <NameSurrogate>1</NameSurrogate>
-      <ColNames>id</ColNames>
-      <Primary>1</Primary>
-    </key>
-    <foreign-key id="18" parent="4" name="FKjjm6bq6air24oqlhw7ssnfhju">
-      <ColNames>id</ColNames>
-      <RefSchemaName>db_movieservice</RefSchemaName>
-      <RefTableName>people</RefTableName>
-      <RefColNames>id</RefColNames>
-    </foreign-key>
-    <column id="19" parent="5" name="id">
-      <Position>1</Position>
-      <DataType>binary(255)|0</DataType>
-      <NotNull>1</NotNull>
-    </column>
-    <key id="20" parent="5" name="PRIMARY">
-      <NameSurrogate>1</NameSurrogate>
-      <ColNames>id</ColNames>
-      <Primary>1</Primary>
-    </key>
-    <foreign-key id="21" parent="5" name="FKptbvqa9lryvhiciuyxgdr213f">
-      <ColNames>id</ColNames>
-      <RefSchemaName>db_movieservice</RefSchemaName>
-      <RefTableName>people</RefTableName>
-      <RefColNames>id</RefColNames>
-    </foreign-key>
-    <column id="22" parent="6" name="genre">
+    <table id="4" parent="2" name="genres"/>
+    <table id="5" parent="2" name="movies"/>
+    <table id="6" parent="2" name="participations"/>
+    <table id="7" parent="2" name="people"/>
+    <table id="8" parent="2" name="people_proffesions"/>
+    <table id="9" parent="2" name="ratings"/>
+    <table id="10" parent="2" name="series"/>
+    <table id="11" parent="2" name="shows"/>
+    <table id="12" parent="2" name="shows_genres"/>
+    <table id="13" parent="2" name="users"/>
+    <column id="14" parent="4" name="name">
       <Position>1</Position>
       <DataType>varchar(255)|0</DataType>
       <NotNull>1</NotNull>
     </column>
-    <key id="23" parent="6" name="PRIMARY">
+    <key id="15" parent="4" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
-      <ColNames>genre</ColNames>
+      <ColNames>name</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="24" parent="7" name="boxoffice">
+    <column id="16" parent="5" name="boxoffice">
       <Position>1</Position>
       <DataType>int(11)|0</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="25" parent="7" name="duration">
+    <column id="17" parent="5" name="duration">
       <Position>2</Position>
       <DataType>smallint(6)|0</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="26" parent="7" name="id">
+    <column id="18" parent="5" name="id">
       <Position>3</Position>
-      <DataType>binary(255)|0</DataType>
+      <DataType>bigint(20)|0</DataType>
       <NotNull>1</NotNull>
     </column>
-    <key id="27" parent="7" name="PRIMARY">
+    <key id="19" parent="5" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <foreign-key id="28" parent="7" name="FK2f78kolfstynig77881ipeu2i">
+    <foreign-key id="20" parent="5" name="FK2f78kolfstynig77881ipeu2i">
       <ColNames>id</ColNames>
       <RefSchemaName>db_movieservice</RefSchemaName>
       <RefTableName>shows</RefTableName>
       <RefColNames>id</RefColNames>
     </foreign-key>
-    <column id="29" parent="8" name="id">
+    <column id="21" parent="6" name="id">
+      <Position>1</Position>
+      <DataType>bigint(20)|0</DataType>
+      <NotNull>1</NotNull>
+      <SequenceIdentity>1</SequenceIdentity>
+    </column>
+    <column id="22" parent="6" name="info">
+      <Position>2</Position>
+      <DataType>varchar(255)|0</DataType>
+    </column>
+    <column id="23" parent="6" name="role">
+      <Position>3</Position>
+      <DataType>int(11)|0</DataType>
+    </column>
+    <column id="24" parent="6" name="performer_id">
+      <Position>4</Position>
+      <DataType>binary(255)|0</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <column id="25" parent="6" name="show_id">
+      <Position>5</Position>
+      <DataType>bigint(20)|0</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <index id="26" parent="6" name="FK4hjrfc8ylvgcqd234d87oyi0y">
+      <ColNames>show_id</ColNames>
+    </index>
+    <index id="27" parent="6" name="FKj7ra3g1ukwyov5vws0ui947mv">
+      <ColNames>performer_id</ColNames>
+    </index>
+    <key id="28" parent="6" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <ColNames>id</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <foreign-key id="29" parent="6" name="FKj7ra3g1ukwyov5vws0ui947mv">
+      <ColNames>performer_id</ColNames>
+      <RefSchemaName>db_movieservice</RefSchemaName>
+      <RefTableName>people</RefTableName>
+      <RefColNames>id</RefColNames>
+    </foreign-key>
+    <foreign-key id="30" parent="6" name="FK4hjrfc8ylvgcqd234d87oyi0y">
+      <ColNames>show_id</ColNames>
+      <RefSchemaName>db_movieservice</RefSchemaName>
+      <RefTableName>shows</RefTableName>
+      <RefColNames>id</RefColNames>
+    </foreign-key>
+    <column id="31" parent="7" name="id">
       <Position>1</Position>
       <DataType>binary(255)|0</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="30" parent="8" name="birth_date">
+    <column id="32" parent="7" name="birth_date">
       <Position>2</Position>
       <DataType>datetime|0</DataType>
     </column>
-    <column id="31" parent="8" name="birth_place">
+    <column id="33" parent="7" name="birth_place">
       <Position>3</Position>
       <DataType>varchar(255)|0</DataType>
     </column>
-    <column id="32" parent="8" name="name">
+    <column id="34" parent="7" name="name">
       <Position>4</Position>
       <DataType>varchar(255)|0</DataType>
     </column>
-    <column id="33" parent="8" name="sex">
+    <column id="35" parent="7" name="sex">
       <Position>5</Position>
       <DataType>varchar(255)|0</DataType>
     </column>
-    <key id="34" parent="8" name="PRIMARY">
+    <key id="36" parent="7" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="35" parent="9" name="id">
+    <column id="37" parent="8" name="people_id">
       <Position>1</Position>
       <DataType>binary(255)|0</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="36" parent="9" name="role">
+    <column id="38" parent="8" name="proffesion">
       <Position>2</Position>
       <DataType>varchar(255)|0</DataType>
     </column>
-    <column id="37" parent="9" name="actor_id">
-      <Position>3</Position>
-      <DataType>binary(255)|0</DataType>
-      <NotNull>1</NotNull>
-    </column>
-    <column id="38" parent="9" name="show_id">
-      <Position>4</Position>
-      <DataType>binary(255)|0</DataType>
-      <NotNull>1</NotNull>
-    </column>
-    <index id="39" parent="9" name="FKoqc3mii6awc79one2x1ngmfkb">
-      <ColNames>show_id</ColNames>
+    <index id="39" parent="8" name="FKb83sswdxw2ahd1ydti7sn8d0v">
+      <ColNames>people_id</ColNames>
     </index>
-    <index id="40" parent="9" name="FKpf6y5plpj0nlaxkkoafv0pjwg">
-      <ColNames>actor_id</ColNames>
-    </index>
-    <key id="41" parent="9" name="PRIMARY">
-      <NameSurrogate>1</NameSurrogate>
-      <ColNames>id</ColNames>
-      <Primary>1</Primary>
-    </key>
-    <foreign-key id="42" parent="9" name="FKpf6y5plpj0nlaxkkoafv0pjwg">
-      <ColNames>actor_id</ColNames>
+    <foreign-key id="40" parent="8" name="FKb83sswdxw2ahd1ydti7sn8d0v">
+      <ColNames>people_id</ColNames>
       <RefSchemaName>db_movieservice</RefSchemaName>
-      <RefTableName>actors</RefTableName>
+      <RefTableName>people</RefTableName>
       <RefColNames>id</RefColNames>
     </foreign-key>
-    <foreign-key id="43" parent="9" name="FKoqc3mii6awc79one2x1ngmfkb">
-      <ColNames>show_id</ColNames>
-      <RefSchemaName>db_movieservice</RefSchemaName>
-      <RefTableName>shows</RefTableName>
-      <RefColNames>id</RefColNames>
-    </foreign-key>
-    <column id="44" parent="10" name="id">
+    <column id="41" parent="9" name="id">
       <Position>1</Position>
-      <DataType>binary(255)|0</DataType>
+      <DataType>bigint(20)|0</DataType>
       <NotNull>1</NotNull>
+      <SequenceIdentity>1</SequenceIdentity>
     </column>
-    <column id="45" parent="10" name="date">
+    <column id="42" parent="9" name="date">
       <Position>2</Position>
       <DataType>datetime|0</DataType>
     </column>
-    <column id="46" parent="10" name="rating">
+    <column id="43" parent="9" name="rating">
       <Position>3</Position>
       <DataType>smallint(6)|0</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="47" parent="10" name="show_id">
+    <column id="44" parent="9" name="show_id">
       <Position>4</Position>
-      <DataType>binary(255)|0</DataType>
+      <DataType>bigint(20)|0</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="48" parent="10" name="login">
+    <column id="45" parent="9" name="user_login">
       <Position>5</Position>
       <DataType>varchar(255)|0</DataType>
       <NotNull>1</NotNull>
     </column>
-    <index id="49" parent="10" name="FKbcn4o7xq8b98sojq48cxt9rya">
-      <ColNames>login</ColNames>
+    <index id="46" parent="9" name="FK3qrk7eoifenegr5bdkprrxibc">
+      <ColNames>user_login</ColNames>
     </index>
-    <index id="50" parent="10" name="FKgco0aj3f4xu5sambmtr8q0124">
+    <index id="47" parent="9" name="FKgco0aj3f4xu5sambmtr8q0124">
       <ColNames>show_id</ColNames>
     </index>
-    <key id="51" parent="10" name="PRIMARY">
+    <key id="48" parent="9" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <foreign-key id="52" parent="10" name="FKgco0aj3f4xu5sambmtr8q0124">
+    <foreign-key id="49" parent="9" name="FKgco0aj3f4xu5sambmtr8q0124">
       <ColNames>show_id</ColNames>
       <RefSchemaName>db_movieservice</RefSchemaName>
       <RefTableName>shows</RefTableName>
       <RefColNames>id</RefColNames>
     </foreign-key>
-    <foreign-key id="53" parent="10" name="FKbcn4o7xq8b98sojq48cxt9rya">
-      <ColNames>login</ColNames>
+    <foreign-key id="50" parent="9" name="FK3qrk7eoifenegr5bdkprrxibc">
+      <ColNames>user_login</ColNames>
       <RefSchemaName>db_movieservice</RefSchemaName>
       <RefTableName>users</RefTableName>
       <RefColNames>login</RefColNames>
     </foreign-key>
-    <column id="54" parent="11" name="seasons">
+    <column id="51" parent="10" name="seasons">
       <Position>1</Position>
       <DataType>smallint(6)|0</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="55" parent="11" name="id">
+    <column id="52" parent="10" name="id">
       <Position>2</Position>
-      <DataType>binary(255)|0</DataType>
+      <DataType>bigint(20)|0</DataType>
       <NotNull>1</NotNull>
     </column>
-    <key id="56" parent="11" name="PRIMARY">
+    <key id="53" parent="10" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <foreign-key id="57" parent="11" name="FKodue3ym3vstvmk5kn6ovunhuy">
+    <foreign-key id="54" parent="10" name="FKodue3ym3vstvmk5kn6ovunhuy">
       <ColNames>id</ColNames>
       <RefSchemaName>db_movieservice</RefSchemaName>
       <RefTableName>shows</RefTableName>
       <RefColNames>id</RefColNames>
     </foreign-key>
-    <column id="58" parent="12" name="id">
+    <column id="55" parent="11" name="id">
       <Position>1</Position>
-      <DataType>binary(255)|0</DataType>
+      <DataType>bigint(20)|0</DataType>
       <NotNull>1</NotNull>
+      <SequenceIdentity>1</SequenceIdentity>
     </column>
-    <column id="59" parent="12" name="description">
+    <column id="56" parent="11" name="description">
       <Position>2</Position>
       <DataType>varchar(255)|0</DataType>
     </column>
-    <column id="60" parent="12" name="location">
+    <column id="57" parent="11" name="location">
       <Position>3</Position>
       <DataType>varchar(255)|0</DataType>
     </column>
-    <column id="61" parent="12" name="release_date">
+    <column id="58" parent="11" name="release_date">
       <Position>4</Position>
-      <DataType>datetime|0</DataType>
+      <DataType>date|0</DataType>
     </column>
-    <column id="62" parent="12" name="title">
+    <column id="59" parent="11" name="title">
       <Position>5</Position>
       <DataType>varchar(255)|0</DataType>
     </column>
-    <key id="63" parent="12" name="PRIMARY">
+    <key id="60" parent="11" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="64" parent="13" name="shows_id">
+    <column id="61" parent="12" name="show_id">
       <Position>1</Position>
-      <DataType>binary(255)|0</DataType>
+      <DataType>bigint(20)|0</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="65" parent="13" name="genres_genre">
+    <column id="62" parent="12" name="genre_name">
       <Position>2</Position>
       <DataType>varchar(255)|0</DataType>
       <NotNull>1</NotNull>
     </column>
-    <index id="66" parent="13" name="FKchcmaklkxvol5e60ouk6tawfd">
-      <ColNames>shows_id</ColNames>
+    <index id="63" parent="12" name="FKi52p6y0nlf6b34b1qv0uwarjb">
+      <ColNames>genre_name</ColNames>
     </index>
-    <index id="67" parent="13" name="FKrdmsbcx1a6g91ciraj4pey88x">
-      <ColNames>genres_genre</ColNames>
-    </index>
-    <foreign-key id="68" parent="13" name="FKchcmaklkxvol5e60ouk6tawfd">
-      <ColNames>shows_id</ColNames>
+    <key id="64" parent="12" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <ColNames>show_id
+genre_name</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <foreign-key id="65" parent="12" name="FKhsapbnl7nh6sjsj2uhryhaq9x">
+      <ColNames>show_id</ColNames>
       <RefSchemaName>db_movieservice</RefSchemaName>
       <RefTableName>shows</RefTableName>
       <RefColNames>id</RefColNames>
     </foreign-key>
-    <foreign-key id="69" parent="13" name="FKrdmsbcx1a6g91ciraj4pey88x">
-      <ColNames>genres_genre</ColNames>
+    <foreign-key id="66" parent="12" name="FKi52p6y0nlf6b34b1qv0uwarjb">
+      <ColNames>genre_name</ColNames>
       <RefSchemaName>db_movieservice</RefSchemaName>
       <RefTableName>genres</RefTableName>
-      <RefColNames>genre</RefColNames>
+      <RefColNames>name</RefColNames>
     </foreign-key>
-    <column id="70" parent="14" name="login">
+    <column id="67" parent="13" name="login">
       <Position>1</Position>
       <DataType>varchar(255)|0</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="71" parent="14" name="joined">
+    <column id="68" parent="13" name="joined">
       <Position>2</Position>
-      <DataType>datetime|0</DataType>
+      <DataType>date|0</DataType>
     </column>
-    <column id="72" parent="14" name="mail">
+    <column id="69" parent="13" name="mail">
       <Position>3</Position>
       <DataType>varchar(255)|0</DataType>
     </column>
-    <column id="73" parent="14" name="name">
+    <column id="70" parent="13" name="name">
       <Position>4</Position>
       <DataType>varchar(255)|0</DataType>
     </column>
-    <column id="74" parent="14" name="sex">
+    <column id="71" parent="13" name="sex">
       <Position>5</Position>
       <DataType>varchar(255)|0</DataType>
     </column>
-    <key id="75" parent="14" name="PRIMARY">
+    <key id="72" parent="13" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>login</ColNames>
       <Primary>1</Primary>

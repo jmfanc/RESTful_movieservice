@@ -149,7 +149,7 @@ public class UserControllerTest {
 
     @Test
     public void deleteMethodRemovesObjectFromDB() throws Exception {
-        mockMvc.perform(delete("/users/krzysiek21"))
+        mockMvc.perform(delete("/users/krzysiek21/delete"))
                 .andExpect(status().isNoContent());
         assertNull(userRepository.findOne("krzysiek21"));
     }

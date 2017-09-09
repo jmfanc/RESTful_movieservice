@@ -19,9 +19,13 @@ public class Movie extends Show implements Serializable {
     public Movie() {
     }
 
-    public Movie(String title, String description, Date releaseDate, String location, Director director,
-                 short duration, int boxoffice) {
-        super(title, description, releaseDate, location, director);
+    public Movie(String title,
+                 String description,
+                 Date releaseDate,
+                 String location,
+                 short duration,
+                 int boxoffice) {
+        super(title, description, releaseDate, location);
         this.duration = duration;
         this.boxoffice = boxoffice;
     }

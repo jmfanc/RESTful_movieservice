@@ -6,15 +6,25 @@ import lombok.Data;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Entity(name = "GENRES")
-public class Genre {
+public class Genre implements Serializable {
+
     @Id
     private String name;
+
     @ManyToMany(mappedBy = "genres")
     @JsonIgnore
-    private List<Show> shows = new ArrayList<>();
+    private Set<Show> shows = new HashSet<>();
+
+    public Genre() {
+    }
+
+    public Genre(String name) {
+        this.name = name;
+    }
 }

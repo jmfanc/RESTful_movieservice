@@ -3,13 +3,9 @@ package com.tomaszstankowski.movieservice.model;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.UUID;
 
 @Data
 @EqualsAndHashCode(of = "id")
@@ -17,7 +13,8 @@ import java.util.UUID;
 public class Rating implements Serializable {
 
     @Id
-    private final UUID id = UUID.randomUUID();
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
     private short rating;
 
