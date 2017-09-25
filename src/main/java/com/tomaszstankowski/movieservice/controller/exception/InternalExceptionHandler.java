@@ -1,9 +1,6 @@
 package com.tomaszstankowski.movieservice.controller.exception;
 
-import com.tomaszstankowski.movieservice.service.exception.InvalidShowException;
-import com.tomaszstankowski.movieservice.service.exception.InvalidUserException;
-import com.tomaszstankowski.movieservice.service.exception.UserAlreadyExistsException;
-import com.tomaszstankowski.movieservice.service.exception.UserNotFoundException;
+import com.tomaszstankowski.movieservice.service.exception.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +12,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class InternalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(UserNotFoundException.class)
+    @ExceptionHandler(value = {UserNotFoundException.class, ShowNotFoundException.class})
     public ResponseEntity<Object> handleResourceNotFoundExceptions(RuntimeException ex, WebRequest request) {
         return handleExceptionInternal(
                 ex,
@@ -35,7 +32,7 @@ public class InternalExceptionHandler extends ResponseEntityExceptionHandler {
                 request);
     }
 
-    @ExceptionHandler(value = {UserAlreadyExistsException.class})
+    @ExceptionHandler(value = {UserAlreadyExistsException.class, ShowAlreadyExistsException.class})
     public ResponseEntity<Object> handleConflictExceptions(RuntimeException ex, WebRequest request) {
         return handleExceptionInternal(
                 ex,

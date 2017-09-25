@@ -25,7 +25,7 @@ public class Person implements Serializable {
     private String name;
 
     @Column(name = "BIRTH_DATE")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(timezone = "Europe/Paris", shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date birthDate;
 
     @Column(name = "BIRTH_PLACE")

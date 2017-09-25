@@ -26,7 +26,7 @@ public class User implements Serializable {
     @Enumerated(EnumType.STRING)
     private Sex sex;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(timezone = "Europe/Paris", shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @Temporal(TemporalType.DATE)
     private Date joined = new Date();
 

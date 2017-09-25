@@ -47,6 +47,7 @@ public class UserService {
         User user = userRepo.findOne(login);
         if (user == null)
             throw new UserNotFoundException(login);
+        validateUser(body);
         user.setName(body.getName());
         user.setMail(body.getMail());
         user.setSex(body.getSex());

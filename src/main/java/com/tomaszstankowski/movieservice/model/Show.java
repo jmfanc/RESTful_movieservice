@@ -23,27 +23,17 @@ public abstract class Show {
     private String description;
 
     @Column(name = "RELEASE_DATE")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(timezone = "Europe/Paris", shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @Temporal(TemporalType.DATE)
     private Date releaseDate;
 
     private String location;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(cascade = {CascadeType.MERGE})
     @JoinTable(name = "SHOWS_GENRES",
             joinColumns = @JoinColumn(name = "SHOW_ID", referencedColumnName = "ID"),
             inverseJoinColumns = @JoinColumn(name = "GENRE_NAME", referencedColumnName = "NAME"))
     private Set<Genre> genres = new HashSet<>();
-
-    public void addGenre(Genre genre) {
-        genre.getShows().add(this);
-        genres.add(genre);
-    }
-
-    public void removeGenre(Genre genre) {
-        genre.getShows().remove(this);
-        genres.remove(genre);
-    }
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "show")
     @JsonIgnore

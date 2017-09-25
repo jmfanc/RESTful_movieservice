@@ -2,6 +2,7 @@ package com.tomaszstankowski.movieservice.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -12,6 +13,7 @@ import java.util.Set;
 
 @Data
 @Entity(name = "GENRES")
+@EqualsAndHashCode(of = "name")
 public class Genre implements Serializable {
 
     @Id
