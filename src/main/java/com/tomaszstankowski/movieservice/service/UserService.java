@@ -5,10 +5,11 @@ import com.tomaszstankowski.movieservice.repository.UserRepository;
 import com.tomaszstankowski.movieservice.service.exception.InvalidUserException;
 import com.tomaszstankowski.movieservice.service.exception.UserAlreadyExistsException;
 import com.tomaszstankowski.movieservice.service.exception.UserNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class UserService {
@@ -18,16 +19,16 @@ public class UserService {
         this.userRepo = userRepo;
     }
 
-    public User find(String login) {
+    public User findOne(String login) {
         return userRepo.findOne(login);
     }
 
-    public List<User> findAll(Sort sort) {
-        return userRepo.findAll(sort);
+    public Page<User> findAll(int page, Sort sort) {
+        return userRepo.findAll(createPageable(page, sort));
     }
 
-    public List<User> findAll(String name, Sort sort) {
-        return userRepo.findUsersByNameContains(name, sort);
+    public Page<User> findByName(String name, int page, Sort sort) {
+        return userRepo.findUsersByNameContains(name, createPageable(page, sort));
     }
 
     public void add(User body) {
@@ -59,6 +60,10 @@ public class UserService {
         if (user == null)
             throw new UserNotFoundException(login);
         userRepo.delete(login);
+    }
+
+    private Pageable createPageable(int page, Sort sort) {
+        return new PageRequest(page, 10, sort);
     }
 
     private void validateUser(User user) {

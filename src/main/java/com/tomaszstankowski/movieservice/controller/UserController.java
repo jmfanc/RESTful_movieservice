@@ -2,7 +2,9 @@ package com.tomaszstankowski.movieservice.controller;
 
 import com.tomaszstankowski.movieservice.model.User;
 import com.tomaszstankowski.movieservice.service.UserService;
+import com.tomaszstankowski.movieservice.service.exception.PageNotFoundException;
 import com.tomaszstankowski.movieservice.service.exception.UserNotFoundException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.SortDefault;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
@@ -24,23 +26,27 @@ public class UserController {
     }
 
     @GetMapping(path = "/{login}")
-    public ResponseEntity<User> getUserByLogin(@PathVariable String login) {
-        User user = userService.find(login);
+    public ResponseEntity<User> getUser(@PathVariable String login) {
+        User user = userService.findOne(login);
         if (user == null)
             throw new UserNotFoundException(login);
         return ResponseEntity.ok(user);
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> getUsersByName(@RequestParam(value = "name", required = false) String name,
-                                                     @SortDefault("login") Sort sort) {
-        List<User> result;
+    public ResponseEntity<List<User>> getUsers(@RequestParam("page") int page,
+                                               @RequestParam(value = "name", required = false) String name,
+                                               @SortDefault("login") Sort sort) {
+        Page<User> result;
 
         if (name == null)
-            result = userService.findAll(sort);
+            result = userService.findAll(page, sort);
         else
-            result = userService.findAll(name, sort);
-        return ResponseEntity.ok(result);
+            result = userService.findByName(name, page, sort);
+
+        if (page >= result.getTotalPages())
+            throw new PageNotFoundException(page);
+        return ResponseEntity.ok(result.getContent());
     }
 
     @PostMapping(path = "/add")

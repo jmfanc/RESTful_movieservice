@@ -77,14 +77,14 @@ public class UserControllerTest {
     public void setup() throws Exception {
         mockMvc = webAppContextSetup(context).build();
         user = new User("krzysiek21", "Krzysztof Jarzyna", "kj@o2.pl", Sex.MALE);
-        when(service.find(user.getLogin()))
+        when(service.findOne(user.getLogin()))
                 .thenReturn(user);
     }
 
     @Test
     public void get_whenUserNotExists_statusNotFound() throws Exception {
         String login = "someuser";
-        when(service.find(login)).thenReturn(null);
+        when(service.findOne(login)).thenReturn(null);
         mockMvc.perform(get("/users/{login}", login))
                 .andExpect(status().isNotFound());
     }

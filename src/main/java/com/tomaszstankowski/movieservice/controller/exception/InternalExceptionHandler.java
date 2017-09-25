@@ -12,7 +12,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class InternalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(value = {UserNotFoundException.class, ShowNotFoundException.class})
+    @ExceptionHandler(value = {UserNotFoundException.class, ShowNotFoundException.class, PageNotFoundException.class})
     public ResponseEntity<Object> handleResourceNotFoundExceptions(RuntimeException ex, WebRequest request) {
         return handleExceptionInternal(
                 ex,

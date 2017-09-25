@@ -11,6 +11,9 @@ import com.tomaszstankowski.movieservice.repository.ShowRepository;
 import com.tomaszstankowski.movieservice.service.exception.InvalidShowException;
 import com.tomaszstankowski.movieservice.service.exception.ShowAlreadyExistsException;
 import com.tomaszstankowski.movieservice.service.exception.ShowNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -42,8 +45,8 @@ public class ShowService {
         return serialRepo.findOne(id);
     }
 
-    public List<Show> findAll(Specification<Show> spec, Sort sort) {
-        return showRepo.findAll(spec, sort);
+    public Page<Show> findAll(Specification<Show> spec, int page, Sort sort) {
+        return showRepo.findAll(spec, createPegeable(page, sort));
     }
 
     public List<Movie> findMovies(Specification<Movie> spec, Sort sort) {
@@ -150,6 +153,10 @@ public class ShowService {
     private void removeShow(Show show) {
         disconnectShowFromGenres(show);
         showRepo.delete(show);
+    }
+
+    private Pageable createPegeable(int page, Sort sort) {
+        return new PageRequest(page, 5, sort);
     }
 
     private void validateShow(Show show) {

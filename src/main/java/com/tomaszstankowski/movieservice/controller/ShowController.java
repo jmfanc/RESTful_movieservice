@@ -4,7 +4,9 @@ import com.tomaszstankowski.movieservice.model.Movie;
 import com.tomaszstankowski.movieservice.model.Serial;
 import com.tomaszstankowski.movieservice.model.Show;
 import com.tomaszstankowski.movieservice.service.ShowService;
+import com.tomaszstankowski.movieservice.service.exception.PageNotFoundException;
 import com.tomaszstankowski.movieservice.service.exception.ShowNotFoundException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.data.web.SortDefault;
@@ -31,11 +33,12 @@ public class ShowController {
     }
 
     @GetMapping
-    public List<Show> getShows(@RequestParam(value = "title", required = false) String title,
+    public List<Show> getShows(@RequestParam("page") int page,
+                               @RequestParam(value = "title", required = false) String title,
                                @RequestParam(value = "year_lt", required = false) Integer yearLt,
                                @RequestParam(value = "year_gt", required = false) Integer yearGt,
-                               @RequestParam(value = "genres[]", required = false) String[] genres,
                                @SortDefault("title") Sort sort) {
+
         Specifications<Show> specs = null;
         if (title != null)
             specs = where(titleContains(title));
@@ -43,7 +46,11 @@ public class ShowController {
             specs = (specs == null) ? where(olderThan(yearLt)) : specs.and(olderThan(yearLt));
         if (yearGt != null)
             specs = (specs == null) ? where(youngerThan(yearGt)) : specs.and(youngerThan(yearGt));
-        return service.findAll(specs, sort);
+
+        Page<Show> result = service.findAll(specs, page, sort);
+        if (page >= result.getTotalPages())
+            throw new PageNotFoundException(page);
+        return result.getContent();
     }
 
     @GetMapping(path = "/movies/{id}")
