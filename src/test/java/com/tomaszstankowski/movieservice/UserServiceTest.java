@@ -55,7 +55,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void add_whenUserAlreadyExists_ThrowExc() {
+    public void add_whenUserAlreadyExists_throwExc() {
         when(repo.findOne(user.getLogin())).thenReturn(user);
         exception.expect(UserAlreadyExistsException.class);
 
@@ -66,7 +66,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void add_whenBodyInvalid_ThrowExc() {
+    public void add_whenBodyInvalid_throwExc() {
         when(repo.findOne(user.getLogin())).thenReturn(null);
         User body = new User(
                 user.getLogin(),
@@ -138,7 +138,7 @@ public class UserServiceTest {
     public void delete_successful() {
         when(repo.findOne(user.getLogin())).thenReturn(user);
 
-        service.delete(user.getLogin());
+        service.remove(user.getLogin());
 
         verify(repo, times(1)).findOne(user.getLogin());
         verify(repo, times(1)).delete(user.getLogin());
@@ -150,7 +150,7 @@ public class UserServiceTest {
         when(repo.findOne(user.getLogin())).thenReturn(null);
         exception.expect(UserNotFoundException.class);
 
-        service.delete(user.getLogin());
+        service.remove(user.getLogin());
 
         verify(repo, times(1)).findOne(user.getLogin());
         verifyNoMoreInteractions(repo);

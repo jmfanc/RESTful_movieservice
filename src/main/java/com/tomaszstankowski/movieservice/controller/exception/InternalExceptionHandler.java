@@ -12,7 +12,12 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class InternalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(value = {UserNotFoundException.class, ShowNotFoundException.class, PageNotFoundException.class})
+    @ExceptionHandler(value = {
+            UserNotFoundException.class,
+            ShowNotFoundException.class,
+            PageNotFoundException.class,
+            PersonNotFoundException.class
+    })
     public ResponseEntity<Object> handleResourceNotFoundExceptions(RuntimeException ex, WebRequest request) {
         return handleExceptionInternal(
                 ex,
@@ -22,7 +27,11 @@ public class InternalExceptionHandler extends ResponseEntityExceptionHandler {
                 request);
     }
 
-    @ExceptionHandler(value = {InvalidUserException.class, InvalidShowException.class})
+    @ExceptionHandler(value = {
+            InvalidUserException.class,
+            InvalidShowException.class,
+            InvalidPersonException.class
+    })
     public ResponseEntity<Object> handleInvalidBodyExceptions(RuntimeException ex, WebRequest request) {
         return handleExceptionInternal(
                 ex,
@@ -32,7 +41,11 @@ public class InternalExceptionHandler extends ResponseEntityExceptionHandler {
                 request);
     }
 
-    @ExceptionHandler(value = {UserAlreadyExistsException.class, ShowAlreadyExistsException.class})
+    @ExceptionHandler(value = {
+            UserAlreadyExistsException.class,
+            ShowAlreadyExistsException.class,
+            PersonAlreadyExistsException.class
+    })
     public ResponseEntity<Object> handleConflictExceptions(RuntimeException ex, WebRequest request) {
         return handleExceptionInternal(
                 ex,

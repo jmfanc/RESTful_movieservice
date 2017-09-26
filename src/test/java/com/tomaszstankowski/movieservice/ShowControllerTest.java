@@ -241,7 +241,7 @@ public class ShowControllerTest {
 
     @Test
     public void delete_whenShowRemoved_statusOk() throws Exception {
-        mockMvc.perform(delete("/shows/movies/{id}/delete", 1L))
+        mockMvc.perform(delete("/shows/movies/{id}/remove", 1L))
                 .andExpect(status().isOk());
     }
 
@@ -249,7 +249,7 @@ public class ShowControllerTest {
     public void delete_whenShowNotExists_statusNotFound() throws Exception {
         doThrow(new ShowNotFoundException(3L))
                 .when(service).removeMovie(3L);
-        mockMvc.perform(delete("/shows/movies/{id}/delete", 3L))
+        mockMvc.perform(delete("/shows/movies/{id}/remove", 3L))
                 .andExpect(status().isNotFound());
     }
 }

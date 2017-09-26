@@ -56,7 +56,7 @@ public class ShowService {
         return serialRepo.findAll(spec, createPegeable(page, sort));
     }
 
-    public void addMovie(Movie body) {
+    public Movie addMovie(Movie body) {
         Movie movie = new Movie(
                 body.getTitle(),
                 body.getDescription(),
@@ -65,10 +65,10 @@ public class ShowService {
                 body.getDuration(),
                 body.getBoxoffice()
         );
-        addShow(movie, body);
+        return (Movie) addShow(movie, body);
     }
 
-    public void addSerial(Serial body) {
+    public Serial addSerial(Serial body) {
         Serial serial = new Serial(
                 body.getTitle(),
                 body.getDescription(),
@@ -76,14 +76,14 @@ public class ShowService {
                 body.getLocation(),
                 body.getSeasons()
         );
-        addShow(serial, body);
+        return (Serial) addShow(serial, body);
     }
 
-    private void addShow(Show show, Show body) {
+    private Show addShow(Show show, Show body) {
         validateShow(show);
         checkIfShowAlreadyExists(show);
         connectShowWithGenres(show, body.getGenres());
-        showRepo.save(show);
+        return showRepo.save(show);
     }
 
     private void connectShowWithGenres(Show show, Set<Genre> genres) {

@@ -55,7 +55,7 @@ public class UserService {
         userRepo.save(user);
     }
 
-    public void delete(String login) {
+    public void remove(String login) {
         User user = userRepo.findOne(login);
         if (user == null)
             throw new UserNotFoundException(login);

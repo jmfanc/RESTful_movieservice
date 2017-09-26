@@ -54,7 +54,8 @@ public class UserController {
         userService.add(body);
         URI location = ServletUriComponentsBuilder
                 .fromPath("/users/{login}")
-                .buildAndExpand(body.getLogin()).toUri();
+                .buildAndExpand(body.getLogin())
+                .toUri();
         return ResponseEntity.created(location).build();
     }
 
@@ -66,7 +67,7 @@ public class UserController {
 
     @DeleteMapping(path = "/{login}/delete")
     public ResponseEntity<?> deleteUser(@PathVariable String login) {
-        userService.delete(login);
+        userService.remove(login);
         return ResponseEntity.ok().build();
     }
 }

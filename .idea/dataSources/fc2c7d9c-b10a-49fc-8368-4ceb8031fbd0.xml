@@ -69,7 +69,7 @@
     </column>
     <column id="24" parent="6" name="performer_id">
       <Position>4</Position>
-      <DataType>binary(255)|0</DataType>
+      <DataType>bigint(20)|0</DataType>
       <NotNull>1</NotNull>
     </column>
     <column id="25" parent="6" name="show_id">
@@ -102,8 +102,9 @@
     </foreign-key>
     <column id="31" parent="7" name="id">
       <Position>1</Position>
-      <DataType>binary(255)|0</DataType>
+      <DataType>bigint(20)|0</DataType>
       <NotNull>1</NotNull>
+      <SequenceIdentity>1</SequenceIdentity>
     </column>
     <column id="32" parent="7" name="birth_date">
       <Position>2</Position>
@@ -126,20 +127,20 @@
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="37" parent="8" name="people_id">
+    <column id="37" parent="8" name="person_id">
       <Position>1</Position>
-      <DataType>binary(255)|0</DataType>
+      <DataType>bigint(20)|0</DataType>
       <NotNull>1</NotNull>
     </column>
     <column id="38" parent="8" name="proffesion">
       <Position>2</Position>
       <DataType>varchar(255)|0</DataType>
     </column>
-    <index id="39" parent="8" name="FKb83sswdxw2ahd1ydti7sn8d0v">
-      <ColNames>people_id</ColNames>
+    <index id="39" parent="8" name="FKhc2o2otgqv5w3lg7osml99p0x">
+      <ColNames>person_id</ColNames>
     </index>
-    <foreign-key id="40" parent="8" name="FKb83sswdxw2ahd1ydti7sn8d0v">
-      <ColNames>people_id</ColNames>
+    <foreign-key id="40" parent="8" name="FKhc2o2otgqv5w3lg7osml99p0x">
+      <ColNames>person_id</ColNames>
       <RefSchemaName>db_movieservice</RefSchemaName>
       <RefTableName>people</RefTableName>
       <RefColNames>id</RefColNames>

@@ -7,10 +7,10 @@ import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
+import java.util.Set;
 
 @Data
 @EqualsAndHashCode(of = "id")
@@ -20,7 +20,8 @@ public class Person implements Serializable {
     public enum Proffesion {ACTOR, DIRECTOR}
 
     @Id
-    private final UUID id = UUID.randomUUID();
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
     private String name;
 
@@ -40,14 +41,14 @@ public class Person implements Serializable {
 
     @ElementCollection(targetClass = Proffesion.class)
     @Enumerated(EnumType.STRING)
-    @CollectionTable(name = "PEOPLE_PROFFESIONS")
+    @CollectionTable(name = "PEOPLE_PROFFESIONS", joinColumns = @JoinColumn(name = "PERSON_ID"))
     @Column(name = "PROFFESION")
-    private Collection<Proffesion> proffesions;
+    private Set<Proffesion> proffesions = new HashSet<>();
 
     public Person() {
     }
 
-    public Person(String name, Date birthDate, String birthPlace, Sex sex, Collection<Proffesion> proffesions) {
+    public Person(String name, Date birthDate, String birthPlace, Sex sex, Set<Proffesion> proffesions) {
         this.name = name;
         this.birthDate = birthDate;
         this.birthPlace = birthPlace;

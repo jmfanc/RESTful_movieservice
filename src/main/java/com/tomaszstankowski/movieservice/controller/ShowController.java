@@ -149,19 +149,21 @@ public class ShowController {
 
     @PostMapping(path = "/movies/add")
     public ResponseEntity<?> addMovie(@RequestBody Movie body) {
-        service.addMovie(body);
+        Movie movie = service.addMovie(body);
         URI location = ServletUriComponentsBuilder
                 .fromPath("/shows/movies/{id}")
-                .buildAndExpand(body.getId()).toUri();
+                .buildAndExpand(movie.getId())
+                .toUri();
         return ResponseEntity.created(location).build();
     }
 
     @PostMapping(path = "/series/add")
     public ResponseEntity<?> addSerial(@RequestBody Serial body) {
-        service.addSerial(body);
+        Serial serial = service.addSerial(body);
         URI location = ServletUriComponentsBuilder
                 .fromPath("/shows/series/{id}")
-                .buildAndExpand(body.getId()).toUri();
+                .buildAndExpand(serial.getId())
+                .toUri();
         return ResponseEntity.created(location).build();
     }
 

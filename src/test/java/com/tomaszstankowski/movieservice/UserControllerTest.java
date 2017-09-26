@@ -160,15 +160,15 @@ public class UserControllerTest {
 
     @Test
     public void delete_whenMovieRemoved_statusOk() throws Exception {
-        mockMvc.perform(delete("/users/{login}/delete", user.getLogin()))
+        mockMvc.perform(delete("/users/{login}/remove", user.getLogin()))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void delete_whenMovieNotExists_statusNotFound() throws Exception {
-        doThrow(UserNotFoundException.class).when(service).delete(user.getLogin());
+        doThrow(UserNotFoundException.class).when(service).remove(user.getLogin());
 
-        mockMvc.perform(delete("/users/{login}/delete", user.getLogin()))
+        mockMvc.perform(delete("/users/{login}/remove", user.getLogin()))
                 .andExpect(status().isNotFound());
     }
 }
