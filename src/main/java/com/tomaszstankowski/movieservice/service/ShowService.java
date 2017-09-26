@@ -19,7 +19,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 @Service
@@ -49,12 +48,12 @@ public class ShowService {
         return showRepo.findAll(spec, createPegeable(page, sort));
     }
 
-    public List<Movie> findMovies(Specification<Movie> spec, Sort sort) {
-        return movieRepo.findAll(spec, sort);
+    public Page<Movie> findMovies(Specification<Movie> spec, int page, Sort sort) {
+        return movieRepo.findAll(spec, createPegeable(page, sort));
     }
 
-    public List<Serial> findSeries(Specification<Serial> spec, Sort sort) {
-        return serialRepo.findAll(spec, sort);
+    public Page<Serial> findSeries(Specification<Serial> spec, int page, Sort sort) {
+        return serialRepo.findAll(spec, createPegeable(page, sort));
     }
 
     public void addMovie(Movie body) {
