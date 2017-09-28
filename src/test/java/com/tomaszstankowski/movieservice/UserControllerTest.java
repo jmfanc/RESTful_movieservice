@@ -1,41 +1,36 @@
 package com.tomaszstankowski.movieservice;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tomaszstankowski.movieservice.controller.UserController;
+import com.tomaszstankowski.movieservice.controller.exception.InternalExceptionHandler;
 import com.tomaszstankowski.movieservice.model.Sex;
 import com.tomaszstankowski.movieservice.model.User;
+import com.tomaszstankowski.movieservice.model.dto.ModelMapper;
+import com.tomaszstankowski.movieservice.model.dto.UserDTO;
 import com.tomaszstankowski.movieservice.service.UserService;
 import com.tomaszstankowski.movieservice.service.exception.InvalidUserException;
 import com.tomaszstankowski.movieservice.service.exception.UserNotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.mock.http.MockHttpOutputMessage;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
-@RunWith(SpringRunner.class)
-@WebMvcTest(value = UserController.class, secure = false)
+@RunWith(MockitoJUnitRunner.class)
 public class UserControllerTest {
 
     private MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
@@ -44,54 +39,45 @@ public class UserControllerTest {
 
     private MockMvc mockMvc;
 
-    @MockBean
+    @Mock
     private UserService service;
 
-    @Autowired
-    private WebApplicationContext context;
+    private ModelMapper modelMapper = new ModelMapper();
 
-    private HttpMessageConverter mappingJackson2HttpMessageConverter;
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     private User user;
+    private UserDTO userDTO;
 
-    @Autowired
-    void setConverters(HttpMessageConverter<?>[] converters) {
-
-        this.mappingJackson2HttpMessageConverter = Arrays.stream(converters)
-                .filter(hmc -> hmc instanceof MappingJackson2HttpMessageConverter)
-                .findAny()
-                .orElse(null);
-
-        assertNotNull("the JSON message converter must not be null",
-                this.mappingJackson2HttpMessageConverter);
-    }
-
-    protected String json(Object o) throws IOException {
-        MockHttpOutputMessage mockHttpOutputMessage = new MockHttpOutputMessage();
-        this.mappingJackson2HttpMessageConverter.write(
-                o, MediaType.APPLICATION_JSON, mockHttpOutputMessage);
-        return mockHttpOutputMessage.getBodyAsString();
+    private String json(Object o) throws IOException {
+        return objectMapper.writeValueAsString(o);
     }
 
     @Before
     public void setup() throws Exception {
-        mockMvc = webAppContextSetup(context).build();
+        mockMvc = standaloneSetup(new UserController(service, modelMapper))
+                .setControllerAdvice(new InternalExceptionHandler())
+                .build();
         user = new User("krzysiek21", "Krzysztof Jarzyna", "kj@o2.pl", Sex.MALE);
-        when(service.findOne(user.getLogin()))
-                .thenReturn(user);
+        userDTO = modelMapper.fromEntity(user);
+
     }
 
     @Test
     public void get_whenUserNotExists_statusNotFound() throws Exception {
         String login = "someuser";
         when(service.findOne(login)).thenReturn(null);
+
         mockMvc.perform(get("/users/{login}", login))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     public void get_whenUserExists_statusOkJsonCorrect() throws Exception {
+        when(service.findOne(user.getLogin()))
+                .thenReturn(user);
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+
         mockMvc.perform(get("/users/{login}", user.getLogin()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
@@ -105,19 +91,19 @@ public class UserControllerTest {
 
     @Test
     public void post_whenUserAdded_statusCreated() throws Exception {
-        User body = new User("steve", "Steve Maden", "steve@steve.com", Sex.MALE);
         mockMvc.perform(post("/users/add")
-                .content(this.json(body))
+                .content(json(userDTO))
                 .contentType(contentType))
                 .andExpect(status().isCreated());
     }
 
     @Test
     public void post_whenBodyInvalid_statusUnprocessableEntity() throws Exception {
-        User emptyLoginBody = new User("", "Ewelina", "dd@o2.pl", Sex.FEMALE);
-        User nullMailBody = new User("romek21", "Roman", null, Sex.MALE);
-        doThrow(new InvalidUserException()).when(service).add(emptyLoginBody);
-        doThrow(new InvalidUserException()).when(service).add(nullMailBody);
+        UserDTO emptyLoginBody = new UserDTO("", "Ewelina", "dd@o2.pl", Sex.FEMALE);
+        UserDTO nullMailBody = new UserDTO("romek21", "Roman", null, Sex.MALE);
+        doThrow(new InvalidUserException()).when(service).add(modelMapper.fromDTO(emptyLoginBody));
+        doThrow(new InvalidUserException()).when(service).add(modelMapper.fromDTO(nullMailBody));
+
         mockMvc.perform(post("/users/add")
                 .content(json(emptyLoginBody))
                 .contentType(contentType))
@@ -129,38 +115,27 @@ public class UserControllerTest {
     }
 
     @Test
-    public void put_whenMovieEdited_statusOk() throws Exception {
-        User body = new User(
-                user.getLogin(),
-                user.getName(),
-                "kjarzyna@gmail.com",
-                user.getSex()
-        );
+    public void put_whenUserEdited_statusOk() throws Exception {
+        userDTO.setMail("kjarzyna@gmail.com");
         mockMvc.perform(put("/users/{login}/edit", user.getLogin())
-                .content(this.json(body))
+                .content(json(userDTO))
                 .contentType(contentType))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void put_whenMovieNotExists_statusNotFound() throws Exception {
-        User body = new User(
-                user.getLogin(),
-                user.getName(),
-                "kjarzyna@gmail.com",
-                user.getSex()
-        );
-        doThrow(UserNotFoundException.class).when(service).edit(user.getLogin(), body);
+        doThrow(UserNotFoundException.class).when(service).edit(user.getLogin(), user);
 
         mockMvc.perform(put("/users/{login}/edit", user.getLogin())
-                .content(json(body))
+                .content(json(userDTO))
                 .contentType(contentType))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     public void delete_whenMovieRemoved_statusOk() throws Exception {
-        mockMvc.perform(delete("/users/{login}/remove", user.getLogin()))
+        mockMvc.perform(delete("/users/{login}/delete", user.getLogin()))
                 .andExpect(status().isOk());
     }
 
@@ -168,7 +143,7 @@ public class UserControllerTest {
     public void delete_whenMovieNotExists_statusNotFound() throws Exception {
         doThrow(UserNotFoundException.class).when(service).remove(user.getLogin());
 
-        mockMvc.perform(delete("/users/{login}/remove", user.getLogin()))
+        mockMvc.perform(delete("/users/{login}/delete", user.getLogin()))
                 .andExpect(status().isNotFound());
     }
 }

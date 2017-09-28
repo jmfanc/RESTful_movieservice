@@ -29,7 +29,10 @@ public class ShowService {
     private final SerialRepository serialRepo;
     private final GenreRepository genreRepo;
 
-    public ShowService(ShowRepository showRepo, MovieRepository movieRepo, SerialRepository serialRepo, GenreRepository genreRepo) {
+    public ShowService(ShowRepository showRepo,
+                       MovieRepository movieRepo,
+                       SerialRepository serialRepo,
+                       GenreRepository genreRepo) {
         this.showRepo = showRepo;
         this.movieRepo = movieRepo;
         this.serialRepo = serialRepo;

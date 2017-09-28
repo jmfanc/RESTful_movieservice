@@ -1,7 +1,5 @@
 package com.tomaszstankowski.movieservice.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -26,12 +24,10 @@ public class User implements Serializable {
     @Enumerated(EnumType.STRING)
     private Sex sex;
 
-    @JsonFormat(timezone = "Europe/Paris", shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @Temporal(TemporalType.DATE)
     private Date joined = new Date();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-    @JsonIgnore
     private List<Rating> ratings = new ArrayList<>();
 
     public User() {
