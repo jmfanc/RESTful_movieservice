@@ -3,6 +3,10 @@ package com.tomaszstankowski.movieservice.controller;
 import com.tomaszstankowski.movieservice.model.Movie;
 import com.tomaszstankowski.movieservice.model.Serial;
 import com.tomaszstankowski.movieservice.model.Show;
+import com.tomaszstankowski.movieservice.model.dto.ModelMapper;
+import com.tomaszstankowski.movieservice.model.dto.MovieDTO;
+import com.tomaszstankowski.movieservice.model.dto.SerialDTO;
+import com.tomaszstankowski.movieservice.model.dto.ShowDTO;
 import com.tomaszstankowski.movieservice.repository.specifications.MovieSpecifications;
 import com.tomaszstankowski.movieservice.repository.specifications.SerialSpecifications;
 import com.tomaszstankowski.movieservice.repository.specifications.ShowSpecifications;
@@ -14,12 +18,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.data.web.SortDefault;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.data.jpa.domain.Specifications.where;
 
@@ -29,18 +35,20 @@ import static org.springframework.data.jpa.domain.Specifications.where;
 public class ShowController {
 
     private final ShowService service;
+    private final ModelMapper mapper;
 
-    public ShowController(final ShowService service) {
+    public ShowController(ShowService service, ModelMapper mapper) {
         this.service = service;
+        this.mapper = mapper;
     }
 
     @GetMapping
-    public List<Show> getShows(@RequestParam("page") int page,
-                               @RequestParam(value = "title", required = false) String title,
-                               @RequestParam(value = "year_lt", required = false) Integer yearLt,
-                               @RequestParam(value = "year_gt", required = false) Integer yearGt,
-                               @RequestParam(value = "genres", required = false) String[] genres,
-                               @SortDefault("title") Sort sort) {
+    public List<ShowDTO> getShows(@RequestParam("page") int page,
+                                  @RequestParam(value = "title", required = false) String title,
+                                  @RequestParam(value = "year_lt", required = false) Integer yearLt,
+                                  @RequestParam(value = "year_gt", required = false) Integer yearGt,
+                                  @RequestParam(value = "genres", required = false) String[] genres,
+                                  @SortDefault("title") Sort sort) {
 
         Specifications<Show> specs = null;
         if (title != null)
@@ -58,18 +66,21 @@ public class ShowController {
         Page<Show> result = service.findAll(specs, page, sort);
         if (page >= result.getTotalPages())
             throw new PageNotFoundException(page);
-        return result.getContent();
+
+        return result.getContent().stream()
+                .map(mapper::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @GetMapping(path = "/movies")
-    public List<Movie> getMovies(@RequestParam("page") int page,
-                                 @RequestParam(value = "title", required = false) String title,
-                                 @RequestParam(value = "year_lt", required = false) Integer yearLt,
-                                 @RequestParam(value = "year_gt", required = false) Integer yearGt,
-                                 @RequestParam(value = "genres", required = false) String[] genres,
-                                 @RequestParam(value = "duration_lt", required = false) Integer durationLt,
-                                 @RequestParam(value = "duration_gt", required = false) Integer durationGt,
-                                 @SortDefault("title") Sort sort) {
+    public List<MovieDTO> getMovies(@RequestParam("page") int page,
+                                    @RequestParam(value = "title", required = false) String title,
+                                    @RequestParam(value = "year_lt", required = false) Integer yearLt,
+                                    @RequestParam(value = "year_gt", required = false) Integer yearGt,
+                                    @RequestParam(value = "genres", required = false) String[] genres,
+                                    @RequestParam(value = "duration_lt", required = false) Integer durationLt,
+                                    @RequestParam(value = "duration_gt", required = false) Integer durationGt,
+                                    @SortDefault("title") Sort sort) {
 
         Specifications<Movie> specs = null;
         if (title != null)
@@ -93,18 +104,21 @@ public class ShowController {
         Page<Movie> result = service.findMovies(specs, page, sort);
         if (page >= result.getTotalPages())
             throw new PageNotFoundException(page);
-        return result.getContent();
+
+        return result.getContent().stream()
+                .map(mapper::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @GetMapping(path = "/series")
-    public List<Serial> getSeries(@RequestParam("page") int page,
-                                  @RequestParam(value = "title", required = false) String title,
-                                  @RequestParam(value = "year_lt", required = false) Integer yearLt,
-                                  @RequestParam(value = "year_gt", required = false) Integer yearGt,
-                                  @RequestParam(value = "genres", required = false) String[] genres,
-                                  @RequestParam(value = "seasons_lt", required = false) Integer seasonsLt,
-                                  @RequestParam(value = "seasons_gt", required = false) Integer seasonsGt,
-                                  @SortDefault("title") Sort sort) {
+    public List<SerialDTO> getSeries(@RequestParam("page") int page,
+                                     @RequestParam(value = "title", required = false) String title,
+                                     @RequestParam(value = "year_lt", required = false) Integer yearLt,
+                                     @RequestParam(value = "year_gt", required = false) Integer yearGt,
+                                     @RequestParam(value = "genres", required = false) String[] genres,
+                                     @RequestParam(value = "seasons_lt", required = false) Integer seasonsLt,
+                                     @RequestParam(value = "seasons_gt", required = false) Integer seasonsGt,
+                                     @SortDefault("title") Sort sort) {
 
         Specifications<Serial> specs = null;
         if (title != null)
@@ -128,28 +142,30 @@ public class ShowController {
         Page<Serial> result = service.findSeries(specs, page, sort);
         if (page >= result.getTotalPages())
             throw new PageNotFoundException(page);
-        return result.getContent();
+        return result.getContent().stream()
+                .map(mapper::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @GetMapping(path = "/movies/{id}")
-    public Movie getMovie(@PathVariable("id") long id) {
+    public MovieDTO getMovie(@PathVariable("id") long id) {
         Movie movie = service.findMovie(id);
         if (movie == null)
             throw new ShowNotFoundException(id);
-        return movie;
+        return mapper.fromEntity(movie);
     }
 
     @GetMapping(path = "/series/{id}")
-    public Serial getSerial(@PathVariable("id") long id) {
+    public SerialDTO getSerial(@PathVariable("id") long id) {
         Serial serial = service.findSerial(id);
         if (serial == null)
             throw new ShowNotFoundException(id);
-        return serial;
+        return mapper.fromEntity(serial);
     }
 
     @PostMapping(path = "/movies/add")
-    public ResponseEntity<?> addMovie(@RequestBody Movie body) {
-        Movie movie = service.addMovie(body);
+    public ResponseEntity<?> addMovie(@RequestBody MovieDTO body) {
+        Movie movie = service.addMovie(mapper.fromDTO(body));
         URI location = ServletUriComponentsBuilder
                 .fromPath("/shows/movies/{id}")
                 .buildAndExpand(movie.getId())
@@ -158,8 +174,8 @@ public class ShowController {
     }
 
     @PostMapping(path = "/series/add")
-    public ResponseEntity<?> addSerial(@RequestBody Serial body) {
-        Serial serial = service.addSerial(body);
+    public ResponseEntity<?> addSerial(@RequestBody SerialDTO body) {
+        Serial serial = service.addSerial(mapper.fromDTO(body));
         URI location = ServletUriComponentsBuilder
                 .fromPath("/shows/series/{id}")
                 .buildAndExpand(serial.getId())
@@ -168,26 +184,26 @@ public class ShowController {
     }
 
     @PutMapping(path = "/movies/{id}/edit")
-    public ResponseEntity<?> editMovie(@PathVariable("id") long id, @RequestBody Movie body) {
-        service.editMovie(id, body);
-        return ResponseEntity.ok().build();
+    @ResponseStatus(HttpStatus.OK)
+    public void editMovie(@PathVariable("id") long id, @RequestBody MovieDTO body) {
+        service.editMovie(id, mapper.fromDTO(body));
     }
 
     @PutMapping(path = "/series/{id}/edit")
-    public ResponseEntity<?> editSerial(@PathVariable("id") long id, @RequestBody Serial body) {
-        service.editSerial(id, body);
-        return ResponseEntity.ok().build();
+    @ResponseStatus(HttpStatus.OK)
+    public void editSerial(@PathVariable("id") long id, @RequestBody SerialDTO body) {
+        service.editSerial(id, mapper.fromDTO(body));
     }
 
     @DeleteMapping(path = "/movies/{id}/delete")
-    public ResponseEntity<?> deleteMovie(@PathVariable("id") long id) {
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteMovie(@PathVariable("id") long id) {
         service.removeMovie(id);
-        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping(path = "/series/{id}/delete")
-    public ResponseEntity<?> deleteSerial(@PathVariable("id") long id) {
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteSerial(@PathVariable("id") long id) {
         service.removeSerial(id);
-        return ResponseEntity.ok().build();
     }
 }

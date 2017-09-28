@@ -17,7 +17,10 @@ public class Serial extends Show implements Serializable {
     public Serial() {
     }
 
-    public Serial(String title, String description, Date releaseDate, String location,
+    public Serial(String title,
+                  String description,
+                  Date releaseDate,
+                  String location,
                   short seasons) {
         super(title, description, releaseDate, location);
         this.seasons = seasons;

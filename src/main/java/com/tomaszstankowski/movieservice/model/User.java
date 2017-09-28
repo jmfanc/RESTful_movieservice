@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -12,7 +11,7 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(of = "login")
 @Entity(name = "USERS")
-public class User implements Serializable {
+public class User {
 
     @Id
     private String login;

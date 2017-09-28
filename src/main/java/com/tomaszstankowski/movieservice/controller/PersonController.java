@@ -1,6 +1,8 @@
 package com.tomaszstankowski.movieservice.controller;
 
 import com.tomaszstankowski.movieservice.model.Person;
+import com.tomaszstankowski.movieservice.model.dto.ModelMapper;
+import com.tomaszstankowski.movieservice.model.dto.PersonDTO;
 import com.tomaszstankowski.movieservice.service.PersonService;
 import com.tomaszstankowski.movieservice.service.exception.PageNotFoundException;
 import com.tomaszstankowski.movieservice.service.exception.PersonNotFoundException;
@@ -8,12 +10,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.SortDefault;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/people")
@@ -21,32 +25,36 @@ import java.util.List;
 public class PersonController {
 
     private final PersonService service;
+    private final ModelMapper mapper;
 
-    public PersonController(final PersonService service) {
+    public PersonController(PersonService service, ModelMapper mapper) {
         this.service = service;
+        this.mapper = mapper;
     }
 
     @GetMapping
-    public List<Person> getPeople(@RequestParam("page") int page,
-                                  @SortDefault("name") Sort sort) {
+    public List<PersonDTO> getPeople(@RequestParam("page") int page,
+                                     @SortDefault("name") Sort sort) {
 
         Page<Person> result = service.findAll(null, page, sort);
         if (page >= result.getTotalPages())
             throw new PageNotFoundException(page);
-        return result.getContent();
+        return result.getContent().stream()
+                .map(mapper::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @GetMapping(path = "/{id}")
-    public Person getPerson(@PathVariable("id") long id) {
+    public PersonDTO getPerson(@PathVariable("id") long id) {
         Person person = service.findPerson(id);
         if (person == null)
             throw new PersonNotFoundException(id);
-        return person;
+        return mapper.fromEntity(person);
     }
 
     @PostMapping(path = "/add")
-    public ResponseEntity<?> addPerson(@RequestBody Person body) {
-        Person person = service.addPerson(body);
+    public ResponseEntity<?> addPerson(@RequestBody PersonDTO body) {
+        Person person = service.addPerson(mapper.fromDTO(body));
         URI location = ServletUriComponentsBuilder
                 .fromPath("/people/{id}")
                 .buildAndExpand(person.getId())
@@ -55,14 +63,14 @@ public class PersonController {
     }
 
     @PutMapping(path = "/{id}/edit")
-    public ResponseEntity<?> editPerson(@PathVariable("id") long id, @RequestBody Person body) {
-        service.editPerson(id, body);
-        return ResponseEntity.ok().build();
+    @ResponseStatus(HttpStatus.OK)
+    public void editPerson(@PathVariable("id") long id, @RequestBody PersonDTO body) {
+        service.editPerson(id, mapper.fromDTO(body));
     }
 
     @DeleteMapping(path = "/{id}/delete")
-    public ResponseEntity<?> deletePerson(@PathVariable("id") long id) {
+    @ResponseStatus(HttpStatus.OK)
+    public void deletePerson(@PathVariable("id") long id) {
         service.removePerson(id);
-        return ResponseEntity.ok().build();
     }
 }

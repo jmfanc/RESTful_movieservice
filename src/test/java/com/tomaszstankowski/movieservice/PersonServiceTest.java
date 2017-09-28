@@ -16,9 +16,9 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.GregorianCalendar;
-import java.util.HashSet;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -41,11 +41,9 @@ public class PersonServiceTest {
                 "Janusz Gajos",
                 new GregorianCalendar(1939, 8, 23).getTime(),
                 "Dąbrowa Górnicza, Poland",
-                Sex.MALE,
-                new HashSet<Person.Proffesion>() {{
-                    add(Person.Proffesion.ACTOR);
-                }}
+                Sex.MALE
         );
+        person.getProfessions().add(Person.Profession.ACTOR);
     }
 
     @Test
@@ -80,8 +78,7 @@ public class PersonServiceTest {
                 "",
                 person.getBirthDate(),
                 person.getBirthPlace(),
-                person.getSex(),
-                person.getProffesions()
+                person.getSex()
         );
         exception.expect(InvalidPersonException.class);
 
@@ -97,8 +94,7 @@ public class PersonServiceTest {
                 person.getName(),
                 new GregorianCalendar(1939, 8, 24).getTime(),
                 "Dąbrowa Górnicza, PL",
-                Sex.MALE,
-                person.getProffesions()
+                Sex.MALE
         );
 
         service.editPerson(1L, body);
@@ -108,6 +104,7 @@ public class PersonServiceTest {
         verifyNoMoreInteractions(repo);
         assertEquals(body.getBirthDate(), person.getBirthDate());
         assertEquals(body.getBirthPlace(), person.getBirthPlace());
+        assertTrue(person.getProfessions().isEmpty());
     }
 
     @Test
@@ -117,8 +114,7 @@ public class PersonServiceTest {
                 person.getName(),
                 new GregorianCalendar(1939, 8, 24).getTime(),
                 "Dąbrowa Górnicza, PL",
-                Sex.MALE,
-                person.getProffesions()
+                Sex.MALE
         );
         exception.expect(PersonNotFoundException.class);
 
@@ -134,8 +130,7 @@ public class PersonServiceTest {
                 null,
                 new GregorianCalendar(1939, 8, 24).getTime(),
                 "Dąbrowa Górnicza, PL",
-                Sex.MALE,
-                person.getProffesions()
+                Sex.MALE
         );
         exception.expect(InvalidPersonException.class);
 

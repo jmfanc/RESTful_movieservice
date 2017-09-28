@@ -1,12 +1,9 @@
 package com.tomaszstankowski.movieservice.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -15,9 +12,9 @@ import java.util.Set;
 @Data
 @EqualsAndHashCode(of = "id")
 @Entity(name = "PEOPLE")
-public class Person implements Serializable {
+public class Person {
 
-    public enum Proffesion {ACTOR, DIRECTOR}
+    public enum Profession {ACTOR, DIRECTOR, SCREENWRITER}
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,7 +23,6 @@ public class Person implements Serializable {
     private String name;
 
     @Column(name = "BIRTH_DATE")
-    @JsonFormat(timezone = "Europe/Paris", shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date birthDate;
 
     @Column(name = "BIRTH_PLACE")
@@ -36,23 +32,21 @@ public class Person implements Serializable {
     private Sex sex;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "participant")
-    @JsonIgnore
     private List<Participation> participations;
 
-    @ElementCollection(targetClass = Proffesion.class)
+    @ElementCollection(targetClass = Profession.class)
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "PEOPLE_PROFFESIONS", joinColumns = @JoinColumn(name = "PERSON_ID"))
     @Column(name = "PROFFESION")
-    private Set<Proffesion> proffesions = new HashSet<>();
+    private Set<Profession> professions = new HashSet<>();
 
     public Person() {
     }
 
-    public Person(String name, Date birthDate, String birthPlace, Sex sex, Set<Proffesion> proffesions) {
+    public Person(String name, Date birthDate, String birthPlace, Sex sex) {
         this.name = name;
         this.birthDate = birthDate;
         this.birthPlace = birthPlace;
         this.sex = sex;
-        this.proffesions = proffesions;
     }
 }

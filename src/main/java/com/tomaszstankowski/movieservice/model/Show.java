@@ -1,7 +1,5 @@
 package com.tomaszstankowski.movieservice.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -23,7 +21,6 @@ public abstract class Show {
     private String description;
 
     @Column(name = "RELEASE_DATE")
-    @JsonFormat(timezone = "Europe/Paris", shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @Temporal(TemporalType.DATE)
     private Date releaseDate;
 
@@ -36,11 +33,9 @@ public abstract class Show {
     private Set<Genre> genres = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "show")
-    @JsonIgnore
     private List<Participation> participations = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "show")
-    @JsonIgnore
     private List<Rating> ratings = new ArrayList<>();
 
     public Show() {

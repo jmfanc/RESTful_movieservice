@@ -1,8 +1,12 @@
 package com.tomaszstankowski.movieservice;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tomaszstankowski.movieservice.controller.PersonController;
+import com.tomaszstankowski.movieservice.controller.exception.InternalExceptionHandler;
 import com.tomaszstankowski.movieservice.model.Person;
 import com.tomaszstankowski.movieservice.model.Sex;
+import com.tomaszstankowski.movieservice.model.dto.ModelMapper;
+import com.tomaszstankowski.movieservice.model.dto.PersonDTO;
 import com.tomaszstankowski.movieservice.service.PersonService;
 import com.tomaszstankowski.movieservice.service.exception.InvalidPersonException;
 import com.tomaszstankowski.movieservice.service.exception.PersonAlreadyExistsException;
@@ -11,35 +15,25 @@ import net.minidev.json.JSONArray;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.mock.http.MockHttpOutputMessage;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.GregorianCalendar;
-import java.util.HashSet;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
-@RunWith(SpringRunner.class)
-@WebMvcTest(value = PersonController.class, secure = false)
+@RunWith(MockitoJUnitRunner.class)
 public class PersonControllerTest {
 
     private MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
@@ -48,47 +42,34 @@ public class PersonControllerTest {
 
     private MockMvc mockMvc;
 
-    @MockBean
+    @Mock
     private PersonService service;
 
-    @Autowired
-    private WebApplicationContext context;
+    private ModelMapper modelMapper = new ModelMapper();
 
-    private HttpMessageConverter mappingJackson2HttpMessageConverter;
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     private Person person;
 
-    @Autowired
-    void setConverters(HttpMessageConverter<?>[] converters) {
-
-        mappingJackson2HttpMessageConverter = Arrays.stream(converters)
-                .filter(hmc -> hmc instanceof MappingJackson2HttpMessageConverter)
-                .findAny()
-                .orElse(null);
-
-        assertNotNull("the JSON message converter must not be null",
-                mappingJackson2HttpMessageConverter);
-    }
+    private PersonDTO personDTO;
 
     private String json(Object o) throws IOException {
-        MockHttpOutputMessage mockHttpOutputMessage = new MockHttpOutputMessage();
-        mappingJackson2HttpMessageConverter.write(
-                o, MediaType.APPLICATION_JSON, mockHttpOutputMessage);
-        return mockHttpOutputMessage.getBodyAsString();
+        return objectMapper.writeValueAsString(o);
     }
 
     @Before
     public void setup() throws Exception {
-        mockMvc = webAppContextSetup(context).build();
+        mockMvc = standaloneSetup(new PersonController(service, modelMapper))
+                .setControllerAdvice(new InternalExceptionHandler())
+                .build();
         person = new Person(
                 "Janusz Gajos",
                 new GregorianCalendar(1939, 8, 23).getTime(),
                 "Dąbrowa Górnicza, Poland",
-                Sex.MALE,
-                new HashSet<Person.Proffesion>() {{
-                    add(Person.Proffesion.ACTOR);
-                }}
+                Sex.MALE
         );
+        person.getProfessions().add(Person.Profession.ACTOR);
+        personDTO = modelMapper.fromEntity(person);
     }
 
     @Test
@@ -105,7 +86,7 @@ public class PersonControllerTest {
         doThrow(new InvalidPersonException()).when(service).addPerson(person);
 
         mockMvc.perform(post("/people/add")
-                .content(json(person))
+                .content(json(personDTO))
                 .contentType(contentType))
                 .andExpect(status().isUnprocessableEntity());
     }
@@ -115,7 +96,7 @@ public class PersonControllerTest {
         doThrow(new PersonAlreadyExistsException(person)).when(service).addPerson(person);
 
         mockMvc.perform(post("/people/add")
-                .content(json(person))
+                .content(json(personDTO))
                 .contentType(contentType))
                 .andExpect(status().isConflict());
     }
@@ -125,7 +106,7 @@ public class PersonControllerTest {
         when(service.findPerson(1L)).thenReturn(person);
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         JSONArray proffesions = new JSONArray();
-        for (Person.Proffesion p : person.getProffesions())
+        for (Person.Profession p : person.getProfessions())
             proffesions.add(p.toString());
 
         mockMvc.perform(get("/people/{id}", 1L))
@@ -135,7 +116,7 @@ public class PersonControllerTest {
                 .andExpect(jsonPath("$.birthDate", is(format.format(person.getBirthDate()))))
                 .andExpect(jsonPath("$.birthPlace", is(person.getBirthPlace())))
                 .andExpect(jsonPath("$.sex", is(person.getSex().toString())))
-                .andExpect(jsonPath("$.proffesions", is(proffesions)));
+                .andExpect(jsonPath("$.professions", is(proffesions)));
     }
 
     @Test
@@ -148,7 +129,7 @@ public class PersonControllerTest {
     @Test
     public void put_whenPersonEdited_statusOk() throws Exception {
         mockMvc.perform(put("/people/{id}/edit", 1L)
-                .content(json(person))
+                .content(json(personDTO))
                 .contentType(contentType))
                 .andExpect(status().isOk());
     }
@@ -158,7 +139,7 @@ public class PersonControllerTest {
         doThrow(new PersonNotFoundException(1L)).when(service).editPerson(1L, person);
 
         mockMvc.perform(put("/people/{id}/edit", 1L)
-                .content(json(person))
+                .content(json(personDTO))
                 .contentType(contentType))
                 .andExpect(status().isNotFound());
     }
@@ -168,7 +149,7 @@ public class PersonControllerTest {
         doThrow(new InvalidPersonException()).when(service).editPerson(1L, person);
 
         mockMvc.perform(put("/people/{id}/edit", 1L)
-                .content(json(person))
+                .content(json(personDTO))
                 .contentType(contentType))
                 .andExpect(status().isUnprocessableEntity());
     }

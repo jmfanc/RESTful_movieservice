@@ -15,7 +15,7 @@ public class Participation implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private Person.Proffesion role;
+    private Person.Profession role;
 
     private String info;
 
@@ -30,7 +30,7 @@ public class Participation implements Serializable {
     public Participation() {
     }
 
-    public Participation(Person.Proffesion role, String info, Person participant, Show show) {
+    public Participation(Person.Profession role, String info, Person participant, Show show) {
         this.role = role;
         this.info = info;
         this.participant = participant;

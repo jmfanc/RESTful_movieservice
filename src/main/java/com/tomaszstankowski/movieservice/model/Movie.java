@@ -4,13 +4,12 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.Entity;
-import java.io.Serializable;
 import java.util.Date;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Entity(name = "MOVIES")
-public class Movie extends Show implements Serializable {
+public class Movie extends Show {
 
     private short duration;
 

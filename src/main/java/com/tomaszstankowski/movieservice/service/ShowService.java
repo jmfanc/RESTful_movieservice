@@ -19,7 +19,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.Iterator;
-import java.util.Set;
 
 @Service
 public class ShowService {
@@ -59,43 +58,27 @@ public class ShowService {
         return serialRepo.findAll(spec, createPegeable(page, sort));
     }
 
-    public Movie addMovie(Movie body) {
-        Movie movie = new Movie(
-                body.getTitle(),
-                body.getDescription(),
-                body.getReleaseDate(),
-                body.getLocation(),
-                body.getDuration(),
-                body.getBoxoffice()
-        );
-        return (Movie) addShow(movie, body);
+    public Movie addMovie(Movie movie) {
+        return (Movie) addShow(movie);
     }
 
-    public Serial addSerial(Serial body) {
-        Serial serial = new Serial(
-                body.getTitle(),
-                body.getDescription(),
-                body.getReleaseDate(),
-                body.getLocation(),
-                body.getSeasons()
-        );
-        return (Serial) addShow(serial, body);
+    public Serial addSerial(Serial serial) {
+        return (Serial) addShow(serial);
     }
 
-    private Show addShow(Show show, Show body) {
+    private Show addShow(Show show) {
         validateShow(show);
         checkIfShowAlreadyExists(show);
-        connectShowWithGenres(show, body.getGenres());
+        connectShowWithGenres(show);
         return showRepo.save(show);
     }
 
-    private void connectShowWithGenres(Show show, Set<Genre> genres) {
-        for (Genre g : genres) {
+    private void connectShowWithGenres(Show show) {
+        for (Genre g : show.getGenres()) {
             Genre genre = genreRepo.findOne(g.getName());
             if (genre == null)
                 genre = genreRepo.save(g);
             genre.getShows().add(show);
-            show.getGenres().add(genre);
         }
     }
 
@@ -134,7 +117,8 @@ public class ShowService {
         show.setReleaseDate(body.getReleaseDate());
 
         disconnectShowFromGenres(show);
-        connectShowWithGenres(show, body.getGenres());
+        show.getGenres().addAll(body.getGenres());
+        connectShowWithGenres(show);
         showRepo.save(show);
     }
 

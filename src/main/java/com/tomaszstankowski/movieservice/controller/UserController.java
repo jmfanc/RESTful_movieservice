@@ -23,20 +23,20 @@ import java.util.stream.Collectors;
 @RequestMapping(path = "/users")
 @EnableSpringDataWebSupport
 public class UserController {
-    private final UserService userService;
-    private final ModelMapper modelMapper;
+    private final UserService service;
+    private final ModelMapper mapper;
 
-    public UserController(UserService userService, ModelMapper modelMapper) {
-        this.userService = userService;
-        this.modelMapper = modelMapper;
+    public UserController(UserService service, ModelMapper mapper) {
+        this.service = service;
+        this.mapper = mapper;
     }
 
     @GetMapping(path = "/{login}")
     public UserDTO getUser(@PathVariable String login) {
-        User user = userService.findOne(login);
+        User user = service.findOne(login);
         if (user == null)
             throw new UserNotFoundException(login);
-        return modelMapper.fromEntity(user);
+        return mapper.fromEntity(user);
     }
 
     @GetMapping
@@ -46,22 +46,22 @@ public class UserController {
         Page<User> result;
 
         if (name == null)
-            result = userService.findAll(page, sort);
+            result = service.findAll(page, sort);
         else
-            result = userService.findByName(name, page, sort);
+            result = service.findByName(name, page, sort);
 
         if (page >= result.getTotalPages())
             throw new PageNotFoundException(page);
 
         return result.getContent().stream()
-                .map(modelMapper::fromEntity)
+                .map(mapper::fromEntity)
                 .collect(Collectors.toList());
     }
 
     @PostMapping(path = "/add")
     public ResponseEntity<?> addUser(@RequestBody UserDTO body) {
-        User user = modelMapper.fromDTO(body);
-        userService.add(user);
+        User user = mapper.fromDTO(body);
+        service.add(user);
         URI location = ServletUriComponentsBuilder
                 .fromPath("/users/{login}")
                 .buildAndExpand(body.getLogin())
@@ -72,13 +72,13 @@ public class UserController {
     @PutMapping(path = "/{login}/edit")
     @ResponseStatus(HttpStatus.OK)
     public void editUser(@PathVariable String login, @RequestBody UserDTO body) {
-        User user = modelMapper.fromDTO(body);
-        userService.edit(login, user);
+        User user = mapper.fromDTO(body);
+        service.edit(login, user);
     }
 
     @DeleteMapping(path = "/{login}/delete")
     @ResponseStatus(HttpStatus.OK)
     public void deleteUser(@PathVariable String login) {
-        userService.remove(login);
+        service.remove(login);
     }
 }

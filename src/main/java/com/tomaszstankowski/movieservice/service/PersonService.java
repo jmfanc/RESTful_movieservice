@@ -29,16 +29,9 @@ public class PersonService {
         return personRepo.findAll(spec, createPageable(page, sort));
     }
 
-    public Person addPerson(Person body) {
-        validatePerson(body);
-        checkIfPersonAlreadyExists(body);
-        Person person = new Person(
-                body.getName(),
-                body.getBirthDate(),
-                body.getBirthPlace(),
-                body.getSex(),
-                body.getProffesions()
-        );
+    public Person addPerson(Person person) {
+        validatePerson(person);
+        checkIfPersonAlreadyExists(person);
         return personRepo.save(person);
     }
 
@@ -50,7 +43,8 @@ public class PersonService {
         person.setName(body.getName());
         person.setBirthDate(body.getBirthDate());
         person.setBirthPlace(body.getBirthPlace());
-        person.setProffesions(body.getProffesions());
+        person.getProfessions().clear();
+        person.getProfessions().addAll(body.getProfessions());
         personRepo.save(person);
     }
 
