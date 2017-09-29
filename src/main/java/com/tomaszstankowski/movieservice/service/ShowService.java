@@ -80,6 +80,10 @@ public class ShowService {
         return participationRepo.findByShowAndRole(show, role);
     }
 
+    public List<Genre> findAllGenres() {
+        return genreRepo.findAll(new Sort("name"));
+    }
+
     public Movie addMovie(Movie movie) {
         return (Movie) addShow(movie);
     }

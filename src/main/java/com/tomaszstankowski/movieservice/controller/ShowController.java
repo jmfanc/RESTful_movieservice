@@ -5,10 +5,7 @@ import com.tomaszstankowski.movieservice.model.dto.MovieDTO;
 import com.tomaszstankowski.movieservice.model.dto.ParticipationDTO;
 import com.tomaszstankowski.movieservice.model.dto.SerialDTO;
 import com.tomaszstankowski.movieservice.model.dto.ShowDTO;
-import com.tomaszstankowski.movieservice.model.entity.Movie;
-import com.tomaszstankowski.movieservice.model.entity.Person;
-import com.tomaszstankowski.movieservice.model.entity.Serial;
-import com.tomaszstankowski.movieservice.model.entity.Show;
+import com.tomaszstankowski.movieservice.model.entity.*;
 import com.tomaszstankowski.movieservice.repository.specifications.MovieSpecifications;
 import com.tomaszstankowski.movieservice.repository.specifications.SerialSpecifications;
 import com.tomaszstankowski.movieservice.repository.specifications.ShowSpecifications;
@@ -163,6 +160,14 @@ public class ShowController {
         if (serial == null)
             throw new ShowNotFoundException(id);
         return mapper.fromEntity(serial);
+    }
+
+    @GetMapping(path = "/genres")
+    public List<String> getGenres() {
+        return service.findAllGenres()
+                .stream()
+                .map(Genre::getName)
+                .collect(Collectors.toList());
     }
 
     @PostMapping(path = "/movies/add")

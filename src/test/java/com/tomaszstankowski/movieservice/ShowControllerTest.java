@@ -26,9 +26,9 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.GregorianCalendar;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -274,6 +274,25 @@ public class ShowControllerTest {
         mockMvc.perform(get("/shows/series/{id}/participations", 1L)
                 .param("role", "ACTOR"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void get_genres_statusOkJsonCorrect() throws Exception {
+        List<Genre> genres = Stream
+                .of(movie.getGenres(), serial.getGenres())
+                .flatMap(Set::stream)
+                .sorted(Comparator.comparing(Genre::getName))
+                .collect(Collectors.toList());
+        when(service.findAllGenres()).thenReturn(genres);
+
+        mockMvc.perform(get("/shows/genres"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(contentType))
+                .andExpect(jsonPath("$", hasSize(4)))
+                .andExpect(jsonPath("$.[0]", is(genres.get(0).getName())))
+                .andExpect(jsonPath("$.[1]", is(genres.get(1).getName())))
+                .andExpect(jsonPath("$.[2]", is(genres.get(2).getName())))
+                .andExpect(jsonPath("$.[3]", is(genres.get(3).getName())));
     }
 
     @Test
