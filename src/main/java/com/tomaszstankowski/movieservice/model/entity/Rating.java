@@ -1,4 +1,4 @@
-package com.tomaszstankowski.movieservice.model;
+package com.tomaszstankowski.movieservice.model.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

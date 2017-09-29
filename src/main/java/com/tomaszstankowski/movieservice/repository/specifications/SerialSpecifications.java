@@ -1,6 +1,6 @@
 package com.tomaszstankowski.movieservice.repository.specifications;
 
-import com.tomaszstankowski.movieservice.model.Serial;
+import com.tomaszstankowski.movieservice.model.entity.Serial;
 import org.springframework.data.jpa.domain.Specification;
 
 public class SerialSpecifications {

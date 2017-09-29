@@ -1,12 +1,14 @@
 package com.tomaszstankowski.movieservice.controller;
 
-import com.tomaszstankowski.movieservice.model.Movie;
-import com.tomaszstankowski.movieservice.model.Serial;
-import com.tomaszstankowski.movieservice.model.Show;
-import com.tomaszstankowski.movieservice.model.dto.ModelMapper;
+import com.tomaszstankowski.movieservice.model.ModelMapper;
 import com.tomaszstankowski.movieservice.model.dto.MovieDTO;
+import com.tomaszstankowski.movieservice.model.dto.ParticipationDTO;
 import com.tomaszstankowski.movieservice.model.dto.SerialDTO;
 import com.tomaszstankowski.movieservice.model.dto.ShowDTO;
+import com.tomaszstankowski.movieservice.model.entity.Movie;
+import com.tomaszstankowski.movieservice.model.entity.Person;
+import com.tomaszstankowski.movieservice.model.entity.Serial;
+import com.tomaszstankowski.movieservice.model.entity.Show;
 import com.tomaszstankowski.movieservice.repository.specifications.MovieSpecifications;
 import com.tomaszstankowski.movieservice.repository.specifications.SerialSpecifications;
 import com.tomaszstankowski.movieservice.repository.specifications.ShowSpecifications;
@@ -181,6 +183,32 @@ public class ShowController {
                 .buildAndExpand(serial.getId())
                 .toUri();
         return ResponseEntity.created(location).build();
+    }
+
+    @PostMapping(path = "/add_participation")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void addParticipation(@RequestParam("show") long showId,
+                                 @RequestParam("person") long personId,
+                                 @RequestBody ParticipationDTO body) {
+        service.addParticipation(personId, showId, mapper.fromDTO(body));
+    }
+
+    @GetMapping(path = "/movies/{id}/participations")
+    public List<ParticipationDTO> getMovieParticipations(@PathVariable("id") long id,
+                                                         @RequestParam(value = "role", required = false) Person.Profession role) {
+        return service.findMovieParticipations(id, role)
+                .stream()
+                .map(mapper::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping(path = "/series/{id}/participations")
+    public List<ParticipationDTO> getSerialParticipations(@PathVariable("id") long id,
+                                                          @RequestParam(value = "role", required = false) Person.Profession role) {
+        return service.findSerialParticipations(id, role)
+                .stream()
+                .map(mapper::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @PutMapping(path = "/movies/{id}/edit")

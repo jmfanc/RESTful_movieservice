@@ -1,8 +1,9 @@
 package com.tomaszstankowski.movieservice.controller;
 
-import com.tomaszstankowski.movieservice.model.Person;
-import com.tomaszstankowski.movieservice.model.dto.ModelMapper;
+import com.tomaszstankowski.movieservice.model.ModelMapper;
+import com.tomaszstankowski.movieservice.model.dto.ParticipationDTO;
 import com.tomaszstankowski.movieservice.model.dto.PersonDTO;
+import com.tomaszstankowski.movieservice.model.entity.Person;
 import com.tomaszstankowski.movieservice.service.PersonService;
 import com.tomaszstankowski.movieservice.service.exception.PageNotFoundException;
 import com.tomaszstankowski.movieservice.service.exception.PersonNotFoundException;
@@ -50,6 +51,15 @@ public class PersonController {
         if (person == null)
             throw new PersonNotFoundException(id);
         return mapper.fromEntity(person);
+    }
+
+    @GetMapping(path = "/{id}/participations")
+    public List<ParticipationDTO> getPersonParticipations(@PathVariable("id") long personId,
+                                                          @RequestParam("role") Person.Profession role) {
+        return service.findParticipations(personId, role)
+                .stream()
+                .map(mapper::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @PostMapping(path = "/add")

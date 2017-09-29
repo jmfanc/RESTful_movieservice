@@ -1,4 +1,4 @@
-package com.tomaszstankowski.movieservice.model;
+package com.tomaszstankowski.movieservice.model.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -31,7 +31,7 @@ public class Person {
     @Enumerated(EnumType.STRING)
     private Sex sex;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "participant")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "person")
     private List<Participation> participations;
 
     @ElementCollection(targetClass = Profession.class)

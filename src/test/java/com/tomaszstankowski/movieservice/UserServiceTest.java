@@ -1,7 +1,7 @@
 package com.tomaszstankowski.movieservice;
 
-import com.tomaszstankowski.movieservice.model.Sex;
-import com.tomaszstankowski.movieservice.model.User;
+import com.tomaszstankowski.movieservice.model.entity.Sex;
+import com.tomaszstankowski.movieservice.model.entity.User;
 import com.tomaszstankowski.movieservice.repository.UserRepository;
 import com.tomaszstankowski.movieservice.service.UserService;
 import com.tomaszstankowski.movieservice.service.exception.InvalidUserException;

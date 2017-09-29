@@ -1,6 +1,6 @@
 package com.tomaszstankowski.movieservice.repository;
 
-import com.tomaszstankowski.movieservice.model.Serial;
+import com.tomaszstankowski.movieservice.model.entity.Serial;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 

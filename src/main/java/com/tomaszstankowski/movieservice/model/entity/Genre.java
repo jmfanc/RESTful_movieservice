@@ -1,4 +1,4 @@
-package com.tomaszstankowski.movieservice.model;
+package com.tomaszstankowski.movieservice.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;

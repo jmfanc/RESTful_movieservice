@@ -3,14 +3,14 @@ package com.tomaszstankowski.movieservice;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tomaszstankowski.movieservice.controller.ShowController;
 import com.tomaszstankowski.movieservice.controller.exception.InternalExceptionHandler;
-import com.tomaszstankowski.movieservice.model.Genre;
-import com.tomaszstankowski.movieservice.model.Movie;
-import com.tomaszstankowski.movieservice.model.Serial;
-import com.tomaszstankowski.movieservice.model.dto.ModelMapper;
+import com.tomaszstankowski.movieservice.model.ModelMapper;
 import com.tomaszstankowski.movieservice.model.dto.MovieDTO;
+import com.tomaszstankowski.movieservice.model.dto.ParticipationDTO;
 import com.tomaszstankowski.movieservice.model.dto.SerialDTO;
+import com.tomaszstankowski.movieservice.model.entity.*;
 import com.tomaszstankowski.movieservice.service.ShowService;
 import com.tomaszstankowski.movieservice.service.exception.InvalidShowException;
+import com.tomaszstankowski.movieservice.service.exception.PersonNotFoundException;
 import com.tomaszstankowski.movieservice.service.exception.ShowAlreadyExistsException;
 import com.tomaszstankowski.movieservice.service.exception.ShowNotFoundException;
 import net.minidev.json.JSONArray;
@@ -26,8 +26,11 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
+import java.util.List;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -55,6 +58,12 @@ public class ShowControllerTest {
 
     private Serial serial;
 
+    private Person actor;
+
+    private Participation participation;
+
+    private ParticipationDTO participationDTO;
+
     private MovieDTO movieDTO;
 
     private SerialDTO serialDTO;
@@ -80,12 +89,30 @@ public class ShowControllerTest {
                 new GregorianCalendar(2008, 0, 20).getTime(),
                 "USA",
                 (short) 5);
+
+        actor = new Person(
+                "Christian Bale",
+                new GregorianCalendar(1974, 0, 31).getTime(),
+                "Haverfordwest, Wales, UK",
+                Sex.MALE
+        );
+        actor.getProfessions().add(Person.Profession.ACTOR);
+
+        participation = new Participation(Person.Profession.ACTOR, "as Batman", actor, movie);
+
         serial.getGenres().add(new Genre("drama"));
         serial.getGenres().add(new Genre("crime"));
         movie.getGenres().add(new Genre("action"));
         movie.getGenres().add(new Genre("sci-fi"));
+
         movieDTO = modelMapper.fromEntity(movie);
         serialDTO = modelMapper.fromEntity(serial);
+        participationDTO = modelMapper.fromEntity(participation);
+        //request body omits person and show,
+        // their ids must be forwarded as params
+        // so their bodies are redundant
+        participationDTO.setPerson(null);
+        participationDTO.setShow(null);
     }
 
     @Test
@@ -129,6 +156,40 @@ public class ShowControllerTest {
     }
 
     @Test
+    public void post_whenParticipationAdded_statusOk() throws Exception {
+        mockMvc.perform(post("/shows/add_participation")
+                .param("show", "1")
+                .param("person", "1")
+                .content(json(participationDTO))
+                .contentType(contentType))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    public void post_whenParticipationPersonNotExists_statusNotFound() throws Exception {
+        doThrow(PersonNotFoundException.class)
+                .when(service).addParticipation(1L, 1L, participation);
+        mockMvc.perform(post("/shows/add_participation")
+                .param("show", "1")
+                .param("person", "1")
+                .content(json(participationDTO))
+                .contentType(contentType))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void post_whenParticipationShowNotExists_statusNotFound() throws Exception {
+        doThrow(ShowNotFoundException.class)
+                .when(service).addParticipation(1L, 1L, participation);
+        mockMvc.perform(post("/shows/add_participation")
+                .param("show", "1")
+                .param("person", "1")
+                .content(json(participationDTO))
+                .contentType(contentType))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     public void get_whenMovieExists_statusOkJsonCorrect() throws Exception {
         when(service.findMovie(1L)).thenReturn(movie);
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
@@ -169,6 +230,49 @@ public class ShowControllerTest {
     public void get_whenShowNotExists_statusNotFound() throws Exception {
         when(service.findMovie(3L)).thenReturn(null);
         mockMvc.perform(get("/shows/movies/{id}", 3L))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void get_whenParticipationsMovieFound_statusOkCorrectJson() throws Exception {
+        List<Participation> list = new ArrayList<>();
+        list.add(participation);
+        when(service.findMovieParticipations(1L, Person.Profession.ACTOR))
+                .thenReturn(list);
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        JSONArray professions = new JSONArray();
+        actor.getProfessions().stream().map(Enum::toString).forEach(professions::add);
+        JSONArray genres = new JSONArray();
+        genres.addAll(movieDTO.getGenres());
+
+        mockMvc.perform(get("/shows/movies/{id}/participations", 1L)
+                .param("role", "ACTOR"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(contentType))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$.[0].role", is(participation.getRole().toString())))
+                .andExpect(jsonPath("$.[0].info", is(participation.getInfo())))
+                .andExpect(jsonPath("$.[0].person.name", is(actor.getName())))
+                .andExpect(jsonPath("$.[0].person.birthDate", is(format.format(actor.getBirthDate()))))
+                .andExpect(jsonPath("$.[0].person.birthPlace", is(actor.getBirthPlace())))
+                .andExpect(jsonPath("$.[0].person.sex", is(actor.getSex().toString())))
+                .andExpect(jsonPath("$.[0].person.professions", is(professions)))
+                .andExpect(jsonPath("$.[0].show.title", is(movie.getTitle())))
+                .andExpect(jsonPath("$.[0].show.description", is(movie.getDescription())))
+                .andExpect(jsonPath("$.[0].show.releaseDate", is(format.format(movie.getReleaseDate()))))
+                .andExpect(jsonPath("$.[0].show.location", is(movie.getLocation())))
+                .andExpect(jsonPath("$.[0].show.duration", is((int) movie.getDuration())))
+                .andExpect(jsonPath("$.[0].show.boxoffice", is(movie.getBoxoffice())))
+                .andExpect(jsonPath("$.[0].show.genres", is(genres)));
+    }
+
+    @Test
+    public void get_whenParticipationsSerialNotExists_statusNotFound() throws Exception {
+        doThrow(ShowNotFoundException.class)
+                .when(service).findSerialParticipations(1L, Person.Profession.ACTOR);
+
+        mockMvc.perform(get("/shows/series/{id}/participations", 1L)
+                .param("role", "ACTOR"))
                 .andExpect(status().isNotFound());
     }
 

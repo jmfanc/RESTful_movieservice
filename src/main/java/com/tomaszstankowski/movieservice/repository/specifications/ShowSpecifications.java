@@ -1,6 +1,6 @@
 package com.tomaszstankowski.movieservice.repository.specifications;
 
-import com.tomaszstankowski.movieservice.model.Show;
+import com.tomaszstankowski.movieservice.model.entity.Show;
 import org.springframework.data.jpa.domain.Specification;
 public class ShowSpecifications {
 

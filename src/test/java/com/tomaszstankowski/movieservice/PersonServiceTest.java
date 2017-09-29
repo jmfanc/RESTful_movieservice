@@ -1,7 +1,8 @@
 package com.tomaszstankowski.movieservice;
 
-import com.tomaszstankowski.movieservice.model.Person;
-import com.tomaszstankowski.movieservice.model.Sex;
+import com.tomaszstankowski.movieservice.model.entity.Person;
+import com.tomaszstankowski.movieservice.model.entity.Sex;
+import com.tomaszstankowski.movieservice.repository.ParticipationRepository;
 import com.tomaszstankowski.movieservice.repository.PersonRepository;
 import com.tomaszstankowski.movieservice.service.PersonService;
 import com.tomaszstankowski.movieservice.service.exception.InvalidPersonException;
@@ -25,7 +26,9 @@ import static org.mockito.Mockito.*;
 public class PersonServiceTest {
 
     @Mock
-    private PersonRepository repo;
+    private PersonRepository personRepo;
+    @Mock
+    private ParticipationRepository participationRepo;
 
     private PersonService service;
 
@@ -36,7 +39,7 @@ public class PersonServiceTest {
 
     @Before
     public void setup() {
-        service = new PersonService(repo);
+        service = new PersonService(personRepo, participationRepo);
         person = new Person(
                 "Janusz Gajos",
                 new GregorianCalendar(1939, 8, 23).getTime(),
@@ -48,28 +51,28 @@ public class PersonServiceTest {
 
     @Test
     public void add_successful() {
-        when(repo.findByNameAndBirthDateAndBirthPlace(person.getName(), person.getBirthDate(), person.getBirthPlace()))
+        when(personRepo.findByNameAndBirthDateAndBirthPlace(person.getName(), person.getBirthDate(), person.getBirthPlace()))
                 .thenReturn(null);
 
         service.addPerson(person);
 
-        verify(repo, times(1))
+        verify(personRepo, times(1))
                 .findByNameAndBirthDateAndBirthPlace(person.getName(), person.getBirthDate(), person.getBirthPlace());
-        verify(repo, times(1)).save(person);
-        verifyNoMoreInteractions(repo);
+        verify(personRepo, times(1)).save(person);
+        verifyNoMoreInteractions(personRepo);
     }
 
     @Test
     public void add_whenPersonAlreadyExists_throwExc() {
-        when(repo.findByNameAndBirthDateAndBirthPlace(person.getName(), person.getBirthDate(), person.getBirthPlace()))
+        when(personRepo.findByNameAndBirthDateAndBirthPlace(person.getName(), person.getBirthDate(), person.getBirthPlace()))
                 .thenReturn(person);
         exception.expect(PersonAlreadyExistsException.class);
 
         service.addPerson(person);
 
-        verify(repo, times(1))
+        verify(personRepo, times(1))
                 .findByNameAndBirthDateAndBirthPlace(person.getName(), person.getBirthDate(), person.getBirthPlace());
-        verifyNoMoreInteractions(repo);
+        verifyNoMoreInteractions(personRepo);
     }
 
     @Test
@@ -84,12 +87,12 @@ public class PersonServiceTest {
 
         service.addPerson(body);
 
-        verifyZeroInteractions(repo);
+        verifyZeroInteractions(personRepo);
     }
 
     @Test
     public void edit_successful() {
-        when(repo.findOne(1L)).thenReturn(person);
+        when(personRepo.findOne(1L)).thenReturn(person);
         Person body = new Person(
                 person.getName(),
                 new GregorianCalendar(1939, 8, 24).getTime(),
@@ -99,9 +102,9 @@ public class PersonServiceTest {
 
         service.editPerson(1L, body);
 
-        verify(repo, times(1)).findOne(1L);
-        verify(repo, times(1)).save(person);
-        verifyNoMoreInteractions(repo);
+        verify(personRepo, times(1)).findOne(1L);
+        verify(personRepo, times(1)).save(person);
+        verifyNoMoreInteractions(personRepo);
         assertEquals(body.getBirthDate(), person.getBirthDate());
         assertEquals(body.getBirthPlace(), person.getBirthPlace());
         assertTrue(person.getProfessions().isEmpty());
@@ -109,7 +112,7 @@ public class PersonServiceTest {
 
     @Test
     public void edit_whenPersonNotExists_throwExc() {
-        when(repo.findOne(1L)).thenReturn(null);
+        when(personRepo.findOne(1L)).thenReturn(null);
         Person body = new Person(
                 person.getName(),
                 new GregorianCalendar(1939, 8, 24).getTime(),
@@ -120,8 +123,8 @@ public class PersonServiceTest {
 
         service.editPerson(1L, body);
 
-        verify(repo, times(1)).findOne(1L);
-        verifyNoMoreInteractions(repo);
+        verify(personRepo, times(1)).findOne(1L);
+        verifyNoMoreInteractions(personRepo);
     }
 
     @Test
@@ -136,29 +139,29 @@ public class PersonServiceTest {
 
         service.editPerson(1L, body);
 
-        verifyZeroInteractions(repo);
+        verifyZeroInteractions(personRepo);
     }
 
     @Test
     public void delete_successful() {
-        when(repo.findOne(1L)).thenReturn(person);
+        when(personRepo.findOne(1L)).thenReturn(person);
 
         service.removePerson(1L);
 
-        verify(repo, times(1)).findOne(1L);
-        verify(repo, times(1)).delete(1L);
-        verifyNoMoreInteractions(repo);
+        verify(personRepo, times(1)).findOne(1L);
+        verify(personRepo, times(1)).delete(1L);
+        verifyNoMoreInteractions(personRepo);
     }
 
     @Test
     public void delete_whenPersonNotExists_throwExc() {
-        when(repo.findOne(1L)).thenReturn(null);
+        when(personRepo.findOne(1L)).thenReturn(null);
         exception.expect(PersonNotFoundException.class);
 
         service.removePerson(1L);
 
-        verify(repo, times(1)).findOne(1L);
-        verifyNoMoreInteractions(repo);
+        verify(personRepo, times(1)).findOne(1L);
+        verifyNoMoreInteractions(personRepo);
     }
 
 }

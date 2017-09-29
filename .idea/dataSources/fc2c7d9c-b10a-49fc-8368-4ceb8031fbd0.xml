@@ -65,9 +65,9 @@
     </column>
     <column id="23" parent="6" name="role">
       <Position>3</Position>
-      <DataType>int(11)|0</DataType>
+      <DataType>varchar(255)|0</DataType>
     </column>
-    <column id="24" parent="6" name="performer_id">
+    <column id="24" parent="6" name="person_id">
       <Position>4</Position>
       <DataType>bigint(20)|0</DataType>
       <NotNull>1</NotNull>
@@ -80,16 +80,16 @@
     <index id="26" parent="6" name="FK4hjrfc8ylvgcqd234d87oyi0y">
       <ColNames>show_id</ColNames>
     </index>
-    <index id="27" parent="6" name="FKj7ra3g1ukwyov5vws0ui947mv">
-      <ColNames>performer_id</ColNames>
+    <index id="27" parent="6" name="FKf9vvwsy6mpk4uu47jftxlobrn">
+      <ColNames>person_id</ColNames>
     </index>
     <key id="28" parent="6" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <foreign-key id="29" parent="6" name="FKj7ra3g1ukwyov5vws0ui947mv">
-      <ColNames>performer_id</ColNames>
+    <foreign-key id="29" parent="6" name="FKf9vvwsy6mpk4uu47jftxlobrn">
+      <ColNames>person_id</ColNames>
       <RefSchemaName>db_movieservice</RefSchemaName>
       <RefTableName>people</RefTableName>
       <RefColNames>id</RefColNames>

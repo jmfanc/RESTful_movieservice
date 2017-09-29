@@ -1,8 +1,8 @@
 package com.tomaszstankowski.movieservice.controller;
 
-import com.tomaszstankowski.movieservice.model.User;
-import com.tomaszstankowski.movieservice.model.dto.ModelMapper;
+import com.tomaszstankowski.movieservice.model.ModelMapper;
 import com.tomaszstankowski.movieservice.model.dto.UserDTO;
+import com.tomaszstankowski.movieservice.model.entity.User;
 import com.tomaszstankowski.movieservice.service.UserService;
 import com.tomaszstankowski.movieservice.service.exception.PageNotFoundException;
 import com.tomaszstankowski.movieservice.service.exception.UserNotFoundException;

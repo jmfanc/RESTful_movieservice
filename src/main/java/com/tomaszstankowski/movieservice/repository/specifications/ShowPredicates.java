@@ -1,7 +1,7 @@
 package com.tomaszstankowski.movieservice.repository.specifications;
 
-import com.tomaszstankowski.movieservice.model.Genre;
-import com.tomaszstankowski.movieservice.model.Show;
+import com.tomaszstankowski.movieservice.model.entity.Genre;
+import com.tomaszstankowski.movieservice.model.entity.Show;
 
 import javax.persistence.criteria.*;
 import java.util.Date;

@@ -3,14 +3,14 @@ package com.tomaszstankowski.movieservice;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tomaszstankowski.movieservice.controller.PersonController;
 import com.tomaszstankowski.movieservice.controller.exception.InternalExceptionHandler;
-import com.tomaszstankowski.movieservice.model.Person;
-import com.tomaszstankowski.movieservice.model.Sex;
-import com.tomaszstankowski.movieservice.model.dto.ModelMapper;
+import com.tomaszstankowski.movieservice.model.ModelMapper;
 import com.tomaszstankowski.movieservice.model.dto.PersonDTO;
+import com.tomaszstankowski.movieservice.model.entity.*;
 import com.tomaszstankowski.movieservice.service.PersonService;
 import com.tomaszstankowski.movieservice.service.exception.InvalidPersonException;
 import com.tomaszstankowski.movieservice.service.exception.PersonAlreadyExistsException;
 import com.tomaszstankowski.movieservice.service.exception.PersonNotFoundException;
+import com.tomaszstankowski.movieservice.service.exception.ShowNotFoundException;
 import net.minidev.json.JSONArray;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,8 +24,11 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
+import java.util.List;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -53,6 +56,10 @@ public class PersonControllerTest {
 
     private PersonDTO personDTO;
 
+    private Participation participation;
+
+    private Movie movie;
+
     private String json(Object o) throws IOException {
         return objectMapper.writeValueAsString(o);
     }
@@ -68,6 +75,15 @@ public class PersonControllerTest {
                 "Dąbrowa Górnicza, Poland",
                 Sex.MALE
         );
+
+        movie = new Movie("The Dark Knight Rises",
+                "Batman.",
+                new GregorianCalendar(2012, 6, 16).getTime(),
+                "USA",
+                (short) 165,
+                1084439099);
+
+        participation = new Participation(Person.Profession.ACTOR, "as Batman", person, movie);
         person.getProfessions().add(Person.Profession.ACTOR);
         personDTO = modelMapper.fromEntity(person);
     }
@@ -123,6 +139,49 @@ public class PersonControllerTest {
     public void get_whenPersonNotExists_statusNotFound() throws Exception {
         when(service.findPerson(1L)).thenReturn(null);
         mockMvc.perform(get("/people/{id}", 1L))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void get_whenParticipationsMovieFound_statusOkCorrectJson() throws Exception {
+        List<Participation> list = new ArrayList<>();
+        list.add(participation);
+        when(service.findParticipations(1L, Person.Profession.ACTOR))
+                .thenReturn(list);
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        JSONArray professions = new JSONArray();
+        person.getProfessions().stream().map(Enum::toString).forEach(professions::add);
+        JSONArray genres = new JSONArray();
+        participation.getShow().getGenres().stream().map(Genre::getName).forEach(genres::add);
+
+        mockMvc.perform(get("/people/{id}/participations", 1L)
+                .param("role", "ACTOR"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(contentType))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$.[0].role", is(participation.getRole().toString())))
+                .andExpect(jsonPath("$.[0].info", is(participation.getInfo())))
+                .andExpect(jsonPath("$.[0].person.name", is(person.getName())))
+                .andExpect(jsonPath("$.[0].person.birthDate", is(format.format(person.getBirthDate()))))
+                .andExpect(jsonPath("$.[0].person.birthPlace", is(person.getBirthPlace())))
+                .andExpect(jsonPath("$.[0].person.sex", is(person.getSex().toString())))
+                .andExpect(jsonPath("$.[0].person.professions", is(professions)))
+                .andExpect(jsonPath("$.[0].show.title", is(movie.getTitle())))
+                .andExpect(jsonPath("$.[0].show.description", is(movie.getDescription())))
+                .andExpect(jsonPath("$.[0].show.releaseDate", is(format.format(movie.getReleaseDate()))))
+                .andExpect(jsonPath("$.[0].show.location", is(movie.getLocation())))
+                .andExpect(jsonPath("$.[0].show.duration", is((int) movie.getDuration())))
+                .andExpect(jsonPath("$.[0].show.boxoffice", is(movie.getBoxoffice())))
+                .andExpect(jsonPath("$.[0].show.genres", is(genres)));
+    }
+
+    @Test
+    public void get_whenParticipationsSerialNotExists_statusNotFound() throws Exception {
+        doThrow(ShowNotFoundException.class)
+                .when(service).findParticipations(1L, Person.Profession.ACTOR);
+
+        mockMvc.perform(get("/people/{id}/participations", 1L)
+                .param("role", "ACTOR"))
                 .andExpect(status().isNotFound());
     }
 

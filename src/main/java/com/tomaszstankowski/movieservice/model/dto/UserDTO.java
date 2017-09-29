@@ -1,7 +1,7 @@
 package com.tomaszstankowski.movieservice.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.tomaszstankowski.movieservice.model.Sex;
+import com.tomaszstankowski.movieservice.model.entity.Sex;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

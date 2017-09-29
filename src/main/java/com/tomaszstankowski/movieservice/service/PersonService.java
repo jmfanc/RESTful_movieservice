@@ -1,6 +1,8 @@
 package com.tomaszstankowski.movieservice.service;
 
-import com.tomaszstankowski.movieservice.model.Person;
+import com.tomaszstankowski.movieservice.model.entity.Participation;
+import com.tomaszstankowski.movieservice.model.entity.Person;
+import com.tomaszstankowski.movieservice.repository.ParticipationRepository;
 import com.tomaszstankowski.movieservice.repository.PersonRepository;
 import com.tomaszstankowski.movieservice.service.exception.InvalidPersonException;
 import com.tomaszstankowski.movieservice.service.exception.PersonAlreadyExistsException;
@@ -12,13 +14,17 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class PersonService {
 
     private final PersonRepository personRepo;
+    private final ParticipationRepository participationRepo;
 
-    public PersonService(PersonRepository personRepo) {
+    public PersonService(PersonRepository personRepo, ParticipationRepository participationRepo) {
         this.personRepo = personRepo;
+        this.participationRepo = participationRepo;
     }
 
     public Person findPerson(long id) {
@@ -27,6 +33,15 @@ public class PersonService {
 
     public Page<Person> findAll(Specification<Person> spec, int page, Sort sort) {
         return personRepo.findAll(spec, createPageable(page, sort));
+    }
+
+    public List<Participation> findParticipations(long personId, Person.Profession role) {
+        Person person = personRepo.findOne(personId);
+        if (person == null)
+            throw new PersonNotFoundException(personId);
+        if (role == null)
+            return person.getParticipations();
+        return participationRepo.findByPersonAndRole(person, role);
     }
 
     public Person addPerson(Person person) {

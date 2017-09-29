@@ -1,6 +1,6 @@
 package com.tomaszstankowski.movieservice.service;
 
-import com.tomaszstankowski.movieservice.model.User;
+import com.tomaszstankowski.movieservice.model.entity.User;
 import com.tomaszstankowski.movieservice.repository.UserRepository;
 import com.tomaszstankowski.movieservice.service.exception.InvalidUserException;
 import com.tomaszstankowski.movieservice.service.exception.UserAlreadyExistsException;

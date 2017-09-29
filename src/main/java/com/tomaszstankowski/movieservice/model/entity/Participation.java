@@ -1,27 +1,27 @@
-package com.tomaszstankowski.movieservice.model;
+package com.tomaszstankowski.movieservice.model.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
-import java.io.Serializable;
 
 @Data
 @EqualsAndHashCode(of = "id")
 @Entity(name = "PARTICIPATIONS")
-public class Participation implements Serializable {
+public class Participation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Enumerated(value = EnumType.STRING)
     private Person.Profession role;
 
     private String info;
 
     @ManyToOne
-    @JoinColumn(name = "PERFORMER_ID", nullable = false)
-    private Person participant;
+    @JoinColumn(name = "PERSON_ID", nullable = false)
+    private Person person;
 
     @ManyToOne
     @JoinColumn(name = "SHOW_ID", nullable = false)
@@ -30,10 +30,10 @@ public class Participation implements Serializable {
     public Participation() {
     }
 
-    public Participation(Person.Profession role, String info, Person participant, Show show) {
+    public Participation(Person.Profession role, String info, Person person, Show show) {
         this.role = role;
         this.info = info;
-        this.participant = participant;
+        this.person = person;
         this.show = show;
     }
 
