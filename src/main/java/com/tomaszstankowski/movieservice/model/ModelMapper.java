@@ -172,4 +172,17 @@ public class ModelMapper {
         dto.setId(entity.getId());
         return dto;
     }
+
+    public RatingDTO fromEntity(Rating entity) {
+        if (entity == null)
+            return null;
+        RatingDTO dto = new RatingDTO(
+                entity.getRating(),
+                fromEntity(entity.getShow()),
+                fromEntity(entity.getUser())
+        );
+        dto.setId(entity.getId());
+        dto.setId(entity.getId());
+        return dto;
+    }
 }

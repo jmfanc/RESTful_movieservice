@@ -1,20 +1,17 @@
 package com.tomaszstankowski.movieservice.model.entity;
 
+import com.tomaszstankowski.movieservice.model.enums.Profession;
+import com.tomaszstankowski.movieservice.model.enums.Sex;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Data
 @EqualsAndHashCode(of = "id")
 @Entity(name = "PEOPLE")
 public class Person {
-
-    public enum Profession {ACTOR, DIRECTOR, SCREENWRITER}
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,7 +29,7 @@ public class Person {
     private Sex sex;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "person")
-    private List<Participation> participations;
+    private List<Participation> participations = new ArrayList<>();
 
     @ElementCollection(targetClass = Profession.class)
     @Enumerated(EnumType.STRING)

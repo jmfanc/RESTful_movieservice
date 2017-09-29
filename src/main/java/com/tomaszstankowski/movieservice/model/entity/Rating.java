@@ -4,13 +4,12 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Date;
 
 @Data
 @EqualsAndHashCode(of = "id")
 @Entity(name = "RATINGS")
-public class Rating implements Serializable {
+public class Rating {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,6 +17,7 @@ public class Rating implements Serializable {
 
     private short rating;
 
+    @Temporal(TemporalType.TIME)
     private Date date = new Date();
 
     @ManyToOne

@@ -1,5 +1,6 @@
 package com.tomaszstankowski.movieservice.model.entity;
 
+import com.tomaszstankowski.movieservice.model.enums.Profession;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -15,7 +16,7 @@ public class Participation {
     private long id;
 
     @Enumerated(value = EnumType.STRING)
-    private Person.Profession role;
+    private Profession role;
 
     private String info;
 
@@ -30,7 +31,7 @@ public class Participation {
     public Participation() {
     }
 
-    public Participation(Person.Profession role, String info, Person person, Show show) {
+    public Participation(Profession role, String info, Person person, Show show) {
         this.role = role;
         this.info = info;
         this.person = person;

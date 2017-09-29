@@ -1,7 +1,8 @@
 package com.tomaszstankowski.movieservice;
 
 import com.tomaszstankowski.movieservice.model.entity.Person;
-import com.tomaszstankowski.movieservice.model.entity.Sex;
+import com.tomaszstankowski.movieservice.model.enums.Profession;
+import com.tomaszstankowski.movieservice.model.enums.Sex;
 import com.tomaszstankowski.movieservice.repository.ParticipationRepository;
 import com.tomaszstankowski.movieservice.repository.PersonRepository;
 import com.tomaszstankowski.movieservice.service.PersonService;
@@ -46,7 +47,7 @@ public class PersonServiceTest {
                 "Dąbrowa Górnicza, Poland",
                 Sex.MALE
         );
-        person.getProfessions().add(Person.Profession.ACTOR);
+        person.getProfessions().add(Profession.ACTOR);
     }
 
     @Test

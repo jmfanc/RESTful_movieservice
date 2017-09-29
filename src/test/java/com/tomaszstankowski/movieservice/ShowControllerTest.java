@@ -8,6 +8,8 @@ import com.tomaszstankowski.movieservice.model.dto.MovieDTO;
 import com.tomaszstankowski.movieservice.model.dto.ParticipationDTO;
 import com.tomaszstankowski.movieservice.model.dto.SerialDTO;
 import com.tomaszstankowski.movieservice.model.entity.*;
+import com.tomaszstankowski.movieservice.model.enums.Profession;
+import com.tomaszstankowski.movieservice.model.enums.Sex;
 import com.tomaszstankowski.movieservice.service.ShowService;
 import com.tomaszstankowski.movieservice.service.exception.InvalidShowException;
 import com.tomaszstankowski.movieservice.service.exception.PersonNotFoundException;
@@ -96,9 +98,9 @@ public class ShowControllerTest {
                 "Haverfordwest, Wales, UK",
                 Sex.MALE
         );
-        actor.getProfessions().add(Person.Profession.ACTOR);
+        actor.getProfessions().add(Profession.ACTOR);
 
-        participation = new Participation(Person.Profession.ACTOR, "as Batman", actor, movie);
+        participation = new Participation(Profession.ACTOR, "as Batman", actor, movie);
 
         serial.getGenres().add(new Genre("drama"));
         serial.getGenres().add(new Genre("crime"));
@@ -117,8 +119,8 @@ public class ShowControllerTest {
 
     @Test
     public void post_whenShowAdded_statusCreated() throws Exception {
-        when(service.addMovie(modelMapper.fromDTO(movieDTO))).thenReturn(modelMapper.fromDTO(movieDTO));
-        mockMvc.perform(post("/shows/movies/add")
+        when(service.addShow(modelMapper.fromDTO(movieDTO))).thenReturn(modelMapper.fromDTO(movieDTO));
+        mockMvc.perform(post("/shows/add")
                 .content(json(movieDTO))
                 .contentType(contentType))
                 .andExpect(status().isCreated());
@@ -127,8 +129,8 @@ public class ShowControllerTest {
     @Test
     public void post_whenTitleEmpty_statusUnprocessableEntity() throws Exception {
         movieDTO.setTitle("");
-        doThrow(new InvalidShowException()).when(service).addMovie(modelMapper.fromDTO(movieDTO));
-        mockMvc.perform(post("/shows/movies/add")
+        doThrow(new InvalidShowException()).when(service).addShow(modelMapper.fromDTO(movieDTO));
+        mockMvc.perform(post("/shows/add")
                 .content(json(movieDTO))
                 .contentType(contentType))
                 .andExpect(status().isUnprocessableEntity());
@@ -138,8 +140,8 @@ public class ShowControllerTest {
     public void post_whenTitleNull_statusUnprocessableEntity() throws Exception {
         serialDTO.setTitle(null);
         doThrow(new InvalidShowException())
-                .when(service).addSerial(modelMapper.fromDTO(serialDTO));
-        mockMvc.perform(post("/shows/series/add")
+                .when(service).addShow(modelMapper.fromDTO(serialDTO));
+        mockMvc.perform(post("/shows/add")
                 .content(json(serialDTO))
                 .contentType(contentType))
                 .andExpect(status().isUnprocessableEntity());
@@ -148,17 +150,18 @@ public class ShowControllerTest {
     @Test
     public void post_whenShowAlreadyExists_statusConflict() throws Exception {
         doThrow(new ShowAlreadyExistsException(movieDTO.getTitle(), movieDTO.getReleaseDate()))
-                .when(service).addMovie(modelMapper.fromDTO(movieDTO));
-        mockMvc.perform(post("/shows/movies/add")
+                .when(service).addShow(modelMapper.fromDTO(movieDTO));
+        mockMvc.perform(post("/shows/add")
                 .content(json(movieDTO))
                 .contentType(contentType))
                 .andExpect(status().isConflict());
     }
 
     @Test
-    public void post_whenParticipationAdded_statusOk() throws Exception {
-        mockMvc.perform(post("/shows/add_participation")
-                .param("show", "1")
+    public void post_whenParticipationAdded_statusCreated() throws Exception {
+        when(service.addParticipation(1L, 1L, modelMapper.fromDTO(participationDTO)))
+                .thenReturn(modelMapper.fromDTO(participationDTO));
+        mockMvc.perform(post("/shows/{id}/participations/add", 1L)
                 .param("person", "1")
                 .content(json(participationDTO))
                 .contentType(contentType))
@@ -169,8 +172,7 @@ public class ShowControllerTest {
     public void post_whenParticipationPersonNotExists_statusNotFound() throws Exception {
         doThrow(PersonNotFoundException.class)
                 .when(service).addParticipation(1L, 1L, participation);
-        mockMvc.perform(post("/shows/add_participation")
-                .param("show", "1")
+        mockMvc.perform(post("/shows/{id}/participations/add", 1L)
                 .param("person", "1")
                 .content(json(participationDTO))
                 .contentType(contentType))
@@ -181,8 +183,7 @@ public class ShowControllerTest {
     public void post_whenParticipationShowNotExists_statusNotFound() throws Exception {
         doThrow(ShowNotFoundException.class)
                 .when(service).addParticipation(1L, 1L, participation);
-        mockMvc.perform(post("/shows/add_participation")
-                .param("show", "1")
+        mockMvc.perform(post("/shows/{id}/participations/add", 1L)
                 .param("person", "1")
                 .content(json(participationDTO))
                 .contentType(contentType))
@@ -191,12 +192,12 @@ public class ShowControllerTest {
 
     @Test
     public void get_whenMovieExists_statusOkJsonCorrect() throws Exception {
-        when(service.findMovie(1L)).thenReturn(movie);
+        when(service.findShow(1L)).thenReturn(movie);
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         JSONArray genres = new JSONArray();
         genres.addAll(movieDTO.getGenres());
 
-        mockMvc.perform(get("/shows/movies/{id}", 1L))
+        mockMvc.perform(get("/shows/{id}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.title", is(movie.getTitle())))
@@ -210,12 +211,12 @@ public class ShowControllerTest {
 
     @Test
     public void get_whenSerialExists_statusOkJsonCorrect() throws Exception {
-        when(service.findSerial(2L)).thenReturn(serial);
+        when(service.findShow(2L)).thenReturn(serial);
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         JSONArray genres = new JSONArray();
         genres.addAll(serialDTO.getGenres());
 
-        mockMvc.perform(get("/shows/series/{id}", 2L))
+        mockMvc.perform(get("/shows/{id}", 2L))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.title", is(serial.getTitle())))
@@ -228,8 +229,8 @@ public class ShowControllerTest {
 
     @Test
     public void get_whenShowNotExists_statusNotFound() throws Exception {
-        when(service.findMovie(3L)).thenReturn(null);
-        mockMvc.perform(get("/shows/movies/{id}", 3L))
+        when(service.findShow(3L)).thenReturn(null);
+        mockMvc.perform(get("/shows/{id}", 3L))
                 .andExpect(status().isNotFound());
     }
 
@@ -237,7 +238,7 @@ public class ShowControllerTest {
     public void get_whenParticipationsMovieFound_statusOkCorrectJson() throws Exception {
         List<Participation> list = new ArrayList<>();
         list.add(participation);
-        when(service.findMovieParticipations(1L, Person.Profession.ACTOR))
+        when(service.findParticipations(1L, Profession.ACTOR))
                 .thenReturn(list);
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         JSONArray professions = new JSONArray();
@@ -245,7 +246,7 @@ public class ShowControllerTest {
         JSONArray genres = new JSONArray();
         genres.addAll(movieDTO.getGenres());
 
-        mockMvc.perform(get("/shows/movies/{id}/participations", 1L)
+        mockMvc.perform(get("/shows/{id}/participations", 1L)
                 .param("role", "ACTOR"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
@@ -269,9 +270,9 @@ public class ShowControllerTest {
     @Test
     public void get_whenParticipationsSerialNotExists_statusNotFound() throws Exception {
         doThrow(ShowNotFoundException.class)
-                .when(service).findSerialParticipations(1L, Person.Profession.ACTOR);
+                .when(service).findParticipations(1L, Profession.ACTOR);
 
-        mockMvc.perform(get("/shows/series/{id}/participations", 1L)
+        mockMvc.perform(get("/shows/{id}/participations", 1L)
                 .param("role", "ACTOR"))
                 .andExpect(status().isNotFound());
     }
@@ -300,7 +301,7 @@ public class ShowControllerTest {
         movieDTO.setDescription("Bateman.");
         movieDTO.getGenres().clear();
         movieDTO.getGenres().add("thriller");
-        mockMvc.perform(put("/shows/movies/{id}/edit", 1L)
+        mockMvc.perform(put("/shows/{id}/edit", 1L)
                 .content(json(movieDTO))
                 .contentType(contentType))
                 .andExpect(status().isOk());
@@ -308,8 +309,8 @@ public class ShowControllerTest {
 
     @Test
     public void put_whenShowNotExists_statusNotFound() throws Exception {
-        doThrow(new ShowNotFoundException(3L)).when(service).editMovie(3L, modelMapper.fromDTO(movieDTO));
-        mockMvc.perform(put("/shows/movies/{id}/edit", 3L)
+        doThrow(new ShowNotFoundException(3L)).when(service).editShow(3L, modelMapper.fromDTO(movieDTO));
+        mockMvc.perform(put("/shows/{id}/edit", 3L)
                 .content(json(movieDTO))
                 .contentType(contentType))
                 .andExpect(status().isNotFound());
@@ -317,15 +318,15 @@ public class ShowControllerTest {
 
     @Test
     public void delete_whenShowRemoved_statusOk() throws Exception {
-        mockMvc.perform(delete("/shows/movies/{id}/delete", 1L))
+        mockMvc.perform(delete("/shows/{id}/delete", 1L))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void delete_whenShowNotExists_statusNotFound() throws Exception {
         doThrow(new ShowNotFoundException(3L))
-                .when(service).removeMovie(3L);
-        mockMvc.perform(delete("/shows/movies/{id}/delete", 3L))
+                .when(service).removeShow(3L);
+        mockMvc.perform(delete("/shows/{id}/delete", 3L))
                 .andExpect(status().isNotFound());
     }
 }

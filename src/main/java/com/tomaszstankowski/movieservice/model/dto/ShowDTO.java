@@ -1,6 +1,7 @@
 package com.tomaszstankowski.movieservice.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -10,6 +11,7 @@ import java.util.Set;
 
 @Data
 @EqualsAndHashCode(of = "id")
+@JsonDeserialize(using = ShowDTODeserializer.class)
 public abstract class ShowDTO {
 
     private long id;

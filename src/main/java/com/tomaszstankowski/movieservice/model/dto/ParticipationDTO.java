@@ -1,6 +1,6 @@
 package com.tomaszstankowski.movieservice.model.dto;
 
-import com.tomaszstankowski.movieservice.model.entity.Person;
+import com.tomaszstankowski.movieservice.model.enums.Profession;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -11,7 +11,7 @@ import java.io.Serializable;
 public class ParticipationDTO implements Serializable {
 
     private long id;
-    private Person.Profession role;
+    private Profession role;
     private String info;
     private PersonDTO person;
     private ShowDTO show;
@@ -19,7 +19,7 @@ public class ParticipationDTO implements Serializable {
     public ParticipationDTO() {
     }
 
-    public ParticipationDTO(Person.Profession role,
+    public ParticipationDTO(Profession role,
                             String info,
                             PersonDTO person,
                             ShowDTO show) {

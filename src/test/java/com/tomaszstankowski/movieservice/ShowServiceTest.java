@@ -1,6 +1,8 @@
 package com.tomaszstankowski.movieservice;
 
 import com.tomaszstankowski.movieservice.model.entity.*;
+import com.tomaszstankowski.movieservice.model.enums.Profession;
+import com.tomaszstankowski.movieservice.model.enums.Sex;
 import com.tomaszstankowski.movieservice.repository.*;
 import com.tomaszstankowski.movieservice.service.ShowService;
 import com.tomaszstankowski.movieservice.service.exception.InvalidShowException;
@@ -35,7 +37,11 @@ public class ShowServiceTest {
     @Mock
     private PersonRepository personRepo;
     @Mock
+    private UserRepository userRepo;
+    @Mock
     private ParticipationRepository participationRepo;
+    @Mock
+    private RatingRepository ratingRepo;
 
     @Rule
     public final ExpectedException exception = ExpectedException.none();
@@ -80,29 +86,32 @@ public class ShowServiceTest {
                 Sex.MALE
         );
 
-        participation = new Participation(Person.Profession.ACTOR, "as Batman", null, null);
+        participation = new Participation(Profession.ACTOR, "as Batman", null, null);
 
         movie.getGenres().add(action);
         movie.getGenres().add(sciFi);
         serial.getGenres().add(drama);
-        when(showRepo.findOne(1L)).thenReturn(movie);
-        when(showRepo.findOne(2L)).thenReturn(serial);
-
-        when(movieRepo.findOne(1L)).thenReturn(movie);
-        when(serialRepo.findOne(2L)).thenReturn(serial);
         when(genreRepo.findOne("action")).thenReturn(action);
         when(genreRepo.findOne("sci-fi")).thenReturn(sciFi);
         when(genreRepo.findOne("drama")).thenReturn(drama);
         when(genreRepo.findOne("crime")).thenReturn(crime);
-        when(personRepo.findOne(1L)).thenReturn(actor);
-        service = new ShowService(showRepo, movieRepo, serialRepo, genreRepo, personRepo, participationRepo);
+
+        service = new ShowService(
+                showRepo,
+                movieRepo,
+                serialRepo,
+                genreRepo,
+                personRepo,
+                userRepo,
+                participationRepo,
+                ratingRepo);
     }
 
     @Test
     public void add_whenBodyInvalid_ThrowExc() {
         exception.expect(InvalidShowException.class);
 
-        service.addMovie(invalidBody);
+        service.addShow(invalidBody);
 
         verifyZeroInteractions(showRepo);
         verifyZeroInteractions(genreRepo);
@@ -113,7 +122,7 @@ public class ShowServiceTest {
         when(showRepo.findByTitleAndReleaseDate(movie.getTitle(), movie.getReleaseDate())).thenReturn(movie);
         exception.expect(ShowAlreadyExistsException.class);
 
-        service.addMovie(movie);
+        service.addShow(movie);
 
         verify(showRepo, times(1)).findByTitleAndReleaseDate(movie.getTitle(), movie.getReleaseDate());
         verifyNoMoreInteractions(showRepo);
@@ -123,7 +132,7 @@ public class ShowServiceTest {
     @Test
     public void add_successful() {
         when(showRepo.findByTitleAndReleaseDate(movie.getTitle(), movie.getReleaseDate())).thenReturn(null);
-        service.addMovie(movie);
+        service.addShow(movie);
 
         verify(showRepo, times(1)).findByTitleAndReleaseDate(movie.getTitle(), movie.getReleaseDate());
         verify(genreRepo, times(1)).findOne(action.getName());
@@ -135,13 +144,16 @@ public class ShowServiceTest {
 
     @Test
     public void add_participation_successful() {
+        when(showRepo.findOne(1L)).thenReturn(movie);
+        when(personRepo.findOne(1L)).thenReturn(actor);
         service.addParticipation(1L, 1L, participation);
 
         verify(personRepo, times(1)).findOne(1L);
         verifyNoMoreInteractions(personRepo);
         verify(showRepo, times(1)).findOne(1L);
-        verify(showRepo, times(1)).save(movie);
         verifyNoMoreInteractions(showRepo);
+        verify(participationRepo, times(1)).save(participation);
+        verifyNoMoreInteractions(participationRepo);
     }
 
     @Test
@@ -176,20 +188,19 @@ public class ShowServiceTest {
         when(showRepo.findOne(1L)).thenReturn(movie);
         exception.expect(InvalidShowException.class);
 
-        service.editMovie(1L, invalidBody);
+        service.editShow(1L, invalidBody);
 
-        verify(movieRepo, times(1)).findOne(1L);
-        verifyNoMoreInteractions(movieRepo);
-        verifyZeroInteractions(showRepo);
+        verify(showRepo, times(1)).findOne(1L);
+        verifyNoMoreInteractions(showRepo);
         verifyZeroInteractions(genreRepo);
     }
 
     @Test
     public void edit_whenShowNotExits_throwExc() {
-        when(movieRepo.findOne(1L)).thenReturn(null);
+        when(showRepo.findOne(1L)).thenReturn(null);
         exception.expect(ShowNotFoundException.class);
 
-        service.editMovie(1L, movie);
+        service.editShow(1L, movie);
 
         verify(showRepo, times(1)).findOne(1L);
         verifyNoMoreInteractions(showRepo);
@@ -198,22 +209,21 @@ public class ShowServiceTest {
 
     @Test
     public void edit_successful() {
-        when(movieRepo.findOne(1L)).thenReturn(movie);
+        when(showRepo.findOne(1L)).thenReturn(movie);
         Movie body = new Movie(
                 movie.getTitle(),
                 "Movie about batman.",
                 movie.getReleaseDate(),
                 movie.getLocation(),
                 movie.getDuration(),
-                movie.getBoxoffice()
+                111
         );
-        movie.setDescription("Movie about batman.");
+        body.getGenres().clear();
         body.getGenres().add(drama);
 
-        service.editMovie(1L, body);
+        service.editShow(1L, body);
 
         assertEquals(body.getDescription(), movie.getDescription());
-        assertEquals(body.getLocation(), movie.getLocation());
         assertEquals(body.getBoxoffice(), movie.getBoxoffice());
         assertTrue(movie.getGenres().contains(drama));
         assertFalse(movie.getGenres().contains(sciFi));
@@ -221,36 +231,32 @@ public class ShowServiceTest {
         assertFalse(sciFi.getShows().contains(movie));
 
         verify(genreRepo, times(1)).findOne(drama.getName());
-        verify(movieRepo, times(1)).findOne(1L);
+        verify(showRepo, times(1)).findOne(1L);
         verify(showRepo, times(1)).save(movie);
-        verifyNoMoreInteractions(movieRepo);
         verifyNoMoreInteractions(showRepo);
         verifyNoMoreInteractions(genreRepo);
     }
 
     @Test
     public void remove_whenShowNotExists_throwExc() {
-        when(service.findMovie(1L)).thenReturn(null);
+        when(showRepo.findOne(1L)).thenReturn(null);
         exception.expect(ShowNotFoundException.class);
 
-        service.removeMovie(1L);
+        service.removeShow(1L);
 
         verify(showRepo, times(1)).findOne(1L);
         verifyNoMoreInteractions(showRepo);
-        verifyZeroInteractions(genreRepo);
     }
 
     @Test
     public void remove_successful() {
-        when(serialRepo.findOne(2L)).thenReturn(serial);
+        when(showRepo.findOne(2L)).thenReturn(serial);
 
-        service.removeSerial(2L);
+        service.removeShow(2L);
 
-        verify(serialRepo, times(1)).findOne(2L);
+        verify(showRepo, times(1)).findOne(2L);
         verify(showRepo, times(1)).delete(serial);
         verifyNoMoreInteractions(showRepo);
-        verifyNoMoreInteractions(serialRepo);
-        verifyZeroInteractions(genreRepo);
     }
 
 }

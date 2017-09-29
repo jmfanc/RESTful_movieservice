@@ -1,11 +1,9 @@
 package com.tomaszstankowski.movieservice.service;
 
 import com.tomaszstankowski.movieservice.model.entity.*;
+import com.tomaszstankowski.movieservice.model.enums.Profession;
 import com.tomaszstankowski.movieservice.repository.*;
-import com.tomaszstankowski.movieservice.service.exception.InvalidShowException;
-import com.tomaszstankowski.movieservice.service.exception.PersonNotFoundException;
-import com.tomaszstankowski.movieservice.service.exception.ShowAlreadyExistsException;
-import com.tomaszstankowski.movieservice.service.exception.ShowNotFoundException;
+import com.tomaszstankowski.movieservice.service.exception.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,57 +22,48 @@ public class ShowService {
     private final SerialRepository serialRepo;
     private final GenreRepository genreRepo;
     private final PersonRepository personRepo;
+    private final UserRepository userRepo;
     private final ParticipationRepository participationRepo;
+    private final RatingRepository ratingRepo;
 
     public ShowService(ShowRepository showRepo,
                        MovieRepository movieRepo,
                        SerialRepository serialRepo,
                        GenreRepository genreRepo,
                        PersonRepository personRepo,
-                       ParticipationRepository participationRepo) {
+                       UserRepository userRepo,
+                       ParticipationRepository participationRepo,
+                       RatingRepository ratingRepo) {
         this.showRepo = showRepo;
         this.movieRepo = movieRepo;
         this.serialRepo = serialRepo;
         this.genreRepo = genreRepo;
         this.personRepo = personRepo;
         this.participationRepo = participationRepo;
+        this.userRepo = userRepo;
+        this.ratingRepo = ratingRepo;
     }
 
-    public Movie findMovie(long id) {
-        return movieRepo.findOne(id);
+    public Show findShow(long id) {
+        return showRepo.findOne(id);
     }
 
-    public Serial findSerial(long id) {
-        return serialRepo.findOne(id);
-    }
-
-    public Page<Show> findAll(Specification<Show> spec, int page, Sort sort) {
-        return showRepo.findAll(spec, createPegeable(page, sort));
+    public Page<Show> findShows(Specification<Show> spec, int page, Sort sort) {
+        return showRepo.findAll(spec, createPageable(page, sort));
     }
 
     public Page<Movie> findMovies(Specification<Movie> spec, int page, Sort sort) {
-        return movieRepo.findAll(spec, createPegeable(page, sort));
+        return movieRepo.findAll(spec, createPageable(page, sort));
     }
 
     public Page<Serial> findSeries(Specification<Serial> spec, int page, Sort sort) {
-        return serialRepo.findAll(spec, createPegeable(page, sort));
+        return serialRepo.findAll(spec, createPageable(page, sort));
     }
 
-    public List<Participation> findMovieParticipations(long id, Person.Profession role) {
-        Movie movie = movieRepo.findOne(id);
-        if (movie == null)
+    public List<Participation> findParticipations(long id, Profession role) {
+        Show show = showRepo.findOne(id);
+        if (show == null)
             throw new ShowNotFoundException(id);
-        return findParticipations(movie, role);
-    }
-
-    public List<Participation> findSerialParticipations(long id, Person.Profession role) {
-        Serial serial = serialRepo.findOne(id);
-        if (serial == null)
-            throw new ShowNotFoundException(id);
-        return findParticipations(serial, role);
-    }
-
-    private List<Participation> findParticipations(Show show, Person.Profession role) {
         if (role == null)
             return show.getParticipations();
         return participationRepo.findByShowAndRole(show, role);
@@ -84,15 +73,7 @@ public class ShowService {
         return genreRepo.findAll(new Sort("name"));
     }
 
-    public Movie addMovie(Movie movie) {
-        return (Movie) addShow(movie);
-    }
-
-    public Serial addSerial(Serial serial) {
-        return (Serial) addShow(serial);
-    }
-
-    private Show addShow(Show show) {
+    public Show addShow(Show show) {
         validateShow(show);
         checkIfShowAlreadyExists(show);
         connectShowWithGenres(show);
@@ -117,7 +98,7 @@ public class ShowService {
         }
     }
 
-    public void addParticipation(long personId, long showId, Participation participation) {
+    public Participation addParticipation(long showId, long personId, Participation participation) {
         Person person = personRepo.findOne(personId);
         if (person == null)
             throw new PersonNotFoundException(personId);
@@ -128,61 +109,81 @@ public class ShowService {
         participation.setShow(show);
         participation.setPerson(person);
         show.getParticipations().add(participation);
-        showRepo.save(show);
+        person.getParticipations().add(participation);
+        return participationRepo.save(participation);
     }
 
-    public void editMovie(long id, Movie body) {
-        Movie movie = movieRepo.findOne(id);
-        if (movie == null)
-            throw new ShowNotFoundException(id);
-        movie.setDuration(body.getDuration());
-        movie.setBoxoffice(body.getBoxoffice());
-        editShow(movie, body);
+    public Rating addRating(long showId, String login, short rating) {
+        validateRating(rating);
+        Show show = showRepo.findOne(showId);
+        if (show == null)
+            throw new ShowNotFoundException(showId);
+        User user = userRepo.findOne(login);
+        if (user == null)
+            throw new UserNotFoundException(login);
+        Rating entity = new Rating(rating, show, user);
+        show.getRatings().add(entity);
+        user.getRatings().add(entity);
+        return ratingRepo.save(entity);
     }
 
-    public void editSerial(long id, Serial body) {
-        Serial serial = serialRepo.findOne(id);
-        if (serial == null)
-            throw new ShowNotFoundException(id);
-        serial.setSeasons(body.getSeasons());
-        editShow(serial, body);
-    }
-
-    private void editShow(Show show, Show body) {
+    public void editShow(long id, Show body) {
         validateShow(body);
-
+        Show show = showRepo.findOne(id);
+        if (show == null)
+            throw new ShowNotFoundException(id);
         show.setTitle(body.getTitle());
         show.setDescription(body.getDescription());
         show.setLocation(body.getLocation());
         show.setReleaseDate(body.getReleaseDate());
 
-        disconnectShowFromGenres(show);
-        show.getGenres().addAll(body.getGenres());
-        connectShowWithGenres(show);
-        showRepo.save(show);
+        boolean isOk = false;
+        if (body instanceof Movie)
+            if (show instanceof Movie) {
+                editMovie((Movie) show, (Movie) body);
+                isOk = true;
+            } else
+                throw new UnexpectedTypeException(Movie.class, show.getClass());
+        if (body instanceof Serial)
+            if (show instanceof Serial) {
+                editSerial((Serial) show, (Serial) body);
+                isOk = true;
+            } else
+                throw new UnexpectedTypeException(Serial.class, show.getClass());
+        if (isOk) {
+            disconnectShowFromGenres(show);
+            show.getGenres().addAll(body.getGenres());
+            connectShowWithGenres(show);
+            showRepo.save(show);
+        } else {
+            throw new UnknownTypeException(Show.class);
+        }
     }
 
-    public void removeMovie(long id) {
-        Movie movie = movieRepo.findOne(id);
-        if (movie == null)
+    private void editMovie(Movie movie, Movie body) {
+        movie.setDuration(body.getDuration());
+        movie.setBoxoffice(body.getBoxoffice());
+    }
+
+    private void editSerial(Serial serial, Serial body) {
+        serial.setSeasons(body.getSeasons());
+    }
+
+    public void removeShow(long id) {
+        Show show = showRepo.findOne(id);
+        if (show == null)
             throw new ShowNotFoundException(id);
-        removeShow(movie);
-    }
-
-    public void removeSerial(long id) {
-        Serial serial = serialRepo.findOne(id);
-        if (serial == null)
-            throw new ShowNotFoundException(id);
-        removeShow(serial);
-    }
-
-    private void removeShow(Show show) {
         disconnectShowFromGenres(show);
         showRepo.delete(show);
     }
 
-    private Pageable createPegeable(int page, Sort sort) {
+    private Pageable createPageable(int page, Sort sort) {
         return new PageRequest(page, 5, sort);
+    }
+
+    private void validateRating(short rating) {
+        if (rating > 10 || rating < 1)
+            throw new InvalidRatingException(rating);
     }
 
     private void validateShow(Show show) {

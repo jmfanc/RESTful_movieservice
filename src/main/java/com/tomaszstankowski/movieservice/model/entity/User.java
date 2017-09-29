@@ -1,5 +1,6 @@
 package com.tomaszstankowski.movieservice.model.entity;
 
+import com.tomaszstankowski.movieservice.model.enums.Sex;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

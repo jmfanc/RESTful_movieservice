@@ -5,7 +5,12 @@ import com.tomaszstankowski.movieservice.controller.PersonController;
 import com.tomaszstankowski.movieservice.controller.exception.InternalExceptionHandler;
 import com.tomaszstankowski.movieservice.model.ModelMapper;
 import com.tomaszstankowski.movieservice.model.dto.PersonDTO;
-import com.tomaszstankowski.movieservice.model.entity.*;
+import com.tomaszstankowski.movieservice.model.entity.Genre;
+import com.tomaszstankowski.movieservice.model.entity.Movie;
+import com.tomaszstankowski.movieservice.model.entity.Participation;
+import com.tomaszstankowski.movieservice.model.entity.Person;
+import com.tomaszstankowski.movieservice.model.enums.Profession;
+import com.tomaszstankowski.movieservice.model.enums.Sex;
 import com.tomaszstankowski.movieservice.service.PersonService;
 import com.tomaszstankowski.movieservice.service.exception.InvalidPersonException;
 import com.tomaszstankowski.movieservice.service.exception.PersonAlreadyExistsException;
@@ -83,8 +88,8 @@ public class PersonControllerTest {
                 (short) 165,
                 1084439099);
 
-        participation = new Participation(Person.Profession.ACTOR, "as Batman", person, movie);
-        person.getProfessions().add(Person.Profession.ACTOR);
+        participation = new Participation(Profession.ACTOR, "as Batman", person, movie);
+        person.getProfessions().add(Profession.ACTOR);
         personDTO = modelMapper.fromEntity(person);
     }
 
@@ -122,7 +127,7 @@ public class PersonControllerTest {
         when(service.findPerson(1L)).thenReturn(person);
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         JSONArray proffesions = new JSONArray();
-        for (Person.Profession p : person.getProfessions())
+        for (Profession p : person.getProfessions())
             proffesions.add(p.toString());
 
         mockMvc.perform(get("/people/{id}", 1L))
@@ -146,7 +151,7 @@ public class PersonControllerTest {
     public void get_whenParticipationsMovieFound_statusOkCorrectJson() throws Exception {
         List<Participation> list = new ArrayList<>();
         list.add(participation);
-        when(service.findParticipations(1L, Person.Profession.ACTOR))
+        when(service.findParticipations(1L, Profession.ACTOR))
                 .thenReturn(list);
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         JSONArray professions = new JSONArray();
@@ -178,7 +183,7 @@ public class PersonControllerTest {
     @Test
     public void get_whenParticipationsSerialNotExists_statusNotFound() throws Exception {
         doThrow(ShowNotFoundException.class)
-                .when(service).findParticipations(1L, Person.Profession.ACTOR);
+                .when(service).findParticipations(1L, Profession.ACTOR);
 
         mockMvc.perform(get("/people/{id}/participations", 1L)
                 .param("role", "ACTOR"))

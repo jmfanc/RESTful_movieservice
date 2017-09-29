@@ -1,8 +1,8 @@
 package com.tomaszstankowski.movieservice.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.tomaszstankowski.movieservice.model.entity.Person;
-import com.tomaszstankowski.movieservice.model.entity.Sex;
+import com.tomaszstankowski.movieservice.model.enums.Profession;
+import com.tomaszstankowski.movieservice.model.enums.Sex;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -26,7 +26,7 @@ public class PersonDTO implements Serializable {
 
     private Sex sex;
 
-    private Set<Person.Profession> professions = new HashSet<>();
+    private Set<Profession> professions = new HashSet<>();
 
     public PersonDTO() {
     }

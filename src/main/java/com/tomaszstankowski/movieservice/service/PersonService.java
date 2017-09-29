@@ -2,6 +2,7 @@ package com.tomaszstankowski.movieservice.service;
 
 import com.tomaszstankowski.movieservice.model.entity.Participation;
 import com.tomaszstankowski.movieservice.model.entity.Person;
+import com.tomaszstankowski.movieservice.model.enums.Profession;
 import com.tomaszstankowski.movieservice.repository.ParticipationRepository;
 import com.tomaszstankowski.movieservice.repository.PersonRepository;
 import com.tomaszstankowski.movieservice.service.exception.InvalidPersonException;
@@ -35,7 +36,7 @@ public class PersonService {
         return personRepo.findAll(spec, createPageable(page, sort));
     }
 
-    public List<Participation> findParticipations(long personId, Person.Profession role) {
+    public List<Participation> findParticipations(long personId, Profession role) {
         Person person = personRepo.findOne(personId);
         if (person == null)
             throw new PersonNotFoundException(personId);

@@ -4,6 +4,7 @@ import com.tomaszstankowski.movieservice.model.ModelMapper;
 import com.tomaszstankowski.movieservice.model.dto.ParticipationDTO;
 import com.tomaszstankowski.movieservice.model.dto.PersonDTO;
 import com.tomaszstankowski.movieservice.model.entity.Person;
+import com.tomaszstankowski.movieservice.model.enums.Profession;
 import com.tomaszstankowski.movieservice.service.PersonService;
 import com.tomaszstankowski.movieservice.service.exception.PageNotFoundException;
 import com.tomaszstankowski.movieservice.service.exception.PersonNotFoundException;
@@ -55,7 +56,7 @@ public class PersonController {
 
     @GetMapping(path = "/{id}/participations")
     public List<ParticipationDTO> getPersonParticipations(@PathVariable("id") long personId,
-                                                          @RequestParam("role") Person.Profession role) {
+                                                          @RequestParam("role") Profession role) {
         return service.findParticipations(personId, role)
                 .stream()
                 .map(mapper::fromEntity)

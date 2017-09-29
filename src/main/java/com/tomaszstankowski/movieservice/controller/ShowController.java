@@ -1,11 +1,11 @@
 package com.tomaszstankowski.movieservice.controller;
 
 import com.tomaszstankowski.movieservice.model.ModelMapper;
-import com.tomaszstankowski.movieservice.model.dto.MovieDTO;
 import com.tomaszstankowski.movieservice.model.dto.ParticipationDTO;
-import com.tomaszstankowski.movieservice.model.dto.SerialDTO;
 import com.tomaszstankowski.movieservice.model.dto.ShowDTO;
 import com.tomaszstankowski.movieservice.model.entity.*;
+import com.tomaszstankowski.movieservice.model.enums.Profession;
+import com.tomaszstankowski.movieservice.model.enums.ShowType;
 import com.tomaszstankowski.movieservice.repository.specifications.MovieSpecifications;
 import com.tomaszstankowski.movieservice.repository.specifications.SerialSpecifications;
 import com.tomaszstankowski.movieservice.repository.specifications.ShowSpecifications;
@@ -43,11 +43,21 @@ public class ShowController {
 
     @GetMapping
     public List<ShowDTO> getShows(@RequestParam("page") int page,
+                                  @RequestParam(value = "type", required = false) ShowType type,
                                   @RequestParam(value = "title", required = false) String title,
                                   @RequestParam(value = "year_lt", required = false) Integer yearLt,
                                   @RequestParam(value = "year_gt", required = false) Integer yearGt,
                                   @RequestParam(value = "genres", required = false) String[] genres,
+                                  @RequestParam(value = "duration_lt", required = false) Integer durationLt,
+                                  @RequestParam(value = "duration_gt", required = false) Integer durationGt,
+                                  @RequestParam(value = "seasons_lt", required = false) Integer seasonsLt,
+                                  @RequestParam(value = "seasons_gt", required = false) Integer seasonsGt,
                                   @SortDefault("title") Sort sort) {
+        if (type == ShowType.MOVIE)
+            return getMovies(page, title, yearLt, yearGt, genres, durationLt, durationGt, sort);
+        if (type == ShowType.SERIAL)
+            return getSeries(page, title, yearLt, yearGt, genres, seasonsLt, seasonsGt, sort);
+
 
         Specifications<Show> specs = null;
         if (title != null)
@@ -62,7 +72,7 @@ public class ShowController {
             specs = (specs == null) ? where(ShowSpecifications.hasAtLeastOneGenre(genres))
                     : specs.and(ShowSpecifications.hasAtLeastOneGenre(genres));
 
-        Page<Show> result = service.findAll(specs, page, sort);
+        Page<Show> result = service.findShows(specs, page, sort);
         if (page >= result.getTotalPages())
             throw new PageNotFoundException(page);
 
@@ -71,15 +81,14 @@ public class ShowController {
                 .collect(Collectors.toList());
     }
 
-    @GetMapping(path = "/movies")
-    public List<MovieDTO> getMovies(@RequestParam("page") int page,
-                                    @RequestParam(value = "title", required = false) String title,
-                                    @RequestParam(value = "year_lt", required = false) Integer yearLt,
-                                    @RequestParam(value = "year_gt", required = false) Integer yearGt,
-                                    @RequestParam(value = "genres", required = false) String[] genres,
-                                    @RequestParam(value = "duration_lt", required = false) Integer durationLt,
-                                    @RequestParam(value = "duration_gt", required = false) Integer durationGt,
-                                    @SortDefault("title") Sort sort) {
+    private List<ShowDTO> getMovies(int page,
+                                    String title,
+                                    Integer yearLt,
+                                    Integer yearGt,
+                                    String[] genres,
+                                    Integer durationLt,
+                                    Integer durationGt,
+                                    Sort sort) {
 
         Specifications<Movie> specs = null;
         if (title != null)
@@ -109,15 +118,14 @@ public class ShowController {
                 .collect(Collectors.toList());
     }
 
-    @GetMapping(path = "/series")
-    public List<SerialDTO> getSeries(@RequestParam("page") int page,
-                                     @RequestParam(value = "title", required = false) String title,
-                                     @RequestParam(value = "year_lt", required = false) Integer yearLt,
-                                     @RequestParam(value = "year_gt", required = false) Integer yearGt,
-                                     @RequestParam(value = "genres", required = false) String[] genres,
-                                     @RequestParam(value = "seasons_lt", required = false) Integer seasonsLt,
-                                     @RequestParam(value = "seasons_gt", required = false) Integer seasonsGt,
-                                     @SortDefault("title") Sort sort) {
+    private List<ShowDTO> getSeries(int page,
+                                    String title,
+                                    Integer yearLt,
+                                    Integer yearGt,
+                                    String[] genres,
+                                    Integer seasonsLt,
+                                    Integer seasonsGt,
+                                    Sort sort) {
 
         Specifications<Serial> specs = null;
         if (title != null)
@@ -146,20 +154,34 @@ public class ShowController {
                 .collect(Collectors.toList());
     }
 
-    @GetMapping(path = "/movies/{id}")
-    public MovieDTO getMovie(@PathVariable("id") long id) {
-        Movie movie = service.findMovie(id);
-        if (movie == null)
+    @GetMapping("/{id}")
+    public ShowDTO getShow(@PathVariable("id") long id) {
+        Show show = service.findShow(id);
+        if (show == null)
             throw new ShowNotFoundException(id);
-        return mapper.fromEntity(movie);
+        return mapper.fromEntity(show);
     }
 
-    @GetMapping(path = "/series/{id}")
-    public SerialDTO getSerial(@PathVariable("id") long id) {
-        Serial serial = service.findSerial(id);
-        if (serial == null)
-            throw new ShowNotFoundException(id);
-        return mapper.fromEntity(serial);
+    @PostMapping(path = "/add")
+    public ResponseEntity<?> addShow(@RequestBody ShowDTO body) {
+        Show show = service.addShow(mapper.fromDTO(body));
+        URI location = ServletUriComponentsBuilder
+                .fromPath("/shows/{id}")
+                .buildAndExpand(show.getId())
+                .toUri();
+        return ResponseEntity.created(location).build();
+    }
+
+    @PutMapping(path = "/{id}/edit")
+    @ResponseStatus(HttpStatus.OK)
+    public void editShow(@PathVariable("id") long id, @RequestBody ShowDTO body) {
+        service.editShow(id, mapper.fromDTO(body));
+    }
+
+    @DeleteMapping(path = "/{id}/delete")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteShow(@PathVariable("id") long id) {
+        service.removeShow(id);
     }
 
     @GetMapping(path = "/genres")
@@ -170,73 +192,23 @@ public class ShowController {
                 .collect(Collectors.toList());
     }
 
-    @PostMapping(path = "/movies/add")
-    public ResponseEntity<?> addMovie(@RequestBody MovieDTO body) {
-        Movie movie = service.addMovie(mapper.fromDTO(body));
+    @PostMapping(path = "/{id}/participations/add")
+    public ResponseEntity<?> addParticipation(@PathVariable("id") long showId,
+                                              @RequestParam("person") long personId,
+                                              @RequestBody ParticipationDTO body) {
+        Participation participation = service.addParticipation(showId, personId, mapper.fromDTO(body));
         URI location = ServletUriComponentsBuilder
-                .fromPath("/shows/movies/{id}")
-                .buildAndExpand(movie.getId())
+                .fromPath("/shows/{id}")
+                .buildAndExpand(participation.getId())
                 .toUri();
         return ResponseEntity.created(location).build();
     }
 
-    @PostMapping(path = "/series/add")
-    public ResponseEntity<?> addSerial(@RequestBody SerialDTO body) {
-        Serial serial = service.addSerial(mapper.fromDTO(body));
-        URI location = ServletUriComponentsBuilder
-                .fromPath("/shows/series/{id}")
-                .buildAndExpand(serial.getId())
-                .toUri();
-        return ResponseEntity.created(location).build();
-    }
-
-    @PostMapping(path = "/add_participation")
-    @ResponseStatus(HttpStatus.CREATED)
-    public void addParticipation(@RequestParam("show") long showId,
-                                 @RequestParam("person") long personId,
-                                 @RequestBody ParticipationDTO body) {
-        service.addParticipation(personId, showId, mapper.fromDTO(body));
-    }
-
-    @GetMapping(path = "/movies/{id}/participations")
-    public List<ParticipationDTO> getMovieParticipations(@PathVariable("id") long id,
-                                                         @RequestParam(value = "role", required = false) Person.Profession role) {
-        return service.findMovieParticipations(id, role)
+    @GetMapping(path = "/{id}/participations")
+    public List<ParticipationDTO> getParticipations(@PathVariable("id") long id, @RequestParam(value = "role", required = false) Profession role) {
+        return service.findParticipations(id, role)
                 .stream()
                 .map(mapper::fromEntity)
                 .collect(Collectors.toList());
-    }
-
-    @GetMapping(path = "/series/{id}/participations")
-    public List<ParticipationDTO> getSerialParticipations(@PathVariable("id") long id,
-                                                          @RequestParam(value = "role", required = false) Person.Profession role) {
-        return service.findSerialParticipations(id, role)
-                .stream()
-                .map(mapper::fromEntity)
-                .collect(Collectors.toList());
-    }
-
-    @PutMapping(path = "/movies/{id}/edit")
-    @ResponseStatus(HttpStatus.OK)
-    public void editMovie(@PathVariable("id") long id, @RequestBody MovieDTO body) {
-        service.editMovie(id, mapper.fromDTO(body));
-    }
-
-    @PutMapping(path = "/series/{id}/edit")
-    @ResponseStatus(HttpStatus.OK)
-    public void editSerial(@PathVariable("id") long id, @RequestBody SerialDTO body) {
-        service.editSerial(id, mapper.fromDTO(body));
-    }
-
-    @DeleteMapping(path = "/movies/{id}/delete")
-    @ResponseStatus(HttpStatus.OK)
-    public void deleteMovie(@PathVariable("id") long id) {
-        service.removeMovie(id);
-    }
-
-    @DeleteMapping(path = "/series/{id}/delete")
-    @ResponseStatus(HttpStatus.OK)
-    public void deleteSerial(@PathVariable("id") long id) {
-        service.removeSerial(id);
     }
 }
