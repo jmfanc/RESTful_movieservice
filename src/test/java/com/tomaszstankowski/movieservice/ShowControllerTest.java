@@ -11,10 +11,7 @@ import com.tomaszstankowski.movieservice.model.entity.*;
 import com.tomaszstankowski.movieservice.model.enums.Profession;
 import com.tomaszstankowski.movieservice.model.enums.Sex;
 import com.tomaszstankowski.movieservice.service.ShowService;
-import com.tomaszstankowski.movieservice.service.exception.InvalidShowException;
-import com.tomaszstankowski.movieservice.service.exception.PersonNotFoundException;
-import com.tomaszstankowski.movieservice.service.exception.ShowAlreadyExistsException;
-import com.tomaszstankowski.movieservice.service.exception.ShowNotFoundException;
+import com.tomaszstankowski.movieservice.service.exception.*;
 import net.minidev.json.JSONArray;
 import org.junit.Before;
 import org.junit.Test;
@@ -191,6 +188,25 @@ public class ShowControllerTest {
     }
 
     @Test
+    public void post_whenRated_statusCreated() throws Exception {
+        mockMvc.perform(post("/shows/{id}/rate", 1L)
+                .param("login", "jandaciuk")
+                .param("rating", "8"))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    public void post_whenRatingInvalid_statusUnproccessableEntity() throws Exception {
+        doThrow(InvalidRatingException.class)
+                .when(service).rate(1L, "jandaciuk", (short) 0);
+
+        mockMvc.perform(post("/shows/{id}/rate", 1L)
+                .param("login", "jandaciuk")
+                .param("rating", "0"))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
     public void get_whenMovieExists_statusOkJsonCorrect() throws Exception {
         when(service.findShow(1L)).thenReturn(movie);
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
@@ -328,5 +344,22 @@ public class ShowControllerTest {
                 .when(service).removeShow(3L);
         mockMvc.perform(delete("/shows/{id}/delete", 3L))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void delete_whenRatingNotExists_statusNotFound() throws Exception {
+        doThrow(RatingNotFoundException.class)
+                .when(service).removeRating(1L, "jandaciuk");
+
+        mockMvc.perform(delete("/shows/{id}/rate", 1L)
+                .param("login", "jandaciuk"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void delete_whenRatingDeleted_statusOk() throws Exception {
+        mockMvc.perform(delete("/shows/{id}/rate", 1L)
+                .param("login", "jandaciuk"))
+                .andExpect(status().isOk());
     }
 }

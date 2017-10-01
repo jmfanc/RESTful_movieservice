@@ -113,7 +113,22 @@ public class ShowService {
         return participationRepo.save(participation);
     }
 
-    public Rating addRating(long showId, String login, short rating) {
+    public float getShowRating(long showId) {
+        Show show = showRepo.findOne(showId);
+        if (show == null)
+            throw new ShowNotFoundException(showId);
+        Float result = ratingRepo.getAverageRatingForShow(showId);
+        return result == null ? 0f : result;
+    }
+
+    public long getShowRateCount(long showId) {
+        Show show = showRepo.findOne(showId);
+        if (show == null)
+            throw new ShowNotFoundException(showId);
+        return ratingRepo.countByShow(show);
+    }
+
+    public Rating rate(long showId, String login, short rating) {
         validateRating(rating);
         Show show = showRepo.findOne(showId);
         if (show == null)
@@ -121,10 +136,29 @@ public class ShowService {
         User user = userRepo.findOne(login);
         if (user == null)
             throw new UserNotFoundException(login);
-        Rating entity = new Rating(rating, show, user);
-        show.getRatings().add(entity);
-        user.getRatings().add(entity);
-        return ratingRepo.save(entity);
+        Rating oldRating = ratingRepo.findByUserAndShow(user, show);
+        if (oldRating != null) {
+            if (oldRating.getRating() == rating)
+                return oldRating;
+            ratingRepo.delete(oldRating);
+        }
+        Rating newRating = new Rating(rating, show, user);
+        show.getRatings().add(newRating);
+        user.getRatings().add(newRating);
+        return ratingRepo.save(newRating);
+    }
+
+    public void removeRating(long showId, String login) {
+        Show show = showRepo.findOne(showId);
+        if (show == null)
+            throw new ShowNotFoundException(showId);
+        User user = userRepo.findOne(login);
+        if (user == null)
+            throw new UserNotFoundException(login);
+        Rating rating = ratingRepo.findByUserAndShow(user, show);
+        if (rating == null)
+            throw new RatingNotFoundException(show, user);
+        ratingRepo.delete(rating);
     }
 
     public void editShow(long id, Show body) {

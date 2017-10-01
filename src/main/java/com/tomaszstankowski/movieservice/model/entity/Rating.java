@@ -17,7 +17,7 @@ public class Rating {
 
     private short rating;
 
-    @Temporal(TemporalType.TIME)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date date = new Date();
 
     @ManyToOne

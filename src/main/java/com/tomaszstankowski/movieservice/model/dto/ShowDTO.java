@@ -27,6 +27,10 @@ public abstract class ShowDTO {
 
     private Set<String> genres = new HashSet<>();
 
+    private float rating;
+
+    private long rateCount;
+
     public ShowDTO() {
     }
 

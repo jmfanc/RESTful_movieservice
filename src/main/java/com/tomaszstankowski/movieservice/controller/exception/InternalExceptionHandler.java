@@ -16,7 +16,8 @@ public class InternalExceptionHandler extends ResponseEntityExceptionHandler {
             UserNotFoundException.class,
             ShowNotFoundException.class,
             PageNotFoundException.class,
-            PersonNotFoundException.class
+            PersonNotFoundException.class,
+            RatingNotFoundException.class
     })
     public ResponseEntity<Object> handleResourceNotFoundExceptions(RuntimeException ex, WebRequest request) {
         return handleExceptionInternal(
@@ -30,7 +31,10 @@ public class InternalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {
             InvalidUserException.class,
             InvalidShowException.class,
-            InvalidPersonException.class
+            InvalidPersonException.class,
+            InvalidRatingException.class,
+            UnexpectedTypeException.class,
+            UnknownTypeException.class
     })
     public ResponseEntity<Object> handleInvalidBodyExceptions(RuntimeException ex, WebRequest request) {
         return handleExceptionInternal(

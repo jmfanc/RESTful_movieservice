@@ -77,7 +77,7 @@ public class ShowController {
             throw new PageNotFoundException(page);
 
         return result.getContent().stream()
-                .map(mapper::fromEntity)
+                .map(this::map)
                 .collect(Collectors.toList());
     }
 
@@ -114,7 +114,7 @@ public class ShowController {
             throw new PageNotFoundException(page);
 
         return result.getContent().stream()
-                .map(mapper::fromEntity)
+                .map(this::map)
                 .collect(Collectors.toList());
     }
 
@@ -150,7 +150,7 @@ public class ShowController {
         if (page >= result.getTotalPages())
             throw new PageNotFoundException(page);
         return result.getContent().stream()
-                .map(mapper::fromEntity)
+                .map(this::map)
                 .collect(Collectors.toList());
     }
 
@@ -159,7 +159,7 @@ public class ShowController {
         Show show = service.findShow(id);
         if (show == null)
             throw new ShowNotFoundException(id);
-        return mapper.fromEntity(show);
+        return map(show);
     }
 
     @PostMapping(path = "/add")
@@ -198,8 +198,8 @@ public class ShowController {
                                               @RequestBody ParticipationDTO body) {
         Participation participation = service.addParticipation(showId, personId, mapper.fromDTO(body));
         URI location = ServletUriComponentsBuilder
-                .fromPath("/shows/{id}")
-                .buildAndExpand(participation.getId())
+                .fromPath("/shows/{showId}/participations/{participationId}")
+                .buildAndExpand(showId, participation.getId())
                 .toUri();
         return ResponseEntity.created(location).build();
     }
@@ -210,5 +210,27 @@ public class ShowController {
                 .stream()
                 .map(mapper::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    @PostMapping(path = "/{id}/rate")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void rateShow(@PathVariable("id") long id,
+                         @RequestParam("login") String login,
+                         @RequestParam("rating") short rating) {
+        service.rate(id, login, rating);
+    }
+
+    @DeleteMapping(path = "/{id}/rate")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteShowRating(@PathVariable("id") long id,
+                                 @RequestParam("login") String login) {
+        service.removeRating(id, login);
+    }
+
+    private ShowDTO map(Show entity) {
+        ShowDTO dto = mapper.fromEntity(entity);
+        dto.setRateCount(service.getShowRateCount(entity.getId()));
+        dto.setRating(service.getShowRating(entity.getId()));
+        return dto;
     }
 }

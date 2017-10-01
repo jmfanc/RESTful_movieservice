@@ -5,10 +5,7 @@ import com.tomaszstankowski.movieservice.model.enums.Profession;
 import com.tomaszstankowski.movieservice.model.enums.Sex;
 import com.tomaszstankowski.movieservice.repository.*;
 import com.tomaszstankowski.movieservice.service.ShowService;
-import com.tomaszstankowski.movieservice.service.exception.InvalidShowException;
-import com.tomaszstankowski.movieservice.service.exception.PersonNotFoundException;
-import com.tomaszstankowski.movieservice.service.exception.ShowAlreadyExistsException;
-import com.tomaszstankowski.movieservice.service.exception.ShowNotFoundException;
+import com.tomaszstankowski.movieservice.service.exception.*;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -56,6 +53,10 @@ public class ShowServiceTest {
 
     private Participation participation;
 
+    private User user;
+
+    private Rating rating;
+
     private Movie invalidBody = new Movie("", "desc", new Date(), "USA", (short) 120, 1000);
 
     private Genre action = new Genre("action");
@@ -86,7 +87,16 @@ public class ShowServiceTest {
                 Sex.MALE
         );
 
+        user = new User(
+                "jandaciuk",
+                "Jan Daciuk",
+                "jdaciuk@gmail.com",
+                Sex.MALE
+        );
+
         participation = new Participation(Profession.ACTOR, "as Batman", null, null);
+
+        rating = new Rating((short) 8, serial, user);
 
         movie.getGenres().add(action);
         movie.getGenres().add(sciFi);
@@ -184,6 +194,67 @@ public class ShowServiceTest {
     }
 
     @Test
+    public void add_whenUserRatesShowFirstTime_createNewRating() {
+        when(showRepo.findOne(1L)).thenReturn(serial);
+        when(userRepo.findOne(user.getLogin())).thenReturn(user);
+        when(ratingRepo.findByUserAndShow(user, serial)).thenReturn(null);
+
+        service.rate(1L, user.getLogin(), (short) 8);
+
+        verify(showRepo, times(1)).findOne(1L);
+        verify(userRepo, times(1)).findOne(user.getLogin());
+        verify(ratingRepo, times(1)).findByUserAndShow(user, serial);
+        verify(ratingRepo, times(1)).save(rating);
+        verifyNoMoreInteractions(showRepo);
+        verifyNoMoreInteractions(userRepo);
+        verifyNoMoreInteractions(ratingRepo);
+    }
+
+    @Test
+    public void add_whenUserRatesShowAgainWithDifferentRating_deletePreviousRatingAndCreateNew() {
+        when(showRepo.findOne(1L)).thenReturn(serial);
+        when(userRepo.findOne(user.getLogin())).thenReturn(user);
+        when(ratingRepo.findByUserAndShow(user, serial)).thenReturn(rating);
+
+        service.rate(1L, user.getLogin(), (short) 7);
+
+        verify(showRepo, times(1)).findOne(1L);
+        verify(userRepo, times(1)).findOne(user.getLogin());
+        verify(ratingRepo, times(1)).findByUserAndShow(user, serial);
+        verify(ratingRepo, times(1)).delete(rating);
+        verify(ratingRepo, times(1)).save(rating);
+        verifyNoMoreInteractions(showRepo);
+        verifyNoMoreInteractions(userRepo);
+        verifyNoMoreInteractions(ratingRepo);
+    }
+
+    @Test
+    public void add_whenUserRatesShowAgainWithSameRating_doNothing() {
+        when(showRepo.findOne(1L)).thenReturn(serial);
+        when(userRepo.findOne(user.getLogin())).thenReturn(user);
+        when(ratingRepo.findByUserAndShow(user, serial)).thenReturn(rating);
+
+        service.rate(1L, user.getLogin(), (short) 8);
+
+        verify(showRepo, times(1)).findOne(1L);
+        verify(userRepo, times(1)).findOne(user.getLogin());
+        verify(ratingRepo, times(1)).findByUserAndShow(user, serial);
+        verifyNoMoreInteractions(showRepo);
+        verifyNoMoreInteractions(userRepo);
+        verifyNoMoreInteractions(ratingRepo);
+    }
+
+    @Test
+    public void add_whenRatingInvalid_throwExc() {
+        exception.expect(InvalidRatingException.class);
+
+        service.rate(1L, user.getLogin(), (short) 11);
+        verifyZeroInteractions(showRepo);
+        verifyZeroInteractions(userRepo);
+        verifyZeroInteractions(ratingRepo);
+    }
+
+    @Test
     public void edit_whenBodyInvalid_throwExc() {
         when(showRepo.findOne(1L)).thenReturn(movie);
         exception.expect(InvalidShowException.class);
@@ -249,7 +320,7 @@ public class ShowServiceTest {
     }
 
     @Test
-    public void remove_successful() {
+    public void remove_showRemovedSuccessful() {
         when(showRepo.findOne(2L)).thenReturn(serial);
 
         service.removeShow(2L);
@@ -259,4 +330,37 @@ public class ShowServiceTest {
         verifyNoMoreInteractions(showRepo);
     }
 
+    @Test
+    public void remove_whenRatingNotExists_throwExc() {
+        when(showRepo.findOne(1L)).thenReturn(serial);
+        when(userRepo.findOne(user.getLogin())).thenReturn(user);
+        when(ratingRepo.findByUserAndShow(user, serial)).thenReturn(null);
+        exception.expect(RatingNotFoundException.class);
+
+        service.removeRating(1L, user.getLogin());
+
+        verify(showRepo, times(1)).findOne(1L);
+        verify(userRepo, times(1)).findOne(user.getLogin());
+        verify(ratingRepo, times(1)).findByUserAndShow(user, serial);
+        verifyNoMoreInteractions(showRepo);
+        verifyNoMoreInteractions(userRepo);
+        verifyNoMoreInteractions(ratingRepo);
+    }
+
+    @Test
+    public void remove_ratingRemovedSuccessful() {
+        when(showRepo.findOne(1L)).thenReturn(serial);
+        when(userRepo.findOne(user.getLogin())).thenReturn(user);
+        when(ratingRepo.findByUserAndShow(user, serial)).thenReturn(rating);
+
+        service.removeRating(1L, user.getLogin());
+
+        verify(showRepo, times(1)).findOne(1L);
+        verify(userRepo, times(1)).findOne(user.getLogin());
+        verify(ratingRepo, times(1)).findByUserAndShow(user, serial);
+        verify(ratingRepo, times(1)).delete(rating);
+        verifyNoMoreInteractions(showRepo);
+        verifyNoMoreInteractions(userRepo);
+        verifyNoMoreInteractions(ratingRepo);
+    }
 }
