@@ -1,5 +1,6 @@
 package com.tomaszstankowski.movieservice.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -12,6 +13,7 @@ public class RatingDTO implements Serializable {
 
     private long id;
     private short rating;
+    @JsonFormat(timezone = "Europe/Paris", shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date date;
     private ShowDTO show;
     private UserDTO user;

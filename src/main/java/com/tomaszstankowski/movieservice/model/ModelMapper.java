@@ -182,7 +182,7 @@ public class ModelMapper {
                 fromEntity(entity.getUser())
         );
         dto.setId(entity.getId());
-        dto.setId(entity.getId());
+        dto.setDate(entity.getDate());
         return dto;
     }
 }

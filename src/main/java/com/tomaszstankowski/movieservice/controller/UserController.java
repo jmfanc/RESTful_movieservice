@@ -1,23 +1,31 @@
 package com.tomaszstankowski.movieservice.controller;
 
 import com.tomaszstankowski.movieservice.model.ModelMapper;
+import com.tomaszstankowski.movieservice.model.dto.RatingDTO;
 import com.tomaszstankowski.movieservice.model.dto.UserDTO;
+import com.tomaszstankowski.movieservice.model.entity.Rating;
 import com.tomaszstankowski.movieservice.model.entity.User;
 import com.tomaszstankowski.movieservice.service.UserService;
 import com.tomaszstankowski.movieservice.service.exception.not_found.PageNotFoundException;
 import com.tomaszstankowski.movieservice.service.exception.not_found.UserNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.data.web.SortDefault;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.tomaszstankowski.movieservice.repository.specifications.RatingSpecifications.*;
+import static org.springframework.data.jpa.domain.Specifications.where;
 
 @RestController
 @RequestMapping(path = "/users")
@@ -57,6 +65,26 @@ public class UserController {
                 .map(mapper::fromEntity)
                 .collect(Collectors.toList());
     }
+
+    @GetMapping(path = "/{login}/ratings")
+    public List<RatingDTO> getUserRatings(@PathVariable("login") String login,
+                                          @RequestParam("page") int page,
+                                          @RequestParam(value = "from", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date from,
+                                          @RequestParam(value = "rating", required = false) Short rating) {
+        Specifications<Rating> specs = where(user(login));
+        if (from != null)
+            specs = specs.and(youngerThan(from));
+        if (rating != null)
+            specs = specs.and(rating(rating));
+        Page<Rating> result = service.findUserRatings(specs, page);
+        if (page >= result.getTotalPages() && page > 0)
+            throw new PageNotFoundException(page);
+        return result.getContent()
+                .stream()
+                .map(mapper::fromEntity)
+                .collect(Collectors.toList());
+    }
+
 
     @PostMapping(path = "/add")
     public ResponseEntity<?> addUser(@RequestBody UserDTO body) {

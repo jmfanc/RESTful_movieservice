@@ -1,6 +1,8 @@
 package com.tomaszstankowski.movieservice.service;
 
+import com.tomaszstankowski.movieservice.model.entity.Rating;
 import com.tomaszstankowski.movieservice.model.entity.User;
+import com.tomaszstankowski.movieservice.repository.RatingRepository;
 import com.tomaszstankowski.movieservice.repository.UserRepository;
 import com.tomaszstankowski.movieservice.service.exception.already_exists.UserAlreadyExistsException;
 import com.tomaszstankowski.movieservice.service.exception.invalid_body.InvalidUserException;
@@ -9,14 +11,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
     private final UserRepository userRepo;
+    private final RatingRepository ratingRepo;
 
-    public UserService(UserRepository userRepo) {
+    public UserService(UserRepository userRepo, RatingRepository ratingRepo) {
         this.userRepo = userRepo;
+        this.ratingRepo = ratingRepo;
     }
 
     public User findOne(String login) {
@@ -29,6 +34,11 @@ public class UserService {
 
     public Page<User> findByName(String name, int page, Sort sort) {
         return userRepo.findUsersByNameContains(name, createPageable(page, sort));
+    }
+
+    public Page<Rating> findUserRatings(Specifications<Rating> specs, int page) {
+        Pageable pageable = new PageRequest(page, 10, new Sort("date"));
+        return ratingRepo.findAll(specs, pageable);
     }
 
     public void add(User body) {

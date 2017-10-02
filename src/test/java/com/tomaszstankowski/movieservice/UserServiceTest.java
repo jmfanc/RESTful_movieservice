@@ -2,6 +2,7 @@ package com.tomaszstankowski.movieservice;
 
 import com.tomaszstankowski.movieservice.model.entity.User;
 import com.tomaszstankowski.movieservice.model.enums.Sex;
+import com.tomaszstankowski.movieservice.repository.RatingRepository;
 import com.tomaszstankowski.movieservice.repository.UserRepository;
 import com.tomaszstankowski.movieservice.service.UserService;
 import com.tomaszstankowski.movieservice.service.exception.already_exists.UserAlreadyExistsException;
@@ -23,7 +24,9 @@ import static org.mockito.Mockito.*;
 public class UserServiceTest {
 
     @Mock
-    private UserRepository repo;
+    private UserRepository userRepo;
+    @Mock
+    private RatingRepository ratingRepo;
 
     private UserService service;
 
@@ -34,7 +37,7 @@ public class UserServiceTest {
 
     @Before
     public void setup() {
-        service = new UserService(repo);
+        service = new UserService(userRepo, ratingRepo);
         user = new User(
                 "janusz111",
                 "Janusz Cyps",
@@ -45,29 +48,29 @@ public class UserServiceTest {
 
     @Test
     public void add_successful() {
-        when(repo.findOne(user.getLogin())).thenReturn(null);
+        when(userRepo.findOne(user.getLogin())).thenReturn(null);
 
         service.add(user);
 
-        verify(repo, times(1)).findOne(user.getLogin());
-        verify(repo, times(1)).save(user);
-        verifyNoMoreInteractions(repo);
+        verify(userRepo, times(1)).findOne(user.getLogin());
+        verify(userRepo, times(1)).save(user);
+        verifyNoMoreInteractions(userRepo);
     }
 
     @Test
     public void add_whenUserAlreadyExists_throwExc() {
-        when(repo.findOne(user.getLogin())).thenReturn(user);
+        when(userRepo.findOne(user.getLogin())).thenReturn(user);
         exception.expect(UserAlreadyExistsException.class);
 
         service.add(user);
 
-        verify(repo, times(1)).findOne(user.getLogin());
-        verifyNoMoreInteractions(repo);
+        verify(userRepo, times(1)).findOne(user.getLogin());
+        verifyNoMoreInteractions(userRepo);
     }
 
     @Test
     public void add_whenBodyInvalid_throwExc() {
-        when(repo.findOne(user.getLogin())).thenReturn(null);
+        when(userRepo.findOne(user.getLogin())).thenReturn(null);
         User body = new User(
                 user.getLogin(),
                 user.getName(),
@@ -78,12 +81,12 @@ public class UserServiceTest {
 
         service.add(body);
 
-        verifyZeroInteractions(repo);
+        verifyZeroInteractions(userRepo);
     }
 
     @Test
     public void edit_successful() {
-        when(repo.findOne(user.getLogin())).thenReturn(user);
+        when(userRepo.findOne(user.getLogin())).thenReturn(user);
         User body = new User(
                 user.getLogin(),
                 "Janusz Cyps",
@@ -93,15 +96,15 @@ public class UserServiceTest {
 
         service.edit(user.getLogin(), body);
 
-        verify(repo, times(1)).findOne(user.getLogin());
-        verify(repo, times(1)).save(user);
-        verifyNoMoreInteractions(repo);
+        verify(userRepo, times(1)).findOne(user.getLogin());
+        verify(userRepo, times(1)).save(user);
+        verifyNoMoreInteractions(userRepo);
         assertEquals(body.getMail(), user.getMail());
     }
 
     @Test
     public void edit_whenUserNotExists_ThrowExc() {
-        when(repo.findOne(user.getLogin())).thenReturn(null);
+        when(userRepo.findOne(user.getLogin())).thenReturn(null);
         User body = new User(
                 user.getLogin(),
                 "Janusz Cyps",
@@ -112,14 +115,14 @@ public class UserServiceTest {
 
         service.edit(user.getLogin(), body);
 
-        verify(repo, times(1)).findOne(user.getLogin());
-        verifyNoMoreInteractions(repo);
+        verify(userRepo, times(1)).findOne(user.getLogin());
+        verifyNoMoreInteractions(userRepo);
         assertNotEquals(body.getMail(), user.getMail());
     }
 
     @Test
     public void edit_whenBodyInvalid_ThrowExc() {
-        when(repo.findOne(user.getLogin())).thenReturn(user);
+        when(userRepo.findOne(user.getLogin())).thenReturn(user);
         User body = new User(
                 user.getLogin(),
                 user.getName(),
@@ -130,29 +133,29 @@ public class UserServiceTest {
 
         service.edit(user.getLogin(), body);
 
-        verify(repo, times(1)).findOne(user.getLogin());
-        verifyNoMoreInteractions(repo);
+        verify(userRepo, times(1)).findOne(user.getLogin());
+        verifyNoMoreInteractions(userRepo);
     }
 
     @Test
     public void delete_successful() {
-        when(repo.findOne(user.getLogin())).thenReturn(user);
+        when(userRepo.findOne(user.getLogin())).thenReturn(user);
 
         service.remove(user.getLogin());
 
-        verify(repo, times(1)).findOne(user.getLogin());
-        verify(repo, times(1)).delete(user.getLogin());
-        verifyNoMoreInteractions(repo);
+        verify(userRepo, times(1)).findOne(user.getLogin());
+        verify(userRepo, times(1)).delete(user.getLogin());
+        verifyNoMoreInteractions(userRepo);
     }
 
     @Test
     public void delete_whenUserNotExists_ThrowExc() {
-        when(repo.findOne(user.getLogin())).thenReturn(null);
+        when(userRepo.findOne(user.getLogin())).thenReturn(null);
         exception.expect(UserNotFoundException.class);
 
         service.remove(user.getLogin());
 
-        verify(repo, times(1)).findOne(user.getLogin());
-        verifyNoMoreInteractions(repo);
+        verify(userRepo, times(1)).findOne(user.getLogin());
+        verifyNoMoreInteractions(userRepo);
     }
 }
