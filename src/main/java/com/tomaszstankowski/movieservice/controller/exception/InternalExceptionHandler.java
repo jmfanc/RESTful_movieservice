@@ -1,6 +1,10 @@
 package com.tomaszstankowski.movieservice.controller.exception;
 
-import com.tomaszstankowski.movieservice.service.exception.*;
+import com.tomaszstankowski.movieservice.service.exception.already_exists.PersonAlreadyExistsException;
+import com.tomaszstankowski.movieservice.service.exception.already_exists.ShowAlreadyExistsException;
+import com.tomaszstankowski.movieservice.service.exception.already_exists.UserAlreadyExistsException;
+import com.tomaszstankowski.movieservice.service.exception.invalid_body.*;
+import com.tomaszstankowski.movieservice.service.exception.not_found.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +21,7 @@ public class InternalExceptionHandler extends ResponseEntityExceptionHandler {
             ShowNotFoundException.class,
             PageNotFoundException.class,
             PersonNotFoundException.class,
+            ParticipationNotFoundException.class,
             RatingNotFoundException.class
     })
     public ResponseEntity<Object> handleResourceNotFoundExceptions(RuntimeException ex, WebRequest request) {

@@ -6,8 +6,8 @@ import com.tomaszstankowski.movieservice.model.dto.PersonDTO;
 import com.tomaszstankowski.movieservice.model.entity.Person;
 import com.tomaszstankowski.movieservice.model.enums.Profession;
 import com.tomaszstankowski.movieservice.service.PersonService;
-import com.tomaszstankowski.movieservice.service.exception.PageNotFoundException;
-import com.tomaszstankowski.movieservice.service.exception.PersonNotFoundException;
+import com.tomaszstankowski.movieservice.service.exception.not_found.PageNotFoundException;
+import com.tomaszstankowski.movieservice.service.exception.not_found.PersonNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.SortDefault;
@@ -56,7 +56,7 @@ public class PersonController {
 
     @GetMapping(path = "/{id}/participations")
     public List<ParticipationDTO> getPersonParticipations(@PathVariable("id") long personId,
-                                                          @RequestParam("role") Profession role) {
+                                                          @RequestParam(value = "role", required = false) Profession role) {
         return service.findParticipations(personId, role)
                 .stream()
                 .map(mapper::fromEntity)

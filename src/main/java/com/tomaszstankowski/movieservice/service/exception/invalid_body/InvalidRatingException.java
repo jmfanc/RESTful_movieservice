@@ -1,4 +1,4 @@
-package com.tomaszstankowski.movieservice.service.exception;
+package com.tomaszstankowski.movieservice.service.exception.invalid_body;
 
 public class InvalidRatingException extends RuntimeException {
     public InvalidRatingException(short rating) {

@@ -3,7 +3,12 @@ package com.tomaszstankowski.movieservice.service;
 import com.tomaszstankowski.movieservice.model.entity.*;
 import com.tomaszstankowski.movieservice.model.enums.Profession;
 import com.tomaszstankowski.movieservice.repository.*;
-import com.tomaszstankowski.movieservice.service.exception.*;
+import com.tomaszstankowski.movieservice.service.exception.already_exists.ShowAlreadyExistsException;
+import com.tomaszstankowski.movieservice.service.exception.invalid_body.InvalidRatingException;
+import com.tomaszstankowski.movieservice.service.exception.invalid_body.InvalidShowException;
+import com.tomaszstankowski.movieservice.service.exception.invalid_body.UnexpectedTypeException;
+import com.tomaszstankowski.movieservice.service.exception.invalid_body.UnknownTypeException;
+import com.tomaszstankowski.movieservice.service.exception.not_found.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -111,6 +116,22 @@ public class ShowService {
         show.getParticipations().add(participation);
         person.getParticipations().add(participation);
         return participationRepo.save(participation);
+    }
+
+    public void editParticipation(long id, Participation body) {
+        Participation participation = participationRepo.findOne(id);
+        if (participation == null)
+            throw new ParticipationNotFoundException(id);
+        participation.setRole(body.getRole());
+        participation.setInfo(body.getInfo());
+        participationRepo.save(participation);
+    }
+
+    public void removeParticipation(long id) {
+        Participation participation = participationRepo.findOne(id);
+        if (participation == null)
+            throw new ParticipationNotFoundException(id);
+        participationRepo.delete(id);
     }
 
     public float getShowRating(long showId) {

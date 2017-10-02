@@ -2,9 +2,9 @@ package com.tomaszstankowski.movieservice.service;
 
 import com.tomaszstankowski.movieservice.model.entity.User;
 import com.tomaszstankowski.movieservice.repository.UserRepository;
-import com.tomaszstankowski.movieservice.service.exception.InvalidUserException;
-import com.tomaszstankowski.movieservice.service.exception.UserAlreadyExistsException;
-import com.tomaszstankowski.movieservice.service.exception.UserNotFoundException;
+import com.tomaszstankowski.movieservice.service.exception.already_exists.UserAlreadyExistsException;
+import com.tomaszstankowski.movieservice.service.exception.invalid_body.InvalidUserException;
+import com.tomaszstankowski.movieservice.service.exception.not_found.UserNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

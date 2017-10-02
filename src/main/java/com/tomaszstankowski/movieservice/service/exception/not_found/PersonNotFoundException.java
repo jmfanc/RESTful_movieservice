@@ -1,4 +1,4 @@
-package com.tomaszstankowski.movieservice.service.exception;
+package com.tomaszstankowski.movieservice.service.exception.not_found;
 
 public class PersonNotFoundException extends RuntimeException {
     public PersonNotFoundException(long id) {

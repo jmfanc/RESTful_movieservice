@@ -1,4 +1,4 @@
-package com.tomaszstankowski.movieservice.service.exception;
+package com.tomaszstankowski.movieservice.service.exception.not_found;
 
 import com.tomaszstankowski.movieservice.model.entity.Show;
 import com.tomaszstankowski.movieservice.model.entity.User;

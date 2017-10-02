@@ -1,4 +1,4 @@
-package com.tomaszstankowski.movieservice.service.exception;
+package com.tomaszstankowski.movieservice.service.exception.already_exists;
 
 public class UserAlreadyExistsException extends RuntimeException {
 

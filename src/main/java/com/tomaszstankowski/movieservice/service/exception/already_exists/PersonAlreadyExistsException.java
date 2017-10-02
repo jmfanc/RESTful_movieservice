@@ -1,4 +1,4 @@
-package com.tomaszstankowski.movieservice.service.exception;
+package com.tomaszstankowski.movieservice.service.exception.already_exists;
 
 import com.tomaszstankowski.movieservice.model.entity.Person;
 

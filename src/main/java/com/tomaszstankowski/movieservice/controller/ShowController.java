@@ -10,8 +10,8 @@ import com.tomaszstankowski.movieservice.repository.specifications.MovieSpecific
 import com.tomaszstankowski.movieservice.repository.specifications.SerialSpecifications;
 import com.tomaszstankowski.movieservice.repository.specifications.ShowSpecifications;
 import com.tomaszstankowski.movieservice.service.ShowService;
-import com.tomaszstankowski.movieservice.service.exception.PageNotFoundException;
-import com.tomaszstankowski.movieservice.service.exception.ShowNotFoundException;
+import com.tomaszstankowski.movieservice.service.exception.not_found.PageNotFoundException;
+import com.tomaszstankowski.movieservice.service.exception.not_found.ShowNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specifications;
@@ -73,8 +73,7 @@ public class ShowController {
                     : specs.and(ShowSpecifications.hasAtLeastOneGenre(genres));
 
         Page<Show> result = service.findShows(specs, page, sort);
-        if (page >= result.getTotalPages())
-            throw new PageNotFoundException(page);
+        validate(result);
 
         return result.getContent().stream()
                 .map(this::map)
@@ -110,8 +109,7 @@ public class ShowController {
                     : specs.and(MovieSpecifications.longerThan(durationGt));
 
         Page<Movie> result = service.findMovies(specs, page, sort);
-        if (page >= result.getTotalPages())
-            throw new PageNotFoundException(page);
+        validate(result);
 
         return result.getContent().stream()
                 .map(this::map)
@@ -147,8 +145,8 @@ public class ShowController {
                     : specs.and(SerialSpecifications.longerThan(seasonsGt));
 
         Page<Serial> result = service.findSeries(specs, page, sort);
-        if (page >= result.getTotalPages())
-            throw new PageNotFoundException(page);
+        validate(result);
+
         return result.getContent().stream()
                 .map(this::map)
                 .collect(Collectors.toList());
@@ -204,6 +202,27 @@ public class ShowController {
         return ResponseEntity.created(location).build();
     }
 
+    @PutMapping(path = "/{showId}/participations/{participationId}/edit")
+    @ResponseStatus(HttpStatus.OK)
+    public void editParticipation(@PathVariable("showId") long showId,
+                                  @PathVariable("participationId") long participationId,
+                                  @RequestBody ParticipationDTO body) {
+        Show show = service.findShow(showId);
+        if (show == null)
+            throw new ShowNotFoundException(showId);
+        service.editParticipation(participationId, mapper.fromDTO(body));
+    }
+
+    @DeleteMapping(path = "/{showId}/participations/{participationId}/delete")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteParticipation(@PathVariable("showId") long showId,
+                                    @PathVariable("participationId") long participationId) {
+        Show show = service.findShow(showId);
+        if (show == null)
+            throw new ShowNotFoundException(showId);
+        service.removeParticipation(participationId);
+    }
+
     @GetMapping(path = "/{id}/participations")
     public List<ParticipationDTO> getParticipations(@PathVariable("id") long id, @RequestParam(value = "role", required = false) Profession role) {
         return service.findParticipations(id, role)
@@ -232,5 +251,10 @@ public class ShowController {
         dto.setRateCount(service.getShowRateCount(entity.getId()));
         dto.setRating(service.getShowRating(entity.getId()));
         return dto;
+    }
+
+    private void validate(Page page) {
+        if (page.getNumber() >= page.getTotalPages() && page.getNumber() > 0)
+            throw new PageNotFoundException(page.getNumber());
     }
 }

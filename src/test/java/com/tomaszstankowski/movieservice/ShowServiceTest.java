@@ -5,7 +5,13 @@ import com.tomaszstankowski.movieservice.model.enums.Profession;
 import com.tomaszstankowski.movieservice.model.enums.Sex;
 import com.tomaszstankowski.movieservice.repository.*;
 import com.tomaszstankowski.movieservice.service.ShowService;
-import com.tomaszstankowski.movieservice.service.exception.*;
+import com.tomaszstankowski.movieservice.service.exception.already_exists.ShowAlreadyExistsException;
+import com.tomaszstankowski.movieservice.service.exception.invalid_body.InvalidRatingException;
+import com.tomaszstankowski.movieservice.service.exception.invalid_body.InvalidShowException;
+import com.tomaszstankowski.movieservice.service.exception.not_found.ParticipationNotFoundException;
+import com.tomaszstankowski.movieservice.service.exception.not_found.PersonNotFoundException;
+import com.tomaszstankowski.movieservice.service.exception.not_found.RatingNotFoundException;
+import com.tomaszstankowski.movieservice.service.exception.not_found.ShowNotFoundException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -279,7 +285,7 @@ public class ShowServiceTest {
     }
 
     @Test
-    public void edit_successful() {
+    public void edit_showEditedSuccessful() {
         when(showRepo.findOne(1L)).thenReturn(movie);
         Movie body = new Movie(
                 movie.getTitle(),
@@ -306,6 +312,31 @@ public class ShowServiceTest {
         verify(showRepo, times(1)).save(movie);
         verifyNoMoreInteractions(showRepo);
         verifyNoMoreInteractions(genreRepo);
+    }
+
+    @Test
+    public void edit_participationEditedSuccessful() {
+        when(participationRepo.findOne(1L)).thenReturn(participation);
+        Participation body = new Participation(Profession.DIRECTOR, "", null, null);
+
+        service.editParticipation(1L, body);
+
+        verify(participationRepo, times(1)).findOne(1L);
+        verify(participationRepo, times(1)).save(participation);
+        verifyNoMoreInteractions(participationRepo);
+        assertEquals(body.getInfo(), participation.getInfo());
+        assertEquals(body.getRole(), participation.getRole());
+    }
+
+    @Test
+    public void edit_whenParticipationNotExists_throwExc() {
+        when(participationRepo.findOne(1L)).thenReturn(null);
+        Participation body = new Participation(Profession.DIRECTOR, "", null, null);
+        exception.expect(ParticipationNotFoundException.class);
+
+        service.editParticipation(1L, body);
+        verify(participationRepo, times(1)).findOne(1L);
+        verifyNoMoreInteractions(participationRepo);
     }
 
     @Test
@@ -362,5 +393,27 @@ public class ShowServiceTest {
         verifyNoMoreInteractions(showRepo);
         verifyNoMoreInteractions(userRepo);
         verifyNoMoreInteractions(ratingRepo);
+    }
+
+    @Test
+    public void remove_whenParticipationNotExists_throwExc() {
+        when(participationRepo.findOne(1L)).thenReturn(null);
+        exception.expect(ParticipationNotFoundException.class);
+
+        service.removeParticipation(1L);
+
+        verify(participationRepo, times(1)).findOne(1L);
+        verifyNoMoreInteractions(participationRepo);
+    }
+
+    @Test
+    public void remove_participationRemovedSuccessful() {
+        when(participationRepo.findOne(1L)).thenReturn(participation);
+
+        service.removeParticipation(1L);
+
+        verify(participationRepo, times(1)).findOne(1L);
+        verify(participationRepo, times(1)).delete(1L);
+        verifyNoMoreInteractions(participationRepo);
     }
 }

@@ -11,7 +11,13 @@ import com.tomaszstankowski.movieservice.model.entity.*;
 import com.tomaszstankowski.movieservice.model.enums.Profession;
 import com.tomaszstankowski.movieservice.model.enums.Sex;
 import com.tomaszstankowski.movieservice.service.ShowService;
-import com.tomaszstankowski.movieservice.service.exception.*;
+import com.tomaszstankowski.movieservice.service.exception.already_exists.ShowAlreadyExistsException;
+import com.tomaszstankowski.movieservice.service.exception.invalid_body.InvalidRatingException;
+import com.tomaszstankowski.movieservice.service.exception.invalid_body.InvalidShowException;
+import com.tomaszstankowski.movieservice.service.exception.not_found.ParticipationNotFoundException;
+import com.tomaszstankowski.movieservice.service.exception.not_found.PersonNotFoundException;
+import com.tomaszstankowski.movieservice.service.exception.not_found.RatingNotFoundException;
+import com.tomaszstankowski.movieservice.service.exception.not_found.ShowNotFoundException;
 import net.minidev.json.JSONArray;
 import org.junit.Before;
 import org.junit.Test;
@@ -333,6 +339,44 @@ public class ShowControllerTest {
     }
 
     @Test
+    public void put_whenParticipationEdited_statusOk() throws Exception {
+        when(service.findShow(1L)).thenReturn(movie);
+        ParticipationDTO body = new ParticipationDTO(Profession.DIRECTOR, "", null, null);
+
+        mockMvc.perform(put("/shows/{showId}/participations/{participationId}/edit",
+                1L, 1L)
+                .content(json(body))
+                .contentType(contentType))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void put_whenShowOfParticipationNotExists_statusNotFound() throws Exception {
+        when(service.findShow(1L)).thenReturn(null);
+        ParticipationDTO body = new ParticipationDTO(Profession.DIRECTOR, "", null, null);
+
+        mockMvc.perform(put("/shows/{showId}/participations/{participationId}/edit",
+                1L, 1L)
+                .content(json(body))
+                .contentType(contentType))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void put_whenParticipationNotExists_statusNotFound() throws Exception {
+        when(service.findShow(1L)).thenReturn(movie);
+        ParticipationDTO body = new ParticipationDTO(Profession.DIRECTOR, "", null, null);
+        doThrow(ParticipationNotFoundException.class)
+                .when(service).editParticipation(1L, modelMapper.fromDTO(body));
+
+        mockMvc.perform(put("/shows/{showId}/participations/{participationId}/edit",
+                1L, 1L)
+                .content(json(body))
+                .contentType(contentType))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     public void delete_whenShowRemoved_statusOk() throws Exception {
         mockMvc.perform(delete("/shows/{id}/delete", 1L))
                 .andExpect(status().isOk());
@@ -360,6 +404,35 @@ public class ShowControllerTest {
     public void delete_whenRatingDeleted_statusOk() throws Exception {
         mockMvc.perform(delete("/shows/{id}/rate", 1L)
                 .param("login", "jandaciuk"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void delete_whenParticipationNotExists_statusNotFound() throws Exception {
+        when(service.findShow(1L)).thenReturn(movie);
+        doThrow(ParticipationNotFoundException.class)
+                .when(service).removeParticipation(1L);
+
+        mockMvc.perform(delete("/shows/{showId}/participations/{participationId}/delete",
+                1L, 1L))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void delete_whenShowOfParticipationNotExists_statusNotFound() throws Exception {
+        when(service.findShow(1L)).thenReturn(null);
+
+        mockMvc.perform(delete("/shows/{showId}/participations/{participationId}/delete",
+                1L, 1L))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void delete_whenParticipationDeleted_statusOk() throws Exception {
+        when(service.findShow(1L)).thenReturn(movie);
+
+        mockMvc.perform(delete("/shows/{showId}/participations/{participationId}/delete",
+                1L, 1L))
                 .andExpect(status().isOk());
     }
 }
