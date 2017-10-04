@@ -5,11 +5,13 @@ import com.tomaszstankowski.movieservice.model.dto.ParticipationDTO;
 import com.tomaszstankowski.movieservice.model.dto.PersonDTO;
 import com.tomaszstankowski.movieservice.model.entity.Person;
 import com.tomaszstankowski.movieservice.model.enums.Profession;
+import com.tomaszstankowski.movieservice.model.enums.Sex;
 import com.tomaszstankowski.movieservice.service.PersonService;
 import com.tomaszstankowski.movieservice.service.exception.not_found.PageNotFoundException;
 import com.tomaszstankowski.movieservice.service.exception.not_found.PersonNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.data.web.SortDefault;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.tomaszstankowski.movieservice.repository.specifications.PersonSpecifications.*;
+import static org.springframework.data.jpa.domain.Specifications.where;
 
 @RestController
 @RequestMapping("/people")
@@ -36,10 +41,41 @@ public class PersonController {
 
     @GetMapping
     public List<PersonDTO> getPeople(@RequestParam("page") int page,
+                                     @RequestParam(value = "name", required = false) String name,
+                                     @RequestParam(value = "birth_year_lt", required = false) Integer birthYearLt,
+                                     @RequestParam(value = "birth_year_gt", required = false) Integer birthYearGt,
+                                     @RequestParam(value = "sex", required = false) Sex sex,
+                                     @RequestParam(value = "profession", required = false) Profession profession,
                                      @SortDefault("name") Sort sort) {
 
-        Page<Person> result = service.findAll(null, page, sort);
-        if (page >= result.getTotalPages())
+        Specifications<Person> specs = null;
+        if (name != null)
+            specs = where(nameContains(name));
+        if (birthYearLt != null)
+            specs = (specs == null) ? where(olderThan(birthYearLt)) : specs.and(olderThan(birthYearLt));
+        if (birthYearGt != null)
+            specs = (specs == null) ? where(youngerThan(birthYearGt)) : specs.and(youngerThan(birthYearGt));
+        if (sex != null) {
+            if (sex == Sex.MALE)
+                specs = (specs == null) ? where(isMale()) : specs.and(isMale());
+            if (sex == Sex.FEMALE)
+                specs = (specs == null) ? where(isFemale()) : specs.and(isFemale());
+        }
+        if (profession != null)
+            switch (profession) {
+                case ACTOR:
+                    specs = (specs == null) ? where(isActor()) : specs.and(isActor());
+                    break;
+                case DIRECTOR:
+                    specs = (specs == null) ? where(isDirector()) : specs.and(isDirector());
+                    break;
+                case SCREENWRITER:
+                    specs = (specs == null) ? where(isScreenwriter()) : specs.and(isScreenwriter());
+                    break;
+            }
+
+        Page<Person> result = service.findAll(specs, page, sort);
+        if (page >= result.getTotalPages() && page > 0)
             throw new PageNotFoundException(page);
         return result.getContent().stream()
                 .map(mapper::fromEntity)
