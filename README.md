@@ -2,7 +2,7 @@
 Application provides basic features of popular services like imdb.com or filmweb.pl. Apart from simple CRUD operations 
 it also allows to rate movies/series, perform complex queries or add cast members.
 
-##Sample requests and responses
+## Sample requests and responses
 Get first page of action or sci-fi movies with duration below 120 mins and released after 2010, sorted by release date.
 
     GET /shows?page=0&type=MOVIE&genres=ACTION,SCI-FI&duration_lt=120&year_gt=2010&sort=releaseDate
@@ -59,8 +59,8 @@ Get all details about shows rated by user from given day until now with score 8
                     "sci-fi",
                     "action"
                 ],
-                "rating": 0,
-                "rateCount": 0,
+                "rating": 8,
+                "rateCount": 1,
                 "duration": 143,
                 "boxoffice": 65000000
             },
