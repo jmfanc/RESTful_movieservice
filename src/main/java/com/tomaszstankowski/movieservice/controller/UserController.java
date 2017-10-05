@@ -76,6 +76,7 @@ public class UserController {
             specs = specs.and(youngerThan(from));
         if (rating != null)
             specs = specs.and(rating(rating));
+
         Page<Rating> result = service.findUserRatings(specs, page);
         if (page >= result.getTotalPages() && page > 0)
             throw new PageNotFoundException(page);
