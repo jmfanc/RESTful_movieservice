@@ -6,7 +6,7 @@ import com.tomaszstankowski.movieservice.repository.*;
 import com.tomaszstankowski.movieservice.service.exception.already_exists.ShowAlreadyExistsException;
 import com.tomaszstankowski.movieservice.service.exception.invalid_body.InvalidRatingException;
 import com.tomaszstankowski.movieservice.service.exception.invalid_body.InvalidShowException;
-import com.tomaszstankowski.movieservice.service.exception.invalid_body.UnexpectedTypeException;
+import com.tomaszstankowski.movieservice.service.exception.invalid_body.UnexpectedShowException;
 import com.tomaszstankowski.movieservice.service.exception.invalid_body.UnknownTypeException;
 import com.tomaszstankowski.movieservice.service.exception.not_found.*;
 import org.springframework.data.domain.Page;
@@ -198,13 +198,13 @@ public class ShowService {
                 editMovie((Movie) show, (Movie) body);
                 isOk = true;
             } else
-                throw new UnexpectedTypeException(Movie.class, show.getClass());
+                throw new UnexpectedShowException(Movie.class, show.getClass());
         if (body instanceof Serial)
             if (show instanceof Serial) {
                 editSerial((Serial) show, (Serial) body);
                 isOk = true;
             } else
-                throw new UnexpectedTypeException(Serial.class, show.getClass());
+                throw new UnexpectedShowException(Serial.class, show.getClass());
         if (isOk) {
             disconnectShowFromGenres(show);
             show.getGenres().addAll(body.getGenres());

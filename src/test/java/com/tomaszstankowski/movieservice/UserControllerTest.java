@@ -7,6 +7,7 @@ import com.tomaszstankowski.movieservice.model.ModelMapper;
 import com.tomaszstankowski.movieservice.model.dto.UserDTO;
 import com.tomaszstankowski.movieservice.model.entity.User;
 import com.tomaszstankowski.movieservice.model.enums.Sex;
+import com.tomaszstankowski.movieservice.service.ShowService;
 import com.tomaszstankowski.movieservice.service.UserService;
 import com.tomaszstankowski.movieservice.service.exception.invalid_body.InvalidUserException;
 import com.tomaszstankowski.movieservice.service.exception.not_found.UserNotFoundException;
@@ -42,6 +43,9 @@ public class UserControllerTest {
     @Mock
     private UserService service;
 
+    @Mock
+    private ShowService showService;
+
     private ModelMapper modelMapper = new ModelMapper();
 
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -55,10 +59,10 @@ public class UserControllerTest {
 
     @Before
     public void setup() throws Exception {
-        mockMvc = standaloneSetup(new UserController(service, modelMapper))
+        mockMvc = standaloneSetup(new UserController(service, showService, modelMapper))
                 .setControllerAdvice(new InternalExceptionHandler())
                 .build();
-        user = new User("krzysiek21", "Krzysztof Jarzyna", "kj@o2.pl", Sex.MALE);
+        user = new User("krzysiek21", "password", "Krzysztof Jarzyna", "kj@o2.pl", Sex.MALE);
         userDTO = modelMapper.fromEntity(user);
 
     }
@@ -83,7 +87,6 @@ public class UserControllerTest {
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.login", is(user.getLogin())))
                 .andExpect(jsonPath("$.name", is(user.getName())))
-                .andExpect(jsonPath("$.mail", is(user.getMail())))
                 .andExpect(jsonPath("$.joined", is(format.format(user.getJoined()))))
                 .andExpect(jsonPath("$.sex", is(user.getSex().toString())));
 
@@ -91,7 +94,7 @@ public class UserControllerTest {
 
     @Test
     public void post_whenUserAdded_statusCreated() throws Exception {
-        mockMvc.perform(post("/users/add")
+        mockMvc.perform(post("/users/register")
                 .content(json(userDTO))
                 .contentType(contentType))
                 .andExpect(status().isCreated());
@@ -99,16 +102,16 @@ public class UserControllerTest {
 
     @Test
     public void post_whenBodyInvalid_statusUnprocessableEntity() throws Exception {
-        UserDTO emptyLoginBody = new UserDTO("", "Ewelina", "dd@o2.pl", Sex.FEMALE);
-        UserDTO nullMailBody = new UserDTO("romek21", "Roman", null, Sex.MALE);
+        UserDTO emptyLoginBody = new UserDTO("", "Ewelina", "dd@o2.pl", Sex.FEMALE, "password");
+        UserDTO nullMailBody = new UserDTO("romek21", "Roman", null, Sex.MALE, "password");
         doThrow(new InvalidUserException()).when(service).add(modelMapper.fromDTO(emptyLoginBody));
         doThrow(new InvalidUserException()).when(service).add(modelMapper.fromDTO(nullMailBody));
 
-        mockMvc.perform(post("/users/add")
+        mockMvc.perform(post("/users/register")
                 .content(json(emptyLoginBody))
                 .contentType(contentType))
                 .andExpect(status().isUnprocessableEntity());
-        mockMvc.perform(post("/users/add")
+        mockMvc.perform(post("/users/register")
                 .content(json(nullMailBody))
                 .contentType(contentType))
                 .andExpect(status().isUnprocessableEntity());
@@ -116,7 +119,7 @@ public class UserControllerTest {
 
     @Test
     public void put_whenUserEdited_statusOk() throws Exception {
-        userDTO.setMail("kjarzyna@gmail.com");
+        userDTO.setEmail("kjarzyna@gmail.com");
         mockMvc.perform(put("/users/{login}/edit", user.getLogin())
                 .content(json(userDTO))
                 .contentType(contentType))
@@ -125,7 +128,7 @@ public class UserControllerTest {
 
     @Test
     public void put_whenMovieNotExists_statusNotFound() throws Exception {
-        doThrow(UserNotFoundException.class).when(service).edit(user.getLogin(), user);
+        doThrow(UserNotFoundException.class).when(service).edit(user);
 
         mockMvc.perform(put("/users/{login}/edit", user.getLogin())
                 .content(json(userDTO))

@@ -1,6 +1,8 @@
 package com.tomaszstankowski.movieservice.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tomaszstankowski.movieservice.model.enums.Profession;
 import com.tomaszstankowski.movieservice.model.enums.Sex;
 import lombok.Data;
@@ -8,13 +10,13 @@ import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 
 @Data
 @EqualsAndHashCode(of = "id")
 public class PersonDTO implements Serializable {
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private long id;
 
     private String name;
@@ -26,15 +28,28 @@ public class PersonDTO implements Serializable {
 
     private Sex sex;
 
-    private Set<Profession> professions = new HashSet<>();
+    private Set<Profession> professions;
 
-    public PersonDTO() {
-    }
-
-    public PersonDTO(String name, Date birthDate, String birthPlace, Sex sex) {
+    @JsonCreator
+    public PersonDTO(@JsonProperty("name") String name,
+                     @JsonProperty("birthDate") Date birthDate,
+                     @JsonProperty("birthPlace") String birthPlace,
+                     @JsonProperty("sex") Sex sex,
+                     @JsonProperty("professions") Set<Profession> professions) {
         this.name = name;
         this.birthDate = birthDate;
         this.birthPlace = birthPlace;
         this.sex = sex;
+        this.professions = professions;
+    }
+
+    public PersonDTO(long id,
+                     String name,
+                     Date birthDate,
+                     String birthPlace,
+                     Sex sex,
+                     Set<Profession> professions) {
+        this(name, birthDate, birthPlace, sex, professions);
+        this.id = id;
     }
 }

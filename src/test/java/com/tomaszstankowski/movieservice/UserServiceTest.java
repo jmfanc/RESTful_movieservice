@@ -5,6 +5,7 @@ import com.tomaszstankowski.movieservice.model.enums.Sex;
 import com.tomaszstankowski.movieservice.repository.RatingRepository;
 import com.tomaszstankowski.movieservice.repository.UserRepository;
 import com.tomaszstankowski.movieservice.service.UserService;
+import com.tomaszstankowski.movieservice.service.exception.already_exists.EmailAlreadyExistsException;
 import com.tomaszstankowski.movieservice.service.exception.already_exists.UserAlreadyExistsException;
 import com.tomaszstankowski.movieservice.service.exception.invalid_body.InvalidUserException;
 import com.tomaszstankowski.movieservice.service.exception.not_found.UserNotFoundException;
@@ -15,6 +16,8 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -28,6 +31,8 @@ public class UserServiceTest {
     @Mock
     private RatingRepository ratingRepo;
 
+    private PasswordEncoder encoder = new BCryptPasswordEncoder();
+
     private UserService service;
 
     @Rule
@@ -37,9 +42,10 @@ public class UserServiceTest {
 
     @Before
     public void setup() {
-        service = new UserService(userRepo, ratingRepo);
+        service = new UserService(userRepo, ratingRepo, encoder);
         user = new User(
                 "janusz111",
+                "password",
                 "Janusz Cyps",
                 "jan@usz.pl",
                 Sex.MALE
@@ -49,10 +55,12 @@ public class UserServiceTest {
     @Test
     public void add_successful() {
         when(userRepo.findOne(user.getLogin())).thenReturn(null);
+        when(userRepo.findByEmail(user.getEmail())).thenReturn(null);
 
         service.add(user);
 
         verify(userRepo, times(1)).findOne(user.getLogin());
+        verify(userRepo, times(1)).findByEmail(user.getEmail());
         verify(userRepo, times(1)).save(user);
         verifyNoMoreInteractions(userRepo);
     }
@@ -69,10 +77,25 @@ public class UserServiceTest {
     }
 
     @Test
+    public void add_whenUserWithEmailExists_throwExc() {
+        when(userRepo.findOne(user.getLogin())).thenReturn(null);
+        when(userRepo.findByEmail(user.getEmail())).thenReturn(user);
+        exception.expect(EmailAlreadyExistsException.class);
+
+        service.add(user);
+
+        verify(userRepo, times(1)).findOne(user.getLogin());
+        verify(userRepo, times(1)).findByEmail(user.getEmail());
+        ;
+        verifyNoMoreInteractions(userRepo);
+    }
+
+    @Test
     public void add_whenBodyInvalid_throwExc() {
         when(userRepo.findOne(user.getLogin())).thenReturn(null);
         User body = new User(
                 user.getLogin(),
+                user.getPassword(),
                 user.getName(),
                 "",
                 user.getSex()
@@ -89,17 +112,20 @@ public class UserServiceTest {
         when(userRepo.findOne(user.getLogin())).thenReturn(user);
         User body = new User(
                 user.getLogin(),
+                user.getPassword(),
                 "Janusz Cyps",
                 "janusz@janusz.pl",
                 Sex.MALE
         );
+        when(userRepo.findByEmail(body.getEmail())).thenReturn(null);
 
-        service.edit(user.getLogin(), body);
+        service.edit(body);
 
         verify(userRepo, times(1)).findOne(user.getLogin());
+        verify(userRepo, times(1)).findByEmail(user.getEmail());
         verify(userRepo, times(1)).save(user);
         verifyNoMoreInteractions(userRepo);
-        assertEquals(body.getMail(), user.getMail());
+        assertEquals(body.getEmail(), user.getEmail());
     }
 
     @Test
@@ -107,17 +133,18 @@ public class UserServiceTest {
         when(userRepo.findOne(user.getLogin())).thenReturn(null);
         User body = new User(
                 user.getLogin(),
+                user.getPassword(),
                 "Janusz Cyps",
                 "janusz@janusz.pl",
                 Sex.MALE
         );
         exception.expect(UserNotFoundException.class);
 
-        service.edit(user.getLogin(), body);
+        service.edit(body);
 
         verify(userRepo, times(1)).findOne(user.getLogin());
         verifyNoMoreInteractions(userRepo);
-        assertNotEquals(body.getMail(), user.getMail());
+        assertNotEquals(body.getEmail(), user.getEmail());
     }
 
     @Test
@@ -125,13 +152,14 @@ public class UserServiceTest {
         when(userRepo.findOne(user.getLogin())).thenReturn(user);
         User body = new User(
                 user.getLogin(),
+                user.getPassword(),
                 user.getName(),
                 null,
                 user.getSex()
         );
         exception.expect(InvalidUserException.class);
 
-        service.edit(user.getLogin(), body);
+        service.edit(body);
 
         verify(userRepo, times(1)).findOne(user.getLogin());
         verifyNoMoreInteractions(userRepo);

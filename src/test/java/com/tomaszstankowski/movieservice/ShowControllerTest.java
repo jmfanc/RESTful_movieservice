@@ -341,7 +341,7 @@ public class ShowControllerTest {
     @Test
     public void put_whenParticipationEdited_statusOk() throws Exception {
         when(service.findShow(1L)).thenReturn(movie);
-        ParticipationDTO body = new ParticipationDTO(Profession.DIRECTOR, "", null, null);
+        ParticipationDTO body = new ParticipationDTO(Profession.DIRECTOR, "");
 
         mockMvc.perform(put("/shows/{showId}/participations/{participationId}/edit",
                 1L, 1L)
@@ -353,7 +353,7 @@ public class ShowControllerTest {
     @Test
     public void put_whenShowOfParticipationNotExists_statusNotFound() throws Exception {
         when(service.findShow(1L)).thenReturn(null);
-        ParticipationDTO body = new ParticipationDTO(Profession.DIRECTOR, "", null, null);
+        ParticipationDTO body = new ParticipationDTO(Profession.DIRECTOR, "");
 
         mockMvc.perform(put("/shows/{showId}/participations/{participationId}/edit",
                 1L, 1L)
@@ -365,7 +365,7 @@ public class ShowControllerTest {
     @Test
     public void put_whenParticipationNotExists_statusNotFound() throws Exception {
         when(service.findShow(1L)).thenReturn(movie);
-        ParticipationDTO body = new ParticipationDTO(Profession.DIRECTOR, "", null, null);
+        ParticipationDTO body = new ParticipationDTO(Profession.DIRECTOR, "");
         doThrow(ParticipationNotFoundException.class)
                 .when(service).editParticipation(1L, modelMapper.fromDTO(body));
 

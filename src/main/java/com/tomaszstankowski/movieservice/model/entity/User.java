@@ -19,7 +19,10 @@ public class User {
 
     private String name;
 
-    private String mail;
+    @Column(unique = true)
+    private String email;
+
+    private String password;
 
     @Enumerated(EnumType.STRING)
     private Sex sex;
@@ -30,13 +33,17 @@ public class User {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private List<Rating> ratings = new ArrayList<>();
 
+    @Enumerated(value = EnumType.STRING)
+    UserRole role = UserRole.USER;
+
     public User() {
     }
 
-    public User(String login, String name, String mail, Sex sex) {
+    public User(String login, String password, String name, String email, Sex sex) {
         this.login = login;
+        this.password = password;
         this.name = name;
-        this.mail = mail;
+        this.email = email;
         this.sex = sex;
     }
 }

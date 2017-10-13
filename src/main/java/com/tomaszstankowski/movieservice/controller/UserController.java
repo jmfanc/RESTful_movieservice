@@ -5,6 +5,7 @@ import com.tomaszstankowski.movieservice.model.dto.RatingDTO;
 import com.tomaszstankowski.movieservice.model.dto.UserDTO;
 import com.tomaszstankowski.movieservice.model.entity.Rating;
 import com.tomaszstankowski.movieservice.model.entity.User;
+import com.tomaszstankowski.movieservice.service.ShowService;
 import com.tomaszstankowski.movieservice.service.UserService;
 import com.tomaszstankowski.movieservice.service.exception.not_found.PageNotFoundException;
 import com.tomaszstankowski.movieservice.service.exception.not_found.UserNotFoundException;
@@ -19,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.util.Date;
 import java.util.List;
@@ -32,10 +34,12 @@ import static org.springframework.data.jpa.domain.Specifications.where;
 @EnableSpringDataWebSupport
 public class UserController {
     private final UserService service;
+    private final ShowService showService;
     private final ModelMapper mapper;
 
-    public UserController(UserService service, ModelMapper mapper) {
+    public UserController(UserService service, ShowService showService, ModelMapper mapper) {
         this.service = service;
+        this.showService = showService;
         this.mapper = mapper;
     }
 
@@ -82,13 +86,19 @@ public class UserController {
             throw new PageNotFoundException(page);
         return result.getContent()
                 .stream()
-                .map(mapper::fromEntity)
+                .map(entity -> {
+                    RatingDTO dto = mapper.fromEntity(entity);
+                    long showId = dto.getShow().getId();
+                    dto.getShow().setRating(showService.getShowRating(showId));
+                    dto.getShow().setRateCount(showService.getShowRateCount(showId));
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
 
-    @PostMapping(path = "/add")
-    public ResponseEntity<?> addUser(@RequestBody UserDTO body) {
+    @PostMapping(path = "/register")
+    public ResponseEntity<?> register(@RequestBody @Valid UserDTO body) {
         User user = mapper.fromDTO(body);
         service.add(user);
         URI location = ServletUriComponentsBuilder
@@ -101,8 +111,9 @@ public class UserController {
     @PutMapping(path = "/{login}/edit")
     @ResponseStatus(HttpStatus.OK)
     public void editUser(@PathVariable String login, @RequestBody UserDTO body) {
+        body.setLogin(login);
         User user = mapper.fromDTO(body);
-        service.edit(login, user);
+        service.edit(user);
     }
 
     @DeleteMapping(path = "/{login}/delete")

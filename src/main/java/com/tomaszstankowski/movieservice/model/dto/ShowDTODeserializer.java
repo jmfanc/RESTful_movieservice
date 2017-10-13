@@ -5,13 +5,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.tomaszstankowski.movieservice.service.exception.invalid_body.InvalidShowException;
 
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 public class ShowDTODeserializer extends StdDeserializer<ShowDTO> {
 
@@ -38,6 +41,12 @@ public class ShowDTODeserializer extends StdDeserializer<ShowDTO> {
             throw new IOException(e);
         }
         String location = root.get("location").asText();
+        Set<String> genres = new HashSet<>();
+        Iterator<JsonNode> iterator = root.get("genres").elements();
+        while (iterator.hasNext()) {
+            String genre = iterator.next().textValue();
+            genres.add(genre);
+        }
         if (isMovie(root)) {
             short duration = root.get("duration").shortValue();
             int boxoffice = root.get("boxoffice").intValue();
@@ -46,6 +55,7 @@ public class ShowDTODeserializer extends StdDeserializer<ShowDTO> {
                     description,
                     releaseDate,
                     location,
+                    genres,
                     duration,
                     boxoffice
             );
@@ -56,16 +66,12 @@ public class ShowDTODeserializer extends StdDeserializer<ShowDTO> {
                     description,
                     releaseDate,
                     location,
+                    genres,
                     seasons
             );
         }
         if (dto == null)
-            throw new AbstractDTOException(ShowDTO.class);
-        Iterator<JsonNode> iterator = root.get("genres").elements();
-        while (iterator.hasNext()) {
-            String genre = iterator.next().textValue();
-            dto.getGenres().add(genre);
-        }
+            throw new InvalidShowException();
         return dto;
     }
 

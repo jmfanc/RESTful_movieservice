@@ -4,57 +4,49 @@ import com.tomaszstankowski.movieservice.model.dto.*;
 import com.tomaszstankowski.movieservice.model.entity.*;
 
 import javax.lang.model.type.UnknownTypeException;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ModelMapper {
 
     public User fromDTO(UserDTO dto) {
-        if (dto == null)
-            return null;
-        return new User(
+        return (dto == null) ? null : new User(
                 dto.getLogin(),
+                dto.getPassword(),
                 dto.getName(),
-                dto.getMail(),
+                dto.getEmail(),
                 dto.getSex());
     }
 
     public UserDTO fromEntity(User entity) {
-        if (entity == null)
-            return null;
-        UserDTO dto = new UserDTO(
+        return (entity == null) ? null : new UserDTO(
                 entity.getLogin(),
                 entity.getName(),
-                entity.getMail(),
-                entity.getSex());
-        dto.setJoined(entity.getJoined());
-        return dto;
+                entity.getSex(),
+                entity.getJoined());
     }
 
     public Person fromDTO(PersonDTO dto) {
         if (dto == null)
             return null;
-        Person entity = new Person(
+        Person person = new Person(
                 dto.getName(),
                 dto.getBirthDate(),
                 dto.getBirthPlace(),
-                dto.getSex()
-        );
-        entity.getProfessions().addAll(dto.getProfessions());
-        entity.setId(dto.getId());
-        return entity;
+                dto.getSex());
+        person.getProfessions().addAll(dto.getProfessions());
+        return person;
     }
 
     public PersonDTO fromEntity(Person entity) {
-        if (entity == null)
-            return null;
-        PersonDTO dto = new PersonDTO(
+        return (entity == null) ? null : new PersonDTO(
+                entity.getId(),
                 entity.getName(),
                 entity.getBirthDate(),
                 entity.getBirthPlace(),
-                entity.getSex()
+                entity.getSex(),
+                entity.getProfessions()
         );
-        dto.setId(entity.getId());
-        dto.getProfessions().addAll(entity.getProfessions());
-        return dto;
     }
 
     public Show fromDTO(ShowDTO dto) {
@@ -80,7 +72,7 @@ public class ModelMapper {
     public Movie fromDTO(MovieDTO dto) {
         if (dto == null)
             return null;
-        Movie entity = new Movie(
+        Movie movie = new Movie(
                 dto.getTitle(),
                 dto.getDescription(),
                 dto.getReleaseDate(),
@@ -90,15 +82,14 @@ public class ModelMapper {
         );
         dto.getGenres().stream()
                 .map(Genre::new)
-                .forEach(entity.getGenres()::add);
-        entity.setId(dto.getId());
-        return entity;
+                .forEach(movie.getGenres()::add);
+        return movie;
     }
 
     public Serial fromDTO(SerialDTO dto) {
         if (dto == null)
             return null;
-        Serial entity = new Serial(
+        Serial serial = new Serial(
                 dto.getTitle(),
                 dto.getDescription(),
                 dto.getReleaseDate(),
@@ -107,82 +98,75 @@ public class ModelMapper {
         );
         dto.getGenres().stream()
                 .map(Genre::new)
-                .forEach(entity.getGenres()::add);
-        entity.setId(dto.getId());
-        return entity;
+                .forEach(serial.getGenres()::add);
+        return serial;
     }
 
     public MovieDTO fromEntity(Movie entity) {
         if (entity == null)
             return null;
-        MovieDTO dto = new MovieDTO(
+        Set<String> genres = entity.getGenres().stream()
+                .map(Genre::getName)
+                .collect(Collectors.toSet());
+        return new MovieDTO(
+                entity.getId(),
                 entity.getTitle(),
                 entity.getDescription(),
                 entity.getReleaseDate(),
                 entity.getLocation(),
+                genres,
+                0f,
+                0,
                 entity.getDuration(),
                 entity.getBoxoffice()
         );
-        dto.setId(entity.getId());
-        entity.getGenres().stream()
-                .map(Genre::getName)
-                .forEach(dto.getGenres()::add);
-        return dto;
     }
 
     public SerialDTO fromEntity(Serial entity) {
         if (entity == null)
             return null;
-        SerialDTO dto = new SerialDTO(
+        Set<String> genres = entity.getGenres().stream()
+                .map(Genre::getName)
+                .collect(Collectors.toSet());
+        return new SerialDTO(
+                entity.getId(),
                 entity.getTitle(),
                 entity.getDescription(),
                 entity.getReleaseDate(),
                 entity.getLocation(),
+                genres,
+                0f,
+                0,
                 entity.getSeasons()
         );
-        dto.setId(entity.getId());
-        entity.getGenres().stream()
-                .map(Genre::getName)
-                .forEach(dto.getGenres()::add);
-        return dto;
     }
 
     public Participation fromDTO(ParticipationDTO dto) {
-        if (dto == null)
-            return null;
-        Participation entity = new Participation(
+        return (dto == null) ? null : new Participation(
                 dto.getRole(),
                 dto.getInfo(),
                 fromDTO(dto.getPerson()),
                 fromDTO(dto.getShow())
         );
-        entity.setId(dto.getId());
-        return entity;
     }
 
     public ParticipationDTO fromEntity(Participation entity) {
-        if (entity == null)
-            return null;
-        ParticipationDTO dto = new ParticipationDTO(
+        return (entity == null) ? null : new ParticipationDTO(
+                entity.getId(),
                 entity.getRole(),
                 entity.getInfo(),
                 fromEntity(entity.getPerson()),
                 fromEntity(entity.getShow())
         );
-        dto.setId(entity.getId());
-        return dto;
     }
 
     public RatingDTO fromEntity(Rating entity) {
-        if (entity == null)
-            return null;
-        RatingDTO dto = new RatingDTO(
+        return (entity == null) ? null : new RatingDTO(
+                entity.getId(),
                 entity.getRating(),
+                entity.getDate(),
                 fromEntity(entity.getShow()),
                 fromEntity(entity.getUser())
         );
-        dto.setId(entity.getId());
-        dto.setDate(entity.getDate());
-        return dto;
     }
 }

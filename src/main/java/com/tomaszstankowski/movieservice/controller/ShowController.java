@@ -224,10 +224,17 @@ public class ShowController {
     }
 
     @GetMapping(path = "/{id}/participations")
-    public List<ParticipationDTO> getParticipations(@PathVariable("id") long id, @RequestParam(value = "role", required = false) Profession role) {
+    public List<ParticipationDTO> getParticipations(@PathVariable("id") long id,
+                                                    @RequestParam(value = "role", required = false) Profession role) {
         return service.findParticipations(id, role)
                 .stream()
-                .map(mapper::fromEntity)
+                .map(entity -> {
+                    ParticipationDTO dto = mapper.fromEntity(entity);
+                    long showId = dto.getShow().getId();
+                    dto.getShow().setRateCount(service.getShowRateCount(showId));
+                    dto.getShow().setRating(service.getShowRating(showId));
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 

@@ -1,6 +1,8 @@
 package com.tomaszstankowski.movieservice.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tomaszstankowski.movieservice.model.enums.Sex;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -13,19 +15,41 @@ import java.util.Date;
 public class UserDTO implements Serializable {
 
     private String login;
+
     private String name;
-    private String mail;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String email;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String password;
+
     private Sex sex;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @JsonFormat(timezone = "Europe/Paris", shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date joined;
 
-    public UserDTO() {
-    }
-
-    public UserDTO(String login, String name, String mail, Sex sex) {
+    @JsonCreator
+    public UserDTO(@JsonProperty("login") String login,
+                   @JsonProperty("name") String name,
+                   @JsonProperty("email") String email,
+                   @JsonProperty("sex") Sex sex,
+                   @JsonProperty("password") String password) {
         this.login = login;
         this.name = name;
-        this.mail = mail;
+        this.email = email;
         this.sex = sex;
+        this.password = password;
+    }
+
+    public UserDTO(String login,
+                   String name,
+                   Sex sex,
+                   Date joined) {
+        this.login = login;
+        this.name = name;
+        this.sex = sex;
+        this.joined = joined;
     }
 }

@@ -1,5 +1,6 @@
 package com.tomaszstankowski.movieservice.controller.exception;
 
+import com.tomaszstankowski.movieservice.service.exception.already_exists.EmailAlreadyExistsException;
 import com.tomaszstankowski.movieservice.service.exception.already_exists.PersonAlreadyExistsException;
 import com.tomaszstankowski.movieservice.service.exception.already_exists.ShowAlreadyExistsException;
 import com.tomaszstankowski.movieservice.service.exception.already_exists.UserAlreadyExistsException;
@@ -38,7 +39,7 @@ public class InternalExceptionHandler extends ResponseEntityExceptionHandler {
             InvalidShowException.class,
             InvalidPersonException.class,
             InvalidRatingException.class,
-            UnexpectedTypeException.class,
+            UnexpectedShowException.class,
             UnknownTypeException.class
     })
     public ResponseEntity<Object> handleInvalidBodyExceptions(RuntimeException ex, WebRequest request) {
@@ -53,7 +54,8 @@ public class InternalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {
             UserAlreadyExistsException.class,
             ShowAlreadyExistsException.class,
-            PersonAlreadyExistsException.class
+            PersonAlreadyExistsException.class,
+            EmailAlreadyExistsException.class
     })
     public ResponseEntity<Object> handleConflictExceptions(RuntimeException ex, WebRequest request) {
         return handleExceptionInternal(

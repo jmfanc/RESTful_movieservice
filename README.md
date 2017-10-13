@@ -67,7 +67,7 @@ Get all details about shows rated by user from given day until now with score 8
             "user": {
                 "login": "s1vert",
                 "name": "Tomek Stankowski",
-                "mail": "tomek@tomek.pl",
+                "email": "tomek@tomek.pl",
                 "sex": "MALE",
                 "joined": "2017-10-05"
             }

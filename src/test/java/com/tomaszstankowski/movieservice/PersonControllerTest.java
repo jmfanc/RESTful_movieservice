@@ -80,16 +80,16 @@ public class PersonControllerTest {
                 "Dąbrowa Górnicza, Poland",
                 Sex.MALE
         );
-
+        person.getProfessions().add(Profession.ACTOR);
         movie = new Movie("The Dark Knight Rises",
                 "Batman.",
                 new GregorianCalendar(2012, 6, 16).getTime(),
                 "USA",
                 (short) 165,
                 1084439099);
-
+        movie.getGenres().add(new Genre("sci-fi"));
+        movie.getGenres().add(new Genre("action"));
         participation = new Participation(Profession.ACTOR, "as Batman", person, movie);
-        person.getProfessions().add(Profession.ACTOR);
         personDTO = modelMapper.fromEntity(person);
     }
 

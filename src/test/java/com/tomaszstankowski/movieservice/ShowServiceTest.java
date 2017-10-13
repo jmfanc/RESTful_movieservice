@@ -95,6 +95,7 @@ public class ShowServiceTest {
 
         user = new User(
                 "jandaciuk",
+                "password",
                 "Jan Daciuk",
                 "jdaciuk@gmail.com",
                 Sex.MALE

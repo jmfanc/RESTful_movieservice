@@ -2,8 +2,10 @@ package com.tomaszstankowski.movieservice.service;
 
 import com.tomaszstankowski.movieservice.model.entity.Rating;
 import com.tomaszstankowski.movieservice.model.entity.User;
+import com.tomaszstankowski.movieservice.model.entity.UserRole;
 import com.tomaszstankowski.movieservice.repository.RatingRepository;
 import com.tomaszstankowski.movieservice.repository.UserRepository;
+import com.tomaszstankowski.movieservice.service.exception.already_exists.EmailAlreadyExistsException;
 import com.tomaszstankowski.movieservice.service.exception.already_exists.UserAlreadyExistsException;
 import com.tomaszstankowski.movieservice.service.exception.invalid_body.InvalidUserException;
 import com.tomaszstankowski.movieservice.service.exception.not_found.UserNotFoundException;
@@ -12,16 +14,22 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specifications;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class UserService {
     private final UserRepository userRepo;
     private final RatingRepository ratingRepo;
+    private final PasswordEncoder encoder;
 
-    public UserService(UserRepository userRepo, RatingRepository ratingRepo) {
+    public UserService(UserRepository userRepo, RatingRepository ratingRepo, PasswordEncoder encoder) {
         this.userRepo = userRepo;
         this.ratingRepo = ratingRepo;
+        this.encoder = encoder;
     }
 
     public User findOne(String login) {
@@ -47,20 +55,29 @@ public class UserService {
             throw new UserAlreadyExistsException(body.getLogin());
         User user = new User(
                 body.getLogin(),
+                encoder.encode(body.getPassword()),
                 body.getName(),
-                body.getMail(),
+                body.getEmail(),
                 body.getSex()
         );
         userRepo.save(user);
     }
 
-    public void edit(String login, User body) {
+    public void setRole(String login, UserRole role) {
         User user = userRepo.findOne(login);
         if (user == null)
             throw new UserNotFoundException(login);
+        user.setRole(role);
+        userRepo.save(user);
+    }
+
+    public void edit(User body) {
+        User user = userRepo.findOne(body.getLogin());
+        if (user == null)
+            throw new UserNotFoundException(body.getLogin());
         validateUser(body);
         user.setName(body.getName());
-        user.setMail(body.getMail());
+        user.setEmail(body.getEmail());
         user.setSex(body.getSex());
         userRepo.save(user);
     }
@@ -77,10 +94,24 @@ public class UserService {
     }
 
     private void validateUser(User user) {
-        if (user.getLogin() == null
-                || user.getLogin().isEmpty()
-                || user.getMail() == null
-                || user.getMail().isEmpty())
+        if (isLoginValid(user.getLogin()) || isEmailValid(user.getEmail()))
             throw new InvalidUserException();
+        if (userRepo.findByEmail(user.getEmail()) != null)
+            throw new EmailAlreadyExistsException(user.getEmail());
+    }
+
+    private boolean isLoginValid(String login) {
+        final String loginPattern = "^[0-9A-Za-ząćęłńóśżźĄĆĘŁŃÓŚŻŹ_]{1,40}$";
+        Pattern pattern = Pattern.compile(loginPattern);
+        Matcher matcher = pattern.matcher(login);
+        return matcher.matches();
+    }
+
+    private boolean isEmailValid(String email) {
+        final String emailPattern = "^[_A-Za-z0-9-+]+ (.[_A-Za-z0-9-]+)*@" +
+                "[A-Za-z0-9-]+(.[A-Za-z0-9]+)* (.[A-Za-z]{2,})$";
+        Pattern pattern = Pattern.compile(emailPattern);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
     }
 }
