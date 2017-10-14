@@ -17,6 +17,8 @@ import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -94,7 +96,7 @@ public class UserService {
     }
 
     private void validateUser(User user) {
-        if (isLoginValid(user.getLogin()) || isEmailValid(user.getEmail()))
+        if (!isLoginValid(user.getLogin()) || !isPasswordValid(user.getPassword()) || !isEmailValid(user.getEmail()))
             throw new InvalidUserException();
         if (userRepo.findByEmail(user.getEmail()) != null)
             throw new EmailAlreadyExistsException(user.getEmail());
@@ -107,11 +109,20 @@ public class UserService {
         return matcher.matches();
     }
 
+    private boolean isPasswordValid(String password) {
+        return !(password == null || password.isEmpty() || password.length() > 20);
+    }
+
     private boolean isEmailValid(String email) {
-        final String emailPattern = "^[_A-Za-z0-9-+]+ (.[_A-Za-z0-9-]+)*@" +
-                "[A-Za-z0-9-]+(.[A-Za-z0-9]+)* (.[A-Za-z]{2,})$";
-        Pattern pattern = Pattern.compile(emailPattern);
-        Matcher matcher = pattern.matcher(email);
-        return matcher.matches();
+        if (email == null)
+            return false;
+        boolean result = true;
+        try {
+            InternetAddress emailAddr = new InternetAddress(email);
+            emailAddr.validate();
+        } catch (AddressException ex) {
+            result = false;
+        }
+        return result;
     }
 }

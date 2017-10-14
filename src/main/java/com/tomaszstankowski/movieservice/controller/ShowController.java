@@ -160,7 +160,7 @@ public class ShowController {
         return map(show);
     }
 
-    @PostMapping(path = "/add")
+    @PostMapping
     public ResponseEntity<?> addShow(@RequestBody ShowDTO body) {
         Show show = service.addShow(mapper.fromDTO(body));
         URI location = ServletUriComponentsBuilder
@@ -190,7 +190,7 @@ public class ShowController {
                 .collect(Collectors.toList());
     }
 
-    @PostMapping(path = "/{id}/participations/add")
+    @PostMapping(path = "/{id}/participations")
     public ResponseEntity<?> addParticipation(@PathVariable("id") long showId,
                                               @RequestParam("person") long personId,
                                               @RequestBody ParticipationDTO body) {

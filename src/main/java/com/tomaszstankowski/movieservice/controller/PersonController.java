@@ -99,7 +99,7 @@ public class PersonController {
                 .collect(Collectors.toList());
     }
 
-    @PostMapping(path = "/add")
+    @PostMapping
     public ResponseEntity<?> addPerson(@RequestBody PersonDTO body) {
         Person person = service.addPerson(mapper.fromDTO(body));
         URI location = ServletUriComponentsBuilder

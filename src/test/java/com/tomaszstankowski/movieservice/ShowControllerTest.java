@@ -123,7 +123,7 @@ public class ShowControllerTest {
     @Test
     public void post_whenShowAdded_statusCreated() throws Exception {
         when(service.addShow(modelMapper.fromDTO(movieDTO))).thenReturn(modelMapper.fromDTO(movieDTO));
-        mockMvc.perform(post("/shows/add")
+        mockMvc.perform(post("/shows")
                 .content(json(movieDTO))
                 .contentType(contentType))
                 .andExpect(status().isCreated());
@@ -133,7 +133,7 @@ public class ShowControllerTest {
     public void post_whenTitleEmpty_statusUnprocessableEntity() throws Exception {
         movieDTO.setTitle("");
         doThrow(new InvalidShowException()).when(service).addShow(modelMapper.fromDTO(movieDTO));
-        mockMvc.perform(post("/shows/add")
+        mockMvc.perform(post("/shows")
                 .content(json(movieDTO))
                 .contentType(contentType))
                 .andExpect(status().isUnprocessableEntity());
@@ -144,7 +144,7 @@ public class ShowControllerTest {
         serialDTO.setTitle(null);
         doThrow(new InvalidShowException())
                 .when(service).addShow(modelMapper.fromDTO(serialDTO));
-        mockMvc.perform(post("/shows/add")
+        mockMvc.perform(post("/shows")
                 .content(json(serialDTO))
                 .contentType(contentType))
                 .andExpect(status().isUnprocessableEntity());
@@ -154,7 +154,7 @@ public class ShowControllerTest {
     public void post_whenShowAlreadyExists_statusConflict() throws Exception {
         doThrow(new ShowAlreadyExistsException(movieDTO.getTitle(), movieDTO.getReleaseDate()))
                 .when(service).addShow(modelMapper.fromDTO(movieDTO));
-        mockMvc.perform(post("/shows/add")
+        mockMvc.perform(post("/shows")
                 .content(json(movieDTO))
                 .contentType(contentType))
                 .andExpect(status().isConflict());
@@ -164,7 +164,7 @@ public class ShowControllerTest {
     public void post_whenParticipationAdded_statusCreated() throws Exception {
         when(service.addParticipation(1L, 1L, modelMapper.fromDTO(participationDTO)))
                 .thenReturn(modelMapper.fromDTO(participationDTO));
-        mockMvc.perform(post("/shows/{id}/participations/add", 1L)
+        mockMvc.perform(post("/shows/{id}/participations", 1L)
                 .param("person", "1")
                 .content(json(participationDTO))
                 .contentType(contentType))

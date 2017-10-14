@@ -96,7 +96,7 @@ public class PersonControllerTest {
     @Test
     public void post_whenPersonAdded_statusCreated() throws Exception {
         when(service.addPerson(person)).thenReturn(person);
-        mockMvc.perform(post("/people/add")
+        mockMvc.perform(post("/people")
                 .content(json(person))
                 .contentType(contentType))
                 .andExpect(status().isCreated());
@@ -106,7 +106,7 @@ public class PersonControllerTest {
     public void post_whenBodyInvalid_statusUnprocessableEntity() throws Exception {
         doThrow(new InvalidPersonException()).when(service).addPerson(person);
 
-        mockMvc.perform(post("/people/add")
+        mockMvc.perform(post("/people")
                 .content(json(personDTO))
                 .contentType(contentType))
                 .andExpect(status().isUnprocessableEntity());
@@ -116,7 +116,7 @@ public class PersonControllerTest {
     public void post_whenPersonAlreadyExists_statusConflict() throws Exception {
         doThrow(new PersonAlreadyExistsException(person)).when(service).addPerson(person);
 
-        mockMvc.perform(post("/people/add")
+        mockMvc.perform(post("/people")
                 .content(json(personDTO))
                 .contentType(contentType))
                 .andExpect(status().isConflict());
