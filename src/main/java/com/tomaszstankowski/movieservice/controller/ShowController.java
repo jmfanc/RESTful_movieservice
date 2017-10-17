@@ -19,6 +19,7 @@ import org.springframework.data.web.SortDefault;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -161,6 +162,7 @@ public class ShowController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> addShow(@RequestBody ShowDTO body) {
         Show show = service.addShow(mapper.fromDTO(body));
         URI location = ServletUriComponentsBuilder
@@ -172,12 +174,14 @@ public class ShowController {
 
     @PutMapping(path = "/{id}/edit")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void editShow(@PathVariable("id") long id, @RequestBody ShowDTO body) {
         service.editShow(id, mapper.fromDTO(body));
     }
 
     @DeleteMapping(path = "/{id}/delete")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteShow(@PathVariable("id") long id) {
         service.removeShow(id);
     }
@@ -191,6 +195,7 @@ public class ShowController {
     }
 
     @PostMapping(path = "/{id}/participations")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> addParticipation(@PathVariable("id") long showId,
                                               @RequestParam("person") long personId,
                                               @RequestBody ParticipationDTO body) {
@@ -204,6 +209,7 @@ public class ShowController {
 
     @PutMapping(path = "/{showId}/participations/{participationId}/edit")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void editParticipation(@PathVariable("showId") long showId,
                                   @PathVariable("participationId") long participationId,
                                   @RequestBody ParticipationDTO body) {
@@ -215,6 +221,7 @@ public class ShowController {
 
     @DeleteMapping(path = "/{showId}/participations/{participationId}/delete")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteParticipation(@PathVariable("showId") long showId,
                                     @PathVariable("participationId") long participationId) {
         Show show = service.findShow(showId);
@@ -240,6 +247,7 @@ public class ShowController {
 
     @PostMapping(path = "/{id}/rate")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ROLE_USER')")
     public void rateShow(@PathVariable("id") long id,
                          @RequestParam("login") String login,
                          @RequestParam("rating") short rating) {
@@ -248,6 +256,7 @@ public class ShowController {
 
     @DeleteMapping(path = "/{id}/rate")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_USER')")
     public void deleteShowRating(@PathVariable("id") long id,
                                  @RequestParam("login") String login) {
         service.removeRating(id, login);

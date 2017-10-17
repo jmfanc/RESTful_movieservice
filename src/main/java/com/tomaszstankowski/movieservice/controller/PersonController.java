@@ -16,6 +16,7 @@ import org.springframework.data.web.SortDefault;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -100,6 +101,7 @@ public class PersonController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> addPerson(@RequestBody PersonDTO body) {
         Person person = service.addPerson(mapper.fromDTO(body));
         URI location = ServletUriComponentsBuilder
@@ -111,12 +113,14 @@ public class PersonController {
 
     @PutMapping(path = "/{id}/edit")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void editPerson(@PathVariable("id") long id, @RequestBody PersonDTO body) {
         service.editPerson(id, mapper.fromDTO(body));
     }
 
     @DeleteMapping(path = "/{id}/delete")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deletePerson(@PathVariable("id") long id) {
         service.removePerson(id);
     }

@@ -17,9 +17,11 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.Date;
@@ -110,13 +112,15 @@ public class UserController {
 
     @PutMapping(path = "/{login}/edit")
     @ResponseStatus(HttpStatus.OK)
-    public void editUser(@PathVariable String login, @RequestBody UserDTO body) {
+    @PreAuthorize("(hasRole('ROLE_USER') AND principal.username == #login) OR hasRole('ROLE_ADMIN')")
+    public void editUser(HttpServletRequest request, @PathVariable String login, @RequestBody UserDTO body) {
         body.setLogin(login);
         User user = mapper.fromDTO(body);
         service.edit(user);
     }
 
     @DeleteMapping(path = "/{login}/delete")
+    @PreAuthorize("(hasRole('ROLE_USER') AND principal.username == #login) OR hasRole('ROLE_ADMIN')")
     @ResponseStatus(HttpStatus.OK)
     public void deleteUser(@PathVariable String login) {
         service.remove(login);

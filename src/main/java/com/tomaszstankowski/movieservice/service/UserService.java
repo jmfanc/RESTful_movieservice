@@ -2,7 +2,7 @@ package com.tomaszstankowski.movieservice.service;
 
 import com.tomaszstankowski.movieservice.model.entity.Rating;
 import com.tomaszstankowski.movieservice.model.entity.User;
-import com.tomaszstankowski.movieservice.model.entity.UserRole;
+import com.tomaszstankowski.movieservice.model.enums.UserRole;
 import com.tomaszstankowski.movieservice.repository.RatingRepository;
 import com.tomaszstankowski.movieservice.repository.UserRepository;
 import com.tomaszstankowski.movieservice.service.exception.already_exists.EmailAlreadyExistsException;
@@ -55,6 +55,8 @@ public class UserService {
         validateUser(body);
         if (userRepo.findOne(body.getLogin()) != null)
             throw new UserAlreadyExistsException(body.getLogin());
+        if (userRepo.findByEmail(body.getEmail()) != null)
+            throw new EmailAlreadyExistsException(body.getEmail());
         User user = new User(
                 body.getLogin(),
                 encoder.encode(body.getPassword()),
@@ -77,6 +79,9 @@ public class UserService {
         User user = userRepo.findOne(body.getLogin());
         if (user == null)
             throw new UserNotFoundException(body.getLogin());
+        if (!body.getEmail().equals(user.getEmail()))
+            if (userRepo.findByEmail(body.getEmail()) != null)
+                throw new EmailAlreadyExistsException(body.getEmail());
         validateUser(body);
         user.setName(body.getName());
         user.setEmail(body.getEmail());
@@ -98,8 +103,6 @@ public class UserService {
     private void validateUser(User user) {
         if (!isLoginValid(user.getLogin()) || !isPasswordValid(user.getPassword()) || !isEmailValid(user.getEmail()))
             throw new InvalidUserException();
-        if (userRepo.findByEmail(user.getEmail()) != null)
-            throw new EmailAlreadyExistsException(user.getEmail());
     }
 
     private boolean isLoginValid(String login) {

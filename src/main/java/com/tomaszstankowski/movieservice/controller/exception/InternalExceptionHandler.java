@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+/*
+All exceptions thrown inside the app are handled here.
+ */
 @ControllerAdvice
 public class InternalExceptionHandler extends ResponseEntityExceptionHandler {
 
