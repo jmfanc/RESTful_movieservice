@@ -91,8 +91,8 @@ Add an actor to the cast of the show
 - JPA implemented by Spring Data
 - JPA Criteria API for complex queries
 - 3-layered architecture with Controller, Service and Repository
-- ORM model for persistence and DTO model for communicating with clients
+- ORM model for persistence and DTO model for communication with clients
+- secured service with Spring Security, every critical request needs to pass BasicAuthentication so the service remains 
+stateless
 
-## TO DO
-- Authentication of requests
 
