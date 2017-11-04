@@ -1,4 +1,4 @@
-package com.tomaszstankowski.movieservice.service.exception.invalid_body;
+package com.tomaszstankowski.movieservice.service.exception.unproccessable;
 
 public class UnknownTypeException extends RuntimeException {
     public UnknownTypeException(Class superType) {

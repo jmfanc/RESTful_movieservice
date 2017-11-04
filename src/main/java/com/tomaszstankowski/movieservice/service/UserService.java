@@ -2,12 +2,16 @@ package com.tomaszstankowski.movieservice.service;
 
 import com.tomaszstankowski.movieservice.model.entity.Rating;
 import com.tomaszstankowski.movieservice.model.entity.User;
+import com.tomaszstankowski.movieservice.model.enums.Sex;
+import com.tomaszstankowski.movieservice.model.enums.UserRole;
 import com.tomaszstankowski.movieservice.repository.RatingRepository;
 import com.tomaszstankowski.movieservice.repository.UserRepository;
-import com.tomaszstankowski.movieservice.service.exception.already_exists.EmailAlreadyExistsException;
-import com.tomaszstankowski.movieservice.service.exception.already_exists.UserAlreadyExistsException;
-import com.tomaszstankowski.movieservice.service.exception.invalid_body.InvalidUserException;
+import com.tomaszstankowski.movieservice.service.exception.conflict.EmailAlreadyExistsException;
+import com.tomaszstankowski.movieservice.service.exception.conflict.UserAlreadyExistsException;
 import com.tomaszstankowski.movieservice.service.exception.not_found.UserNotFoundException;
+import com.tomaszstankowski.movieservice.service.exception.unproccessable.ImmutableAdministratorException;
+import com.tomaszstankowski.movieservice.service.exception.unproccessable.InvalidUserException;
+import com.tomaszstankowski.movieservice.service.exception.unproccessable.SingleAdministratorException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +35,20 @@ public class UserService {
         this.userRepo = userRepo;
         this.ratingRepo = ratingRepo;
         this.encoder = encoder;
+        setAdmin();
+    }
+
+    private void setAdmin() {
+        User admin = new User(
+                "admin",
+                encoder.encode("admin"),
+                "Tomasz Stankowski",
+                "example@gmail.com",
+                Sex.MALE
+        );
+        admin.setRole(UserRole.ADMIN);
+        if (userRepo.findOne(admin.getLogin()) == null)
+            userRepo.save(admin);
     }
 
     public User findOne(String login) {
@@ -77,6 +95,18 @@ public class UserService {
         user.setName(body.getName());
         user.setEmail(body.getEmail());
         user.setSex(body.getSex());
+        userRepo.save(user);
+    }
+
+    public void changeRole(String login, UserRole role) {
+        User user = userRepo.findOne(login);
+        if (user == null)
+            throw new UserNotFoundException(login);
+        if (user.getRole().equals(UserRole.ADMIN))
+            throw new ImmutableAdministratorException();
+        if (role.equals(UserRole.ADMIN))
+            throw new SingleAdministratorException();
+        user.setRole(role);
         userRepo.save(user);
     }
 

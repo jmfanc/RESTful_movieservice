@@ -9,8 +9,8 @@ import com.tomaszstankowski.movieservice.model.entity.User;
 import com.tomaszstankowski.movieservice.model.enums.Sex;
 import com.tomaszstankowski.movieservice.service.ShowService;
 import com.tomaszstankowski.movieservice.service.UserService;
-import com.tomaszstankowski.movieservice.service.exception.invalid_body.InvalidUserException;
 import com.tomaszstankowski.movieservice.service.exception.not_found.UserNotFoundException;
+import com.tomaszstankowski.movieservice.service.exception.unproccessable.InvalidUserException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -94,7 +94,7 @@ public class UserControllerTest {
 
     @Test
     public void post_whenUserAdded_statusCreated() throws Exception {
-        mockMvc.perform(post("/users/add")
+        mockMvc.perform(post("/users")
                 .content(json(userDTO))
                 .contentType(contentType))
                 .andExpect(status().isCreated());
@@ -107,11 +107,11 @@ public class UserControllerTest {
         doThrow(new InvalidUserException()).when(service).add(modelMapper.fromDTO(emptyLoginBody));
         doThrow(new InvalidUserException()).when(service).add(modelMapper.fromDTO(nullMailBody));
 
-        mockMvc.perform(post("/users/add")
+        mockMvc.perform(post("/users")
                 .content(json(emptyLoginBody))
                 .contentType(contentType))
                 .andExpect(status().isUnprocessableEntity());
-        mockMvc.perform(post("/users/add")
+        mockMvc.perform(post("/users")
                 .content(json(nullMailBody))
                 .contentType(contentType))
                 .andExpect(status().isUnprocessableEntity());
@@ -120,7 +120,7 @@ public class UserControllerTest {
     @Test
     public void put_whenUserEdited_statusOk() throws Exception {
         userDTO.setEmail("kjarzyna@gmail.com");
-        mockMvc.perform(put("/users/{login}/edit", user.getLogin())
+        mockMvc.perform(put("/users/{login}", user.getLogin())
                 .content(json(userDTO))
                 .contentType(contentType))
                 .andExpect(status().isOk());
@@ -130,7 +130,7 @@ public class UserControllerTest {
     public void put_whenMovieNotExists_statusNotFound() throws Exception {
         doThrow(UserNotFoundException.class).when(service).edit(user);
 
-        mockMvc.perform(put("/users/{login}/edit", user.getLogin())
+        mockMvc.perform(put("/users/{login}", user.getLogin())
                 .content(json(userDTO))
                 .contentType(contentType))
                 .andExpect(status().isNotFound());
@@ -138,7 +138,7 @@ public class UserControllerTest {
 
     @Test
     public void delete_whenMovieRemoved_statusOk() throws Exception {
-        mockMvc.perform(delete("/users/{login}/delete", user.getLogin()))
+        mockMvc.perform(delete("/users/{login}", user.getLogin()))
                 .andExpect(status().isOk());
     }
 
@@ -146,7 +146,7 @@ public class UserControllerTest {
     public void delete_whenMovieNotExists_statusNotFound() throws Exception {
         doThrow(UserNotFoundException.class).when(service).remove(user.getLogin());
 
-        mockMvc.perform(delete("/users/{login}/delete", user.getLogin()))
+        mockMvc.perform(delete("/users/{login}", user.getLogin()))
                 .andExpect(status().isNotFound());
     }
 }

@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -162,7 +163,7 @@ public class ShowController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_MOD', 'ROLE_ADMIN')")
     public ResponseEntity<?> addShow(@RequestBody ShowDTO body) {
         Show show = service.addShow(mapper.fromDTO(body));
         URI location = ServletUriComponentsBuilder
@@ -172,16 +173,16 @@ public class ShowController {
         return ResponseEntity.created(location).build();
     }
 
-    @PutMapping(path = "/{id}/edit")
+    @PutMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_MOD', 'ROLE_ADMIN')")
     public void editShow(@PathVariable("id") long id, @RequestBody ShowDTO body) {
         service.editShow(id, mapper.fromDTO(body));
     }
 
-    @DeleteMapping(path = "/{id}/delete")
+    @DeleteMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_MOD', 'ROLE_ADMIN')")
     public void deleteShow(@PathVariable("id") long id) {
         service.removeShow(id);
     }
@@ -195,7 +196,7 @@ public class ShowController {
     }
 
     @PostMapping(path = "/{id}/participations")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_MOD', 'ROLE_ADMIN')")
     public ResponseEntity<?> addParticipation(@PathVariable("id") long showId,
                                               @RequestParam("person") long personId,
                                               @RequestBody ParticipationDTO body) {
@@ -207,9 +208,9 @@ public class ShowController {
         return ResponseEntity.created(location).build();
     }
 
-    @PutMapping(path = "/{showId}/participations/{participationId}/edit")
+    @PutMapping(path = "/{showId}/participations/{participationId}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_MOD', 'ROLE_ADMIN')")
     public void editParticipation(@PathVariable("showId") long showId,
                                   @PathVariable("participationId") long participationId,
                                   @RequestBody ParticipationDTO body) {
@@ -219,9 +220,9 @@ public class ShowController {
         service.editParticipation(participationId, mapper.fromDTO(body));
     }
 
-    @DeleteMapping(path = "/{showId}/participations/{participationId}/delete")
+    @DeleteMapping(path = "/{showId}/participations/{participationId}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_MOD', 'ROLE_ADMIN')")
     public void deleteParticipation(@PathVariable("showId") long showId,
                                     @PathVariable("participationId") long participationId) {
         Show show = service.findShow(showId);
@@ -247,19 +248,19 @@ public class ShowController {
 
     @PostMapping(path = "/{id}/rate")
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MOD')")
     public void rateShow(@PathVariable("id") long id,
-                         @RequestParam("login") String login,
+                         Principal principal,
                          @RequestParam("rating") short rating) {
-        service.rate(id, login, rating);
+        service.rate(id, principal.getName(), rating);
     }
 
     @DeleteMapping(path = "/{id}/rate")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MOD')")
     public void deleteShowRating(@PathVariable("id") long id,
-                                 @RequestParam("login") String login) {
-        service.removeRating(id, login);
+                                 Principal principal) {
+        service.removeRating(id, principal.getName());
     }
 
     private ShowDTO map(Show entity) {

@@ -39,7 +39,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
                 .withClient("web-browser-client")
                 .secret("secret")
                 .scopes("read", "write")
-                .authorities("ROLE_TRUST_CLIENT")
+                .authorities("ROLE_TRUSTED_CLIENT")
                 .authorizedGrantTypes("password", "refresh_token")
                 .accessTokenValiditySeconds(3600);
     }

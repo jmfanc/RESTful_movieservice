@@ -1,4 +1,4 @@
-package com.tomaszstankowski.movieservice.service.exception.already_exists;
+package com.tomaszstankowski.movieservice.service.exception.conflict;
 
 public class EmailAlreadyExistsException extends RuntimeException {
     public EmailAlreadyExistsException(String email) {

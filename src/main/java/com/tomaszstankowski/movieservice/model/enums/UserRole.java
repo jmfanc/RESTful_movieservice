@@ -1,7 +1,7 @@
 package com.tomaszstankowski.movieservice.model.enums;
 
 public enum UserRole {
-    USER, ADMIN;
+    USER, MOD, ADMIN;
 
     @Override
     public String toString() {

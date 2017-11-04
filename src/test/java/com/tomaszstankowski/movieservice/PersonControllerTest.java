@@ -12,10 +12,10 @@ import com.tomaszstankowski.movieservice.model.entity.Person;
 import com.tomaszstankowski.movieservice.model.enums.Profession;
 import com.tomaszstankowski.movieservice.model.enums.Sex;
 import com.tomaszstankowski.movieservice.service.PersonService;
-import com.tomaszstankowski.movieservice.service.exception.already_exists.PersonAlreadyExistsException;
-import com.tomaszstankowski.movieservice.service.exception.invalid_body.InvalidPersonException;
+import com.tomaszstankowski.movieservice.service.exception.conflict.PersonAlreadyExistsException;
 import com.tomaszstankowski.movieservice.service.exception.not_found.PersonNotFoundException;
 import com.tomaszstankowski.movieservice.service.exception.not_found.ShowNotFoundException;
+import com.tomaszstankowski.movieservice.service.exception.unproccessable.InvalidPersonException;
 import net.minidev.json.JSONArray;
 import org.junit.Before;
 import org.junit.Test;
@@ -192,7 +192,7 @@ public class PersonControllerTest {
 
     @Test
     public void put_whenPersonEdited_statusOk() throws Exception {
-        mockMvc.perform(put("/people/{id}/edit", 1L)
+        mockMvc.perform(put("/people/{id}", 1L)
                 .content(json(personDTO))
                 .contentType(contentType))
                 .andExpect(status().isOk());
@@ -212,7 +212,7 @@ public class PersonControllerTest {
     public void put_whenBodyInvalid_statusUnproccesableEntity() throws Exception {
         doThrow(new InvalidPersonException()).when(service).editPerson(1L, person);
 
-        mockMvc.perform(put("/people/{id}/edit", 1L)
+        mockMvc.perform(put("/people/{id}", 1L)
                 .content(json(personDTO))
                 .contentType(contentType))
                 .andExpect(status().isUnprocessableEntity());
@@ -220,7 +220,7 @@ public class PersonControllerTest {
 
     @Test
     public void delete_whenPersonRemoved_statusOk() throws Exception {
-        mockMvc.perform(delete("/people/{id}/delete", 1L))
+        mockMvc.perform(delete("/people/{id}", 1L))
                 .andExpect(status().isOk());
     }
 
@@ -228,7 +228,7 @@ public class PersonControllerTest {
     public void delete_whenPersonNotExists_statusNotFound() throws Exception {
         doThrow(new PersonNotFoundException(1L)).when(service).removePerson(1L);
 
-        mockMvc.perform(delete("/people/{id}/delete", 1L))
+        mockMvc.perform(delete("/people/{id}", 1L))
                 .andExpect(status().isNotFound());
 
     }

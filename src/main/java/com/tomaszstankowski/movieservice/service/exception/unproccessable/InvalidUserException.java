@@ -1,4 +1,4 @@
-package com.tomaszstankowski.movieservice.service.exception.invalid_body;
+package com.tomaszstankowski.movieservice.service.exception.unproccessable;
 
 public class InvalidUserException extends RuntimeException {
 

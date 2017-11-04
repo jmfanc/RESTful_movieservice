@@ -1,4 +1,4 @@
-package com.tomaszstankowski.movieservice.service.exception.already_exists;
+package com.tomaszstankowski.movieservice.service.exception.conflict;
 
 import java.util.Date;
 

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.tomaszstankowski.movieservice.service.exception.invalid_body.InvalidShowException;
+import com.tomaszstankowski.movieservice.service.exception.unproccessable.InvalidShowException;
 
 import java.io.IOException;
 import java.text.DateFormat;

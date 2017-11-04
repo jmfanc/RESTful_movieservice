@@ -1,11 +1,11 @@
 package com.tomaszstankowski.movieservice.controller.exception;
 
-import com.tomaszstankowski.movieservice.service.exception.already_exists.EmailAlreadyExistsException;
-import com.tomaszstankowski.movieservice.service.exception.already_exists.PersonAlreadyExistsException;
-import com.tomaszstankowski.movieservice.service.exception.already_exists.ShowAlreadyExistsException;
-import com.tomaszstankowski.movieservice.service.exception.already_exists.UserAlreadyExistsException;
-import com.tomaszstankowski.movieservice.service.exception.invalid_body.*;
+import com.tomaszstankowski.movieservice.service.exception.conflict.EmailAlreadyExistsException;
+import com.tomaszstankowski.movieservice.service.exception.conflict.PersonAlreadyExistsException;
+import com.tomaszstankowski.movieservice.service.exception.conflict.ShowAlreadyExistsException;
+import com.tomaszstankowski.movieservice.service.exception.conflict.UserAlreadyExistsException;
 import com.tomaszstankowski.movieservice.service.exception.not_found.*;
+import com.tomaszstankowski.movieservice.service.exception.unproccessable.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

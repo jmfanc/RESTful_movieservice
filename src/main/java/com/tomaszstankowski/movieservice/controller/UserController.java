@@ -5,6 +5,7 @@ import com.tomaszstankowski.movieservice.model.dto.RatingDTO;
 import com.tomaszstankowski.movieservice.model.dto.UserDTO;
 import com.tomaszstankowski.movieservice.model.entity.Rating;
 import com.tomaszstankowski.movieservice.model.entity.User;
+import com.tomaszstankowski.movieservice.model.enums.UserRole;
 import com.tomaszstankowski.movieservice.service.ShowService;
 import com.tomaszstankowski.movieservice.service.UserService;
 import com.tomaszstankowski.movieservice.service.exception.not_found.PageNotFoundException;
@@ -96,8 +97,7 @@ public class UserController {
                 .collect(Collectors.toList());
     }
 
-
-    @PostMapping(path = "/add")
+    @PostMapping
     public ResponseEntity<?> addUser(@RequestBody UserDTO body) {
         User user = mapper.fromDTO(body);
         service.add(user);
@@ -108,7 +108,7 @@ public class UserController {
         return ResponseEntity.created(location).build();
     }
 
-    @PutMapping(path = "/{login}/edit")
+    @PutMapping(path = "/{login}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("(hasRole('ROLE_USER') AND principal.username == #login) OR hasRole('ROLE_ADMIN')")
     public void editUser(@PathVariable String login, @RequestBody UserDTO body) {
@@ -117,7 +117,14 @@ public class UserController {
         service.edit(user);
     }
 
-    @DeleteMapping(path = "/{login}/delete")
+    @PutMapping(path = "/{login}/role")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void changeRole(@PathVariable String login, @RequestParam("role") UserRole role) {
+        service.changeRole(login, role);
+    }
+
+    @DeleteMapping(path = "/{login}")
     @PreAuthorize("(hasRole('ROLE_USER') AND principal.username == #login) OR hasRole('ROLE_ADMIN')")
     @ResponseStatus(HttpStatus.OK)
     public void deleteUser(@PathVariable String login) {
