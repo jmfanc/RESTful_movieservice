@@ -21,8 +21,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 import java.net.URI;
 import java.util.Date;
 import java.util.List;
@@ -99,8 +97,8 @@ public class UserController {
     }
 
 
-    @PostMapping(path = "/register")
-    public ResponseEntity<?> register(@RequestBody @Valid UserDTO body) {
+    @PostMapping(path = "/add")
+    public ResponseEntity<?> addUser(@RequestBody UserDTO body) {
         User user = mapper.fromDTO(body);
         service.add(user);
         URI location = ServletUriComponentsBuilder
@@ -113,7 +111,7 @@ public class UserController {
     @PutMapping(path = "/{login}/edit")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("(hasRole('ROLE_USER') AND principal.username == #login) OR hasRole('ROLE_ADMIN')")
-    public void editUser(HttpServletRequest request, @PathVariable String login, @RequestBody UserDTO body) {
+    public void editUser(@PathVariable String login, @RequestBody UserDTO body) {
         body.setLogin(login);
         User user = mapper.fromDTO(body);
         service.edit(user);

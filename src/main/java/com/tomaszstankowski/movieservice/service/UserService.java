@@ -2,7 +2,6 @@ package com.tomaszstankowski.movieservice.service;
 
 import com.tomaszstankowski.movieservice.model.entity.Rating;
 import com.tomaszstankowski.movieservice.model.entity.User;
-import com.tomaszstankowski.movieservice.model.enums.UserRole;
 import com.tomaszstankowski.movieservice.repository.RatingRepository;
 import com.tomaszstankowski.movieservice.repository.UserRepository;
 import com.tomaszstankowski.movieservice.service.exception.already_exists.EmailAlreadyExistsException;
@@ -67,22 +66,14 @@ public class UserService {
         userRepo.save(user);
     }
 
-    public void setRole(String login, UserRole role) {
-        User user = userRepo.findOne(login);
-        if (user == null)
-            throw new UserNotFoundException(login);
-        user.setRole(role);
-        userRepo.save(user);
-    }
-
     public void edit(User body) {
+        validateUser(body);
         User user = userRepo.findOne(body.getLogin());
         if (user == null)
             throw new UserNotFoundException(body.getLogin());
         if (!body.getEmail().equals(user.getEmail()))
             if (userRepo.findByEmail(body.getEmail()) != null)
                 throw new EmailAlreadyExistsException(body.getEmail());
-        validateUser(body);
         user.setName(body.getName());
         user.setEmail(body.getEmail());
         user.setSex(body.getSex());

@@ -94,7 +94,7 @@ public class UserControllerTest {
 
     @Test
     public void post_whenUserAdded_statusCreated() throws Exception {
-        mockMvc.perform(post("/users/register")
+        mockMvc.perform(post("/users/add")
                 .content(json(userDTO))
                 .contentType(contentType))
                 .andExpect(status().isCreated());
@@ -107,11 +107,11 @@ public class UserControllerTest {
         doThrow(new InvalidUserException()).when(service).add(modelMapper.fromDTO(emptyLoginBody));
         doThrow(new InvalidUserException()).when(service).add(modelMapper.fromDTO(nullMailBody));
 
-        mockMvc.perform(post("/users/register")
+        mockMvc.perform(post("/users/add")
                 .content(json(emptyLoginBody))
                 .contentType(contentType))
                 .andExpect(status().isUnprocessableEntity());
-        mockMvc.perform(post("/users/register")
+        mockMvc.perform(post("/users/add")
                 .content(json(nullMailBody))
                 .contentType(contentType))
                 .andExpect(status().isUnprocessableEntity());

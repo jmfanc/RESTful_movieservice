@@ -1,4 +1,4 @@
-# RESTful Movie Service (Spring + JPA)
+# RESTful Movie Service (Spring Boot, Data-Jpa, Security)
 Application provides basic features of popular services like imdb.com or filmweb.pl. Apart from simple CRUD operations 
 it also allows to rate movies/series, perform complex queries or add cast members.
 
@@ -88,11 +88,10 @@ Add an actor to the cast of the show
     
 ## Implementation
 - MySQL database
-- JPA implemented by Spring Data
 - JPA Criteria API for complex queries
+- secured service with Spring Security and OAuth2
 - 3-layered architecture with Controller, Service and Repository
-- ORM model for persistence and DTO model for communication with clients
-- secured service with Spring Security, every critical request needs to pass BasicAuthentication so the service remains 
-stateless
+- model for persistence and DTO model for communication with clients
+
 
 
