@@ -8,7 +8,7 @@ import java.util.Date;
 
 @Data
 @EqualsAndHashCode(of = "id")
-@Entity(name = "RATINGS")
+@Entity(name = "ratings")
 public class Rating {
 
     @Id
@@ -21,11 +21,11 @@ public class Rating {
     private Date date = new Date();
 
     @ManyToOne
-    @JoinColumn(name = "SHOW_ID", nullable = false)
+    @JoinColumn(name = "show_id", nullable = false)
     private Show show;
 
     @ManyToOne
-    @JoinColumn(name = "USER_LOGIN", nullable = false)
+    @JoinColumn(name = "user_login", nullable = false)
     private User user;
 
     public Rating() {

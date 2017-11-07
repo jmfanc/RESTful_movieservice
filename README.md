@@ -5,14 +5,14 @@ it also allows to rate movies/series, perform complex queries or add cast member
 ## Sample requests and responses
 Get first page of action or sci-fi movies with duration below 120 mins and released after 2010, sorted by release date.
 
-    GET /shows?page=0&type=MOVIE&genres=ACTION,SCI-FI&duration_lt=120&year_gt=2010&sort=releaseDate
+    GET /shows?page=0&type=MOVIE&genres=ACTION,SCI-FI&duration_lt=120&year_gt=2010&sort=dateReleased
     
     [
         {
             "id": 1,
             "title": "Inception",
             "description": "Sleeping",
-            "releaseDate": "2011-02-24",
+            "dateReleased": "2011-02-24",
             "location": "USA",
             "genres": [
                 "sci-fi",
@@ -27,7 +27,7 @@ Get first page of action or sci-fi movies with duration below 120 mins and relea
             "id": 2,
             "title": "Interstellar",
             "description": "TARS",
-            "releaseDate": "2014-10-26",
+            "dateReleased": "2014-10-26",
             "location": "USA",
             "genres": [
                 "sci-fi"
@@ -53,7 +53,7 @@ Get all details about shows rated by user from given day until now with score 8
                 "id": 1,
                 "title": "Inception",
                 "description": "Sleeping",
-                "releaseDate": "2011-02-24",
+                "dateReleased": "2011-02-24",
                 "location": "USA",
                 "genres": [
                     "sci-fi",

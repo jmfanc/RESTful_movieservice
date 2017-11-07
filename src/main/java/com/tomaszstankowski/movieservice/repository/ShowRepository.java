@@ -8,5 +8,5 @@ import java.util.Date;
 
 public interface ShowRepository extends JpaRepository<Show, Long>, JpaSpecificationExecutor<Show> {
 
-    Show findByTitleAndReleaseDate(String title, Date releaseDate);
+    Show findByTitleAndDateReleased(String title, Date dateReleased);
 }

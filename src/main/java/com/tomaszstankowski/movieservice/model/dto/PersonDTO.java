@@ -30,6 +30,14 @@ public class PersonDTO implements Serializable {
 
     private Set<Profession> professions;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonFormat(timezone = "Europe/Paris", shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date dateAdded;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonFormat(timezone = "Europe/Paris", shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date dateModified;
+
     @JsonCreator
     public PersonDTO(@JsonProperty("name") String name,
                      @JsonProperty("birthDate") Date birthDate,
@@ -48,8 +56,12 @@ public class PersonDTO implements Serializable {
                      Date birthDate,
                      String birthPlace,
                      Sex sex,
-                     Set<Profession> professions) {
+                     Set<Profession> professions,
+                     Date dateAdded,
+                     Date dateModified) {
         this(name, birthDate, birthPlace, sex, professions);
         this.id = id;
+        this.dateAdded = dateAdded;
+        this.dateModified = dateModified;
     }
 }

@@ -19,12 +19,12 @@ class ShowPredicates {
 
     static Predicate olderThan(int year, Root root, CriteriaQuery query, CriteriaBuilder builder) {
         Date date = new GregorianCalendar(year, 1, 1).getTime();
-        return builder.lessThan(root.<Date>get("releaseDate"), date);
+        return builder.lessThan(root.<Date>get("dateReleased"), date);
     }
 
     static Predicate youngerThan(int year, Root root, CriteriaQuery query, CriteriaBuilder builder) {
         Date date = new GregorianCalendar(year, 1, 1).getTime();
-        return builder.greaterThan(root.<Date>get("releaseDate"), date);
+        return builder.greaterThan(root.<Date>get("dateReleased"), date);
     }
 
     static Predicate hasAtLeastOneGenre(String[] genres, Root root, CriteriaQuery query, CriteriaBuilder builder) {

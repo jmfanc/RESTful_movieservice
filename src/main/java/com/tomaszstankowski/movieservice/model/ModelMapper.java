@@ -45,7 +45,9 @@ public class ModelMapper {
                 entity.getBirthDate(),
                 entity.getBirthPlace(),
                 entity.getSex(),
-                entity.getProfessions()
+                entity.getProfessions(),
+                entity.getDateAdded(),
+                entity.getDateModified()
         );
     }
 
@@ -75,7 +77,7 @@ public class ModelMapper {
         Movie movie = new Movie(
                 dto.getTitle(),
                 dto.getDescription(),
-                dto.getReleaseDate(),
+                dto.getDateReleased(),
                 dto.getLocation(),
                 dto.getDuration(),
                 dto.getBoxoffice()
@@ -92,7 +94,7 @@ public class ModelMapper {
         Serial serial = new Serial(
                 dto.getTitle(),
                 dto.getDescription(),
-                dto.getReleaseDate(),
+                dto.getDateReleased(),
                 dto.getLocation(),
                 dto.getSeasons()
         );
@@ -112,11 +114,13 @@ public class ModelMapper {
                 entity.getId(),
                 entity.getTitle(),
                 entity.getDescription(),
-                entity.getReleaseDate(),
+                entity.getDateReleased(),
                 entity.getLocation(),
                 genres,
                 0f,
                 0,
+                entity.getDateAdded(),
+                entity.getDateModified(),
                 entity.getDuration(),
                 entity.getBoxoffice()
         );
@@ -132,11 +136,13 @@ public class ModelMapper {
                 entity.getId(),
                 entity.getTitle(),
                 entity.getDescription(),
-                entity.getReleaseDate(),
+                entity.getDateReleased(),
                 entity.getLocation(),
                 genres,
                 0f,
                 0,
+                entity.getDateAdded(),
+                entity.getDateModified(),
                 entity.getSeasons()
         );
     }

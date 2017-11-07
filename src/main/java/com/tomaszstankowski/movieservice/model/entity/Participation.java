@@ -8,7 +8,7 @@ import javax.persistence.*;
 
 @Data
 @EqualsAndHashCode(of = "id")
-@Entity(name = "PARTICIPATIONS")
+@Entity(name = "participations")
 public class Participation {
 
     @Id
@@ -21,11 +21,11 @@ public class Participation {
     private String info;
 
     @ManyToOne
-    @JoinColumn(name = "PERSON_ID", nullable = false)
+    @JoinColumn(name = "person_id", nullable = false)
     private Person person;
 
     @ManyToOne
-    @JoinColumn(name = "SHOW_ID", nullable = false)
+    @JoinColumn(name = "show_id", nullable = false)
     private Show show;
 
     public Participation() {

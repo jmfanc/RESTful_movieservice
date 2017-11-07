@@ -152,7 +152,7 @@ public class ShowControllerTest {
 
     @Test
     public void post_whenShowAlreadyExists_statusConflict() throws Exception {
-        doThrow(new ShowAlreadyExistsException(movieDTO.getTitle(), movieDTO.getReleaseDate()))
+        doThrow(new ShowAlreadyExistsException(movieDTO.getTitle(), movieDTO.getDateReleased()))
                 .when(service).addShow(modelMapper.fromDTO(movieDTO));
         mockMvc.perform(post("/shows")
                 .content(json(movieDTO))
@@ -224,7 +224,7 @@ public class ShowControllerTest {
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.title", is(movie.getTitle())))
                 .andExpect(jsonPath("$.description", is(movie.getDescription())))
-                .andExpect(jsonPath("$.releaseDate", is(format.format(movie.getReleaseDate()))))
+                .andExpect(jsonPath("$.dateReleased", is(format.format(movie.getDateReleased()))))
                 .andExpect(jsonPath("$.location", is(movie.getLocation())))
                 .andExpect(jsonPath("$.genres", is(genres)))
                 .andExpect(jsonPath("$.duration", is((int) movie.getDuration())))
@@ -243,7 +243,7 @@ public class ShowControllerTest {
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.title", is(serial.getTitle())))
                 .andExpect(jsonPath("$.description", is(serial.getDescription())))
-                .andExpect(jsonPath("$.releaseDate", is(format.format(serial.getReleaseDate()))))
+                .andExpect(jsonPath("$.dateReleased", is(format.format(serial.getDateReleased()))))
                 .andExpect(jsonPath("$.location", is(serial.getLocation())))
                 .andExpect(jsonPath("$.genres", is(genres)))
                 .andExpect(jsonPath("$.seasons", is((int) serial.getSeasons())));
@@ -282,7 +282,7 @@ public class ShowControllerTest {
                 .andExpect(jsonPath("$.[0].person.professions", is(professions)))
                 .andExpect(jsonPath("$.[0].show.title", is(movie.getTitle())))
                 .andExpect(jsonPath("$.[0].show.description", is(movie.getDescription())))
-                .andExpect(jsonPath("$.[0].show.releaseDate", is(format.format(movie.getReleaseDate()))))
+                .andExpect(jsonPath("$.[0].show.dateReleased", is(format.format(movie.getDateReleased()))))
                 .andExpect(jsonPath("$.[0].show.location", is(movie.getLocation())))
                 .andExpect(jsonPath("$.[0].show.duration", is((int) movie.getDuration())))
                 .andExpect(jsonPath("$.[0].show.boxoffice", is(movie.getBoxoffice())))

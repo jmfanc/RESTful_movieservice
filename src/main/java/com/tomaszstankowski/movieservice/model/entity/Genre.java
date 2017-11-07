@@ -1,6 +1,5 @@
 package com.tomaszstankowski.movieservice.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -12,7 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-@Entity(name = "GENRES")
+@Entity(name = "genres")
 @EqualsAndHashCode(of = "name")
 public class Genre implements Serializable {
 
@@ -20,7 +19,6 @@ public class Genre implements Serializable {
     private String name;
 
     @ManyToMany(mappedBy = "genres")
-    @JsonIgnore
     private Set<Show> shows = new HashSet<>();
 
     public Genre() {

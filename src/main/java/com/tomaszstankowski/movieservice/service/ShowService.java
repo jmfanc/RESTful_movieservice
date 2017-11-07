@@ -16,7 +16,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -81,26 +80,9 @@ public class ShowService {
     public Show addShow(Show show) {
         validateShow(show);
         checkIfShowAlreadyExists(show);
-        connectShowWithGenres(show);
+        for (Genre g : show.getGenres())
+            g.getShows().add(show);
         return showRepo.save(show);
-    }
-
-    private void connectShowWithGenres(Show show) {
-        for (Genre g : show.getGenres()) {
-            Genre genre = genreRepo.findOne(g.getName());
-            if (genre == null)
-                genre = genreRepo.save(g);
-            genre.getShows().add(show);
-        }
-    }
-
-    private void disconnectShowFromGenres(Show show) {
-        Iterator<Genre> iterator = show.getGenres().iterator();
-        while (iterator.hasNext()) {
-            Genre g = iterator.next();
-            g.getShows().remove(show);
-            iterator.remove();
-        }
     }
 
     public Participation addParticipation(long showId, long personId, Participation participation) {
@@ -190,7 +172,7 @@ public class ShowService {
         show.setTitle(body.getTitle());
         show.setDescription(body.getDescription());
         show.setLocation(body.getLocation());
-        show.setReleaseDate(body.getReleaseDate());
+        show.setDateReleased(body.getDateReleased());
 
         boolean isOk = false;
         if (body instanceof Movie)
@@ -206,9 +188,9 @@ public class ShowService {
             } else
                 throw new UnexpectedShowException(Serial.class, show.getClass());
         if (isOk) {
-            disconnectShowFromGenres(show);
-            show.getGenres().addAll(body.getGenres());
-            connectShowWithGenres(show);
+            show.clearGenres();
+            for (Genre g : body.getGenres())
+                show.addGenre(g);
             showRepo.save(show);
         } else {
             throw new UnknownTypeException(Show.class);
@@ -228,7 +210,7 @@ public class ShowService {
         Show show = showRepo.findOne(id);
         if (show == null)
             throw new ShowNotFoundException(id);
-        disconnectShowFromGenres(show);
+        show.clearGenres();
         showRepo.delete(show);
     }
 
@@ -247,7 +229,7 @@ public class ShowService {
     }
 
     private void checkIfShowAlreadyExists(Show show) {
-        if (showRepo.findByTitleAndReleaseDate(show.getTitle(), show.getReleaseDate()) != null)
-            throw new ShowAlreadyExistsException(show.getTitle(), show.getReleaseDate());
+        if (showRepo.findByTitleAndDateReleased(show.getTitle(), show.getDateReleased()) != null)
+            throw new ShowAlreadyExistsException(show.getTitle(), show.getDateReleased());
     }
 }

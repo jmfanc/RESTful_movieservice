@@ -8,7 +8,7 @@ import java.util.Date;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Entity(name = "MOVIES")
+@Entity(name = "movies")
 public class Movie extends Show {
 
     private short duration;

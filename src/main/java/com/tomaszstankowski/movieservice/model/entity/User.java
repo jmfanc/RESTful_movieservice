@@ -12,7 +12,7 @@ import java.util.List;
 
 @Data
 @EqualsAndHashCode(of = "login")
-@Entity(name = "USERS")
+@Entity(name = "users")
 public class User {
 
     @Id
@@ -29,7 +29,12 @@ public class User {
     private Sex sex;
 
     @Temporal(TemporalType.DATE)
-    private Date joined = new Date();
+    private Date joined;
+
+    @PrePersist
+    private void prePersist() {
+        joined = new Date();
+    }
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private List<Rating> ratings = new ArrayList<>();

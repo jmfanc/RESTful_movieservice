@@ -36,7 +36,7 @@ public class ShowDTODeserializer extends StdDeserializer<ShowDTO> {
         String description = root.get("description").textValue();
         Date releaseDate;
         try {
-            releaseDate = format.parse(root.get("releaseDate").textValue());
+            releaseDate = format.parse(root.get("dateReleased").textValue());
         } catch (ParseException e) {
             throw new IOException(e);
         }

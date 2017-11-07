@@ -20,7 +20,7 @@ public class MovieDTO extends ShowDTO implements Serializable {
     @JsonCreator
     public MovieDTO(@JsonProperty("title") String title,
                     @JsonProperty("description") String description,
-                    @JsonProperty("releaseDate") Date releaseDate,
+                    @JsonProperty("dateReleased") Date releaseDate,
                     @JsonProperty("location") String location,
                     @JsonProperty("genres") Set<String> genres,
                     @JsonProperty("duration") short duration,
@@ -38,9 +38,11 @@ public class MovieDTO extends ShowDTO implements Serializable {
                     Set<String> genres,
                     float rating,
                     long rateCount,
+                    Date dateAdded,
+                    Date dateModified,
                     short duration,
                     int boxoffice) {
-        super(id, title, description, releaseDate, location, genres, rating, rateCount);
+        super(id, title, description, releaseDate, location, genres, rating, rateCount, dateAdded, dateModified);
         this.duration = duration;
         this.boxoffice = boxoffice;
     }

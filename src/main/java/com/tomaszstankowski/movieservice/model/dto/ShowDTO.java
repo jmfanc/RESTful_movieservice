@@ -23,7 +23,7 @@ public abstract class ShowDTO {
     private String description;
 
     @JsonFormat(timezone = "Europe/Paris", shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private Date releaseDate;
+    private Date dateReleased;
 
     private String location;
 
@@ -35,15 +35,23 @@ public abstract class ShowDTO {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private long rateCount;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonFormat(timezone = "Europe/Paris", shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date dateAdded;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonFormat(timezone = "Europe/Paris", shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date dateModified;
+
     @JsonCreator
     public ShowDTO(@JsonProperty("title") String title,
                    @JsonProperty("description") String description,
-                   @JsonProperty("releaseDate") Date releaseDate,
+                   @JsonProperty("dateReleased") Date dateReleased,
                    @JsonProperty("location") String location,
                    @JsonProperty("genres") Set<String> genres) {
         this.title = title;
         this.description = description;
-        this.releaseDate = releaseDate;
+        this.dateReleased = dateReleased;
         this.location = location;
         this.genres = genres;
     }
@@ -51,14 +59,18 @@ public abstract class ShowDTO {
     public ShowDTO(long id,
                    String title,
                    String description,
-                   Date releaseDate,
+                   Date dateReleased,
                    String location,
                    Set<String> genres,
                    float rating,
-                   long rateCount) {
-        this(title, description, releaseDate, location, genres);
+                   long rateCount,
+                   Date dateAdded,
+                   Date dateModified) {
+        this(title, description, dateReleased, location, genres);
         this.id = id;
         this.rating = rating;
         this.rateCount = rateCount;
+        this.dateAdded = dateAdded;
+        this.dateModified = dateModified;
     }
 }

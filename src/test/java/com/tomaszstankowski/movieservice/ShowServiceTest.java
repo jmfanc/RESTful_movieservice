@@ -136,22 +136,22 @@ public class ShowServiceTest {
 
     @Test
     public void add_whenShowAlreadyExists_ThrowExc() {
-        when(showRepo.findByTitleAndReleaseDate(movie.getTitle(), movie.getReleaseDate())).thenReturn(movie);
+        when(showRepo.findByTitleAndDateReleased(movie.getTitle(), movie.getDateReleased())).thenReturn(movie);
         exception.expect(ShowAlreadyExistsException.class);
 
         service.addShow(movie);
 
-        verify(showRepo, times(1)).findByTitleAndReleaseDate(movie.getTitle(), movie.getReleaseDate());
+        verify(showRepo, times(1)).findByTitleAndDateReleased(movie.getTitle(), movie.getDateReleased());
         verifyNoMoreInteractions(showRepo);
         verifyZeroInteractions(genreRepo);
     }
 
     @Test
     public void add_successful() {
-        when(showRepo.findByTitleAndReleaseDate(movie.getTitle(), movie.getReleaseDate())).thenReturn(null);
+        when(showRepo.findByTitleAndDateReleased(movie.getTitle(), movie.getDateReleased())).thenReturn(null);
         service.addShow(movie);
 
-        verify(showRepo, times(1)).findByTitleAndReleaseDate(movie.getTitle(), movie.getReleaseDate());
+        verify(showRepo, times(1)).findByTitleAndDateReleased(movie.getTitle(), movie.getDateReleased());
         verify(genreRepo, times(1)).findOne(action.getName());
         verify(genreRepo, times(1)).findOne(sciFi.getName());
         verify(showRepo, times(1)).save(movie);
@@ -291,7 +291,7 @@ public class ShowServiceTest {
         Movie body = new Movie(
                 movie.getTitle(),
                 "Movie about batman.",
-                movie.getReleaseDate(),
+                movie.getDateReleased(),
                 movie.getLocation(),
                 movie.getDuration(),
                 111

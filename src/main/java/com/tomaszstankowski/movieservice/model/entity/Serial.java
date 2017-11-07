@@ -9,7 +9,7 @@ import java.util.Date;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Entity(name = "SERIES")
+@Entity(name = "series")
 public class Serial extends Show implements Serializable {
 
     private short seasons;

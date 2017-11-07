@@ -10,7 +10,7 @@ import java.util.*;
 
 @Data
 @EqualsAndHashCode(of = "id")
-@Entity(name = "PEOPLE")
+@Entity(name = "people")
 public class Person {
 
     @Id
@@ -19,10 +19,10 @@ public class Person {
 
     private String name;
 
-    @Column(name = "BIRTH_DATE")
+    @Column(name = "birth_date")
     private Date birthDate;
 
-    @Column(name = "BIRTH_PLACE")
+    @Column(name = "birth_place")
     private String birthPlace;
 
     @Enumerated(EnumType.STRING)
@@ -33,9 +33,25 @@ public class Person {
 
     @ElementCollection(targetClass = Profession.class)
     @Enumerated(EnumType.STRING)
-    @CollectionTable(name = "PEOPLE_PROFFESIONS", joinColumns = @JoinColumn(name = "PERSON_ID"))
-    @Column(name = "PROFFESION")
+    @CollectionTable(name = "people_professions", joinColumns = @JoinColumn(name = "person_id"))
     private Set<Profession> professions = new HashSet<>();
+
+    @Column(name = "date_added")
+    private Date dateAdded;
+
+    @PrePersist
+    private void prePersist() {
+        dateAdded = new Date();
+        dateModified = new Date();
+    }
+
+    @Column(name = "date_modified")
+    private Date dateModified;
+
+    @PreUpdate
+    private void preUpdate() {
+        dateModified = new Date();
+    }
 
     public Person() {
     }

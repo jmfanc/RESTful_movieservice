@@ -173,7 +173,7 @@ public class PersonControllerTest {
                 .andExpect(jsonPath("$.[0].person.professions", is(professions)))
                 .andExpect(jsonPath("$.[0].show.title", is(movie.getTitle())))
                 .andExpect(jsonPath("$.[0].show.description", is(movie.getDescription())))
-                .andExpect(jsonPath("$.[0].show.releaseDate", is(format.format(movie.getReleaseDate()))))
+                .andExpect(jsonPath("$.[0].show.dateReleased", is(format.format(movie.getDateReleased()))))
                 .andExpect(jsonPath("$.[0].show.location", is(movie.getLocation())))
                 .andExpect(jsonPath("$.[0].show.duration", is((int) movie.getDuration())))
                 .andExpect(jsonPath("$.[0].show.boxoffice", is(movie.getBoxoffice())))
