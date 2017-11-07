@@ -1,6 +1,6 @@
 # RESTful Movie Service (Spring Boot, Data-Jpa, Security)
-Application provides basic features of popular services like imdb.com or filmweb.pl. Apart from simple CRUD operations 
-it also allows to rate movies/series, perform complex queries or add cast members.
+Application provides basic features of popular services like imdb.com or filmweb.pl. It allows to e.g. register, filter 
+list of shows by complex criteria, browse cast of the show, rate shows or follow other users.
 
 ## Sample requests and responses
 Get first page of action or sci-fi movies with duration below 120 mins and released after 2010, sorted by release date.
