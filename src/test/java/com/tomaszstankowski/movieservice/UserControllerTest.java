@@ -87,7 +87,7 @@ public class UserControllerTest {
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.login", is(user.getLogin())))
                 .andExpect(jsonPath("$.name", is(user.getName())))
-                .andExpect(jsonPath("$.joined", is(format.format(user.getJoined()))))
+                .andExpect(jsonPath("$.dateJoined", is(format.format(user.getDateJoined()))))
                 .andExpect(jsonPath("$.sex", is(user.getSex().toString())));
 
     }

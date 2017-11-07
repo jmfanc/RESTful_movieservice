@@ -27,8 +27,14 @@ public class UserDTO implements Serializable {
     private Sex sex;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @JsonFormat(timezone = "Europe/Paris", shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private Date joined;
+    @JsonFormat(timezone = "Europe/Paris", shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date dateJoined;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private int followersCount;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private int followedCount;
 
     @JsonCreator
     public UserDTO(@JsonProperty("login") String login,
@@ -46,10 +52,14 @@ public class UserDTO implements Serializable {
     public UserDTO(String login,
                    String name,
                    Sex sex,
-                   Date joined) {
+                   Date dateJoined,
+                   int followersCount,
+                   int followedCount) {
         this.login = login;
         this.name = name;
         this.sex = sex;
-        this.joined = joined;
+        this.dateJoined = dateJoined;
+        this.followersCount = followersCount;
+        this.followedCount = followedCount;
     }
 }

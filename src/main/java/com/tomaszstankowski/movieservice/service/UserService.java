@@ -7,7 +7,10 @@ import com.tomaszstankowski.movieservice.model.enums.UserRole;
 import com.tomaszstankowski.movieservice.repository.RatingRepository;
 import com.tomaszstankowski.movieservice.repository.UserRepository;
 import com.tomaszstankowski.movieservice.service.exception.conflict.EmailAlreadyExistsException;
+import com.tomaszstankowski.movieservice.service.exception.conflict.SelfFollowException;
 import com.tomaszstankowski.movieservice.service.exception.conflict.UserAlreadyExistsException;
+import com.tomaszstankowski.movieservice.service.exception.conflict.UserAlreadyFollowedException;
+import com.tomaszstankowski.movieservice.service.exception.not_found.FollowerNotFoundException;
 import com.tomaszstankowski.movieservice.service.exception.not_found.UserNotFoundException;
 import com.tomaszstankowski.movieservice.service.exception.unproccessable.ImmutableAdministratorException;
 import com.tomaszstankowski.movieservice.service.exception.unproccessable.InvalidUserException;
@@ -22,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -96,6 +100,50 @@ public class UserService {
         user.setEmail(body.getEmail());
         user.setSex(body.getSex());
         userRepo.save(user);
+    }
+
+    public List<User> getFollowers(String username) {
+        User user = userRepo.findOne(username);
+        if (user == null)
+            throw new UserNotFoundException(username);
+        return user.getFollowers();
+    }
+
+    public List<User> getFollowed(String username) {
+        User user = userRepo.findOne(username);
+        if (user == null)
+            throw new UserNotFoundException(username);
+        return user.getFollowed();
+    }
+
+    public void addFollower(String followedName, String followerName) {
+        if (followedName.equals(followerName))
+            throw new SelfFollowException();
+        User followed = userRepo.findOne(followedName);
+        if (followed == null)
+            throw new UserNotFoundException(followedName);
+        User follower = userRepo.findOne(followerName);
+        if (follower == null)
+            throw new UserNotFoundException(followerName);
+        if (followed.getFollowers().contains(follower))
+            throw new UserAlreadyFollowedException(followedName, followerName);
+        followed.getFollowers().add(follower);
+        follower.getFollowed().add(followed);
+        userRepo.save(followed);
+    }
+
+    public void removeFollower(String followedName, String followerName) {
+        User followed = userRepo.findOne(followedName);
+        if (followed == null)
+            throw new UserNotFoundException(followedName);
+        User follower = userRepo.findOne(followerName);
+        if (follower == null)
+            throw new UserNotFoundException(followerName);
+        if (!followed.getFollowers().contains(follower))
+            throw new FollowerNotFoundException(followedName, followerName);
+        followed.getFollowers().remove(follower);
+        follower.getFollowed().remove(followed);
+        userRepo.save(followed);
     }
 
     public void changeRole(String login, UserRole role) {

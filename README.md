@@ -69,7 +69,7 @@ Get all details about shows rated by user from given day until now with score 8
                 "name": "Tomek Stankowski",
                 "email": "tomek@tomek.pl",
                 "sex": "MALE",
-                "joined": "2017-10-05"
+                "dateJoined": "2017-10-05"
             }
         }
     ]

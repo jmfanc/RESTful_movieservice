@@ -78,7 +78,7 @@ public class ShowController {
         validate(result);
 
         return result.getContent().stream()
-                .map(this::map)
+                .map(mapper::fromEntity)
                 .collect(Collectors.toList());
     }
 
@@ -114,7 +114,7 @@ public class ShowController {
         validate(result);
 
         return result.getContent().stream()
-                .map(this::map)
+                .map(mapper::fromEntity)
                 .collect(Collectors.toList());
     }
 
@@ -150,7 +150,7 @@ public class ShowController {
         validate(result);
 
         return result.getContent().stream()
-                .map(this::map)
+                .map(mapper::fromEntity)
                 .collect(Collectors.toList());
     }
 
@@ -159,7 +159,7 @@ public class ShowController {
         Show show = service.findShow(id);
         if (show == null)
             throw new ShowNotFoundException(id);
-        return map(show);
+        return mapper.fromEntity(show);
     }
 
     @PostMapping
@@ -261,13 +261,6 @@ public class ShowController {
     public void deleteShowRating(@PathVariable("id") long id,
                                  Principal principal) {
         service.removeRating(id, principal.getName());
-    }
-
-    private ShowDTO map(Show entity) {
-        ShowDTO dto = mapper.fromEntity(entity);
-        dto.setRateCount(service.getShowRateCount(entity.getId()));
-        dto.setRating(service.getShowRating(entity.getId()));
-        return dto;
     }
 
     private void validate(Page page) {

@@ -28,16 +28,25 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Sex sex;
 
-    @Temporal(TemporalType.DATE)
-    private Date joined;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date dateJoined;
 
     @PrePersist
     private void prePersist() {
-        joined = new Date();
+        dateJoined = new Date();
     }
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private List<Rating> ratings = new ArrayList<>();
+
+    @ManyToMany(cascade = CascadeType.MERGE)
+    @JoinTable(name = "follows",
+            joinColumns = @JoinColumn(name = "followed", referencedColumnName = "login"),
+            inverseJoinColumns = @JoinColumn(name = "follower", referencedColumnName = "login"))
+    private List<User> followers = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "followers")
+    private List<User> followed = new ArrayList<>();
 
     @Enumerated(value = EnumType.STRING)
     UserRole role = UserRole.USER;

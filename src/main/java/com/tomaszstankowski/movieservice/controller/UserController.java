@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.security.Principal;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -87,13 +88,7 @@ public class UserController {
             throw new PageNotFoundException(page);
         return result.getContent()
                 .stream()
-                .map(entity -> {
-                    RatingDTO dto = mapper.fromEntity(entity);
-                    long showId = dto.getShow().getId();
-                    dto.getShow().setRating(showService.getShowRating(showId));
-                    dto.getShow().setRateCount(showService.getShowRateCount(showId));
-                    return dto;
-                })
+                .map(mapper::fromEntity)
                 .collect(Collectors.toList());
     }
 
@@ -129,5 +124,33 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public void deleteUser(@PathVariable String login) {
         service.remove(login);
+    }
+
+    @GetMapping(path = "/{login}/followers")
+    public List<UserDTO> getFollowers(@PathVariable String login) {
+        return service.getFollowers(login).stream()
+                .map(mapper::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping(path = "/{login}/followed")
+    public List<UserDTO> getFollowed(@PathVariable String login) {
+        return service.getFollowed(login).stream()
+                .map(mapper::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @PostMapping(path = "/{login}/followers")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MOD')")
+    public void followUser(@PathVariable String login, Principal principal) {
+        service.addFollower(login, principal.getName());
+    }
+
+    @DeleteMapping(path = "/{login}/followers")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MOD')")
+    public void unfollowUser(@PathVariable String login, Principal principal) {
+        service.removeFollower(login, principal.getName());
     }
 }

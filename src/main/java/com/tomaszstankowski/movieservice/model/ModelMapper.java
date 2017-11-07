@@ -23,7 +23,9 @@ public class ModelMapper {
                 entity.getLogin(),
                 entity.getName(),
                 entity.getSex(),
-                entity.getJoined());
+                entity.getDateJoined(),
+                entity.getFollowers().size(),
+                entity.getFollowed().size());
     }
 
     public Person fromDTO(PersonDTO dto) {
@@ -110,6 +112,13 @@ public class ModelMapper {
         Set<String> genres = entity.getGenres().stream()
                 .map(Genre::getName)
                 .collect(Collectors.toSet());
+        long rateCount = entity.getRatings().size();
+        float rating = rateCount == 0
+                ? 0
+                : entity.getRatings().stream()
+                .mapToLong(Rating::getRating)
+                .sum()
+                / rateCount;
         return new MovieDTO(
                 entity.getId(),
                 entity.getTitle(),
@@ -117,8 +126,8 @@ public class ModelMapper {
                 entity.getDateReleased(),
                 entity.getLocation(),
                 genres,
-                0f,
-                0,
+                rating,
+                rateCount,
                 entity.getDateAdded(),
                 entity.getDateModified(),
                 entity.getDuration(),
@@ -132,6 +141,13 @@ public class ModelMapper {
         Set<String> genres = entity.getGenres().stream()
                 .map(Genre::getName)
                 .collect(Collectors.toSet());
+        long rateCount = entity.getRatings().size();
+        float rating = rateCount == 0
+                ? 0
+                : entity.getRatings().stream()
+                .mapToLong(Rating::getRating)
+                .sum()
+                / rateCount;
         return new SerialDTO(
                 entity.getId(),
                 entity.getTitle(),
@@ -139,8 +155,8 @@ public class ModelMapper {
                 entity.getDateReleased(),
                 entity.getLocation(),
                 genres,
-                0f,
-                0,
+                rating,
+                rateCount,
                 entity.getDateAdded(),
                 entity.getDateModified(),
                 entity.getSeasons()

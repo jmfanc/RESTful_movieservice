@@ -1,9 +1,6 @@
 package com.tomaszstankowski.movieservice.controller.exception;
 
-import com.tomaszstankowski.movieservice.service.exception.conflict.EmailAlreadyExistsException;
-import com.tomaszstankowski.movieservice.service.exception.conflict.PersonAlreadyExistsException;
-import com.tomaszstankowski.movieservice.service.exception.conflict.ShowAlreadyExistsException;
-import com.tomaszstankowski.movieservice.service.exception.conflict.UserAlreadyExistsException;
+import com.tomaszstankowski.movieservice.service.exception.conflict.*;
 import com.tomaszstankowski.movieservice.service.exception.not_found.*;
 import com.tomaszstankowski.movieservice.service.exception.unproccessable.*;
 import org.springframework.http.HttpHeaders;
@@ -26,7 +23,8 @@ public class InternalExceptionHandler extends ResponseEntityExceptionHandler {
             PageNotFoundException.class,
             PersonNotFoundException.class,
             ParticipationNotFoundException.class,
-            RatingNotFoundException.class
+            RatingNotFoundException.class,
+            FollowerNotFoundException.class
     })
     public ResponseEntity<Object> handleResourceNotFoundExceptions(RuntimeException ex, WebRequest request) {
         return handleExceptionInternal(
@@ -43,7 +41,9 @@ public class InternalExceptionHandler extends ResponseEntityExceptionHandler {
             InvalidPersonException.class,
             InvalidRatingException.class,
             UnexpectedShowException.class,
-            UnknownTypeException.class
+            UnknownTypeException.class,
+            SingleAdministratorException.class,
+            ImmutableAdministratorException.class
     })
     public ResponseEntity<Object> handleInvalidBodyExceptions(RuntimeException ex, WebRequest request) {
         return handleExceptionInternal(
@@ -58,7 +58,9 @@ public class InternalExceptionHandler extends ResponseEntityExceptionHandler {
             UserAlreadyExistsException.class,
             ShowAlreadyExistsException.class,
             PersonAlreadyExistsException.class,
-            EmailAlreadyExistsException.class
+            EmailAlreadyExistsException.class,
+            SelfFollowException.class,
+            UserAlreadyFollowedException.class
     })
     public ResponseEntity<Object> handleConflictExceptions(RuntimeException ex, WebRequest request) {
         return handleExceptionInternal(
