@@ -70,7 +70,7 @@ public class UserControllerTest {
     @Test
     public void get_whenUserNotExists_statusNotFound() throws Exception {
         String login = "someuser";
-        when(service.findOne(login)).thenReturn(null);
+        when(service.findUser(login)).thenReturn(null);
 
         mockMvc.perform(get("/users/{login}", login))
                 .andExpect(status().isNotFound());
@@ -78,7 +78,7 @@ public class UserControllerTest {
 
     @Test
     public void get_whenUserExists_statusOkJsonCorrect() throws Exception {
-        when(service.findOne(user.getLogin()))
+        when(service.findUser(user.getLogin()))
                 .thenReturn(user);
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -104,8 +104,8 @@ public class UserControllerTest {
     public void post_whenBodyInvalid_statusUnprocessableEntity() throws Exception {
         UserDTO emptyLoginBody = new UserDTO("", "Ewelina", "dd@o2.pl", Sex.FEMALE, "password");
         UserDTO nullMailBody = new UserDTO("romek21", "Roman", null, Sex.MALE, "password");
-        doThrow(new InvalidUserException()).when(service).add(modelMapper.fromDTO(emptyLoginBody));
-        doThrow(new InvalidUserException()).when(service).add(modelMapper.fromDTO(nullMailBody));
+        doThrow(new InvalidUserException()).when(service).addUser(modelMapper.fromDTO(emptyLoginBody));
+        doThrow(new InvalidUserException()).when(service).addUser(modelMapper.fromDTO(nullMailBody));
 
         mockMvc.perform(post("/users")
                 .content(json(emptyLoginBody))
@@ -128,7 +128,7 @@ public class UserControllerTest {
 
     @Test
     public void put_whenMovieNotExists_statusNotFound() throws Exception {
-        doThrow(UserNotFoundException.class).when(service).edit(user);
+        doThrow(UserNotFoundException.class).when(service).editUser(user);
 
         mockMvc.perform(put("/users/{login}", user.getLogin())
                 .content(json(userDTO))
@@ -144,7 +144,7 @@ public class UserControllerTest {
 
     @Test
     public void delete_whenMovieNotExists_statusNotFound() throws Exception {
-        doThrow(UserNotFoundException.class).when(service).remove(user.getLogin());
+        doThrow(UserNotFoundException.class).when(service).removeUser(user.getLogin());
 
         mockMvc.perform(delete("/users/{login}", user.getLogin()))
                 .andExpect(status().isNotFound());

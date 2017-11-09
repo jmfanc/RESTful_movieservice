@@ -236,13 +236,7 @@ public class ShowController {
                                                     @RequestParam(value = "role", required = false) Profession role) {
         return service.findParticipations(id, role)
                 .stream()
-                .map(entity -> {
-                    ParticipationDTO dto = mapper.fromEntity(entity);
-                    long showId = dto.getShow().getId();
-                    dto.getShow().setRateCount(service.getShowRateCount(showId));
-                    dto.getShow().setRating(service.getShowRating(showId));
-                    return dto;
-                })
+                .map(mapper::fromEntity)
                 .collect(Collectors.toList());
     }
 

@@ -57,7 +57,7 @@ public class UserServiceTest {
         when(userRepo.findOne(user.getLogin())).thenReturn(null);
         when(userRepo.findByEmail(user.getEmail())).thenReturn(null);
 
-        service.add(user);
+        service.addUser(user);
 
         verify(userRepo, times(1)).findOne(user.getLogin());
         verify(userRepo, times(1)).findByEmail(user.getEmail());
@@ -70,7 +70,7 @@ public class UserServiceTest {
         when(userRepo.findOne(user.getLogin())).thenReturn(user);
         exception.expect(UserAlreadyExistsException.class);
 
-        service.add(user);
+        service.addUser(user);
 
         verify(userRepo, times(1)).findOne(user.getLogin());
         verifyNoMoreInteractions(userRepo);
@@ -82,7 +82,7 @@ public class UserServiceTest {
         when(userRepo.findByEmail(user.getEmail())).thenReturn(user);
         exception.expect(EmailAlreadyExistsException.class);
 
-        service.add(user);
+        service.addUser(user);
 
         verify(userRepo, times(1)).findOne(user.getLogin());
         verify(userRepo, times(1)).findByEmail(user.getEmail());
@@ -102,7 +102,7 @@ public class UserServiceTest {
         );
         exception.expect(InvalidUserException.class);
 
-        service.add(body);
+        service.addUser(body);
 
         verifyZeroInteractions(userRepo);
     }
@@ -119,7 +119,7 @@ public class UserServiceTest {
         );
         when(userRepo.findByEmail(body.getEmail())).thenReturn(null);
 
-        service.edit(body);
+        service.editUser(body);
 
         verify(userRepo, times(1)).findOne(user.getLogin());
         verify(userRepo, times(1)).findByEmail(user.getEmail());
@@ -140,7 +140,7 @@ public class UserServiceTest {
         );
         exception.expect(UserNotFoundException.class);
 
-        service.edit(body);
+        service.editUser(body);
 
         verify(userRepo, times(1)).findOne(user.getLogin());
         verifyNoMoreInteractions(userRepo);
@@ -159,7 +159,7 @@ public class UserServiceTest {
         );
         exception.expect(InvalidUserException.class);
 
-        service.edit(body);
+        service.editUser(body);
 
         verify(userRepo, times(1)).findOne(user.getLogin());
         verifyNoMoreInteractions(userRepo);
@@ -169,7 +169,7 @@ public class UserServiceTest {
     public void delete_successful() {
         when(userRepo.findOne(user.getLogin())).thenReturn(user);
 
-        service.remove(user.getLogin());
+        service.removeUser(user.getLogin());
 
         verify(userRepo, times(1)).findOne(user.getLogin());
         verify(userRepo, times(1)).delete(user.getLogin());
@@ -181,7 +181,7 @@ public class UserServiceTest {
         when(userRepo.findOne(user.getLogin())).thenReturn(null);
         exception.expect(UserNotFoundException.class);
 
-        service.remove(user.getLogin());
+        service.removeUser(user.getLogin());
 
         verify(userRepo, times(1)).findOne(user.getLogin());
         verifyNoMoreInteractions(userRepo);

@@ -47,7 +47,7 @@ public class UserController {
 
     @GetMapping(path = "/{login}")
     public UserDTO getUser(@PathVariable String login) {
-        User user = service.findOne(login);
+        User user = service.findUser(login);
         if (user == null)
             throw new UserNotFoundException(login);
         return mapper.fromEntity(user);
@@ -60,9 +60,9 @@ public class UserController {
         Page<User> result;
 
         if (name == null)
-            result = service.findAll(page, sort);
+            result = service.findAllUsers(page, sort);
         else
-            result = service.findByName(name, page, sort);
+            result = service.findUsersByName(name, page, sort);
 
         if (page >= result.getTotalPages())
             throw new PageNotFoundException(page);
@@ -95,7 +95,7 @@ public class UserController {
     @PostMapping
     public ResponseEntity<?> addUser(@RequestBody UserDTO body) {
         User user = mapper.fromDTO(body);
-        service.add(user);
+        service.addUser(user);
         URI location = ServletUriComponentsBuilder
                 .fromPath("/users/{login}")
                 .buildAndExpand(body.getLogin())
@@ -109,33 +109,33 @@ public class UserController {
     public void editUser(@PathVariable String login, @RequestBody UserDTO body) {
         body.setLogin(login);
         User user = mapper.fromDTO(body);
-        service.edit(user);
+        service.editUser(user);
     }
 
     @PutMapping(path = "/{login}/role")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void changeRole(@PathVariable String login, @RequestParam("role") UserRole role) {
-        service.changeRole(login, role);
+        service.changeUserRole(login, role);
     }
 
     @DeleteMapping(path = "/{login}")
     @PreAuthorize("(hasRole('ROLE_USER') AND principal.username == #login) OR hasRole('ROLE_ADMIN')")
     @ResponseStatus(HttpStatus.OK)
     public void deleteUser(@PathVariable String login) {
-        service.remove(login);
+        service.removeUser(login);
     }
 
     @GetMapping(path = "/{login}/followers")
     public List<UserDTO> getFollowers(@PathVariable String login) {
-        return service.getFollowers(login).stream()
+        return service.getUserFollowers(login).stream()
                 .map(mapper::fromEntity)
                 .collect(Collectors.toList());
     }
 
     @GetMapping(path = "/{login}/followed")
     public List<UserDTO> getFollowed(@PathVariable String login) {
-        return service.getFollowed(login).stream()
+        return service.getUserFollowed(login).stream()
                 .map(mapper::fromEntity)
                 .collect(Collectors.toList());
     }
@@ -144,13 +144,27 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MOD')")
     public void followUser(@PathVariable String login, Principal principal) {
-        service.addFollower(login, principal.getName());
+        service.addUserFollower(login, principal.getName());
     }
 
     @DeleteMapping(path = "/{login}/followers")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MOD')")
     public void unfollowUser(@PathVariable String login, Principal principal) {
-        service.removeFollower(login, principal.getName());
+        service.removeUserFollower(login, principal.getName());
+    }
+
+    @GetMapping(path = "/{login}/followers/ratings")
+    @PreAuthorize("(hasAnyRole('ROLE_USER', 'ROLE_ADMIN') AND principal.username == #login) OR hasRole('ROLE_ADMIN')")
+    public List<RatingDTO> getUserFollowersRatings(@PathVariable String login,
+                                                   @RequestParam("page") int page) {
+        Page<Rating> result = service.findUserFollowersRatings(login, page);
+        if (page >= result.getTotalPages() && page > 0)
+            throw new PageNotFoundException(page);
+        return result
+                .getContent()
+                .stream()
+                .map(mapper::fromEntity)
+                .collect(Collectors.toList());
     }
 }

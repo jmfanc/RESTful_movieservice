@@ -80,8 +80,11 @@ public class ShowService {
     public Show addShow(Show show) {
         validateShow(show);
         checkIfShowAlreadyExists(show);
-        for (Genre g : show.getGenres())
+        for (Genre g : show.getGenres()) {
+            if (genreRepo.findOne(g.getName()) == null)
+                genreRepo.save(g);
             g.getShows().add(show);
+        }
         return showRepo.save(show);
     }
 
@@ -114,21 +117,6 @@ public class ShowService {
         if (participation == null)
             throw new ParticipationNotFoundException(id);
         participationRepo.delete(id);
-    }
-
-    public float getShowRating(long showId) {
-        Show show = showRepo.findOne(showId);
-        if (show == null)
-            throw new ShowNotFoundException(showId);
-        Float result = ratingRepo.getAverageRatingForShow(showId);
-        return result == null ? 0f : result;
-    }
-
-    public long getShowRateCount(long showId) {
-        Show show = showRepo.findOne(showId);
-        if (show == null)
-            throw new ShowNotFoundException(showId);
-        return ratingRepo.countByShow(show);
     }
 
     public Rating rate(long showId, String login, short rating) {

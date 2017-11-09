@@ -202,7 +202,7 @@ public class PersonControllerTest {
     public void put_whenPersonNotExists_statusNotFound() throws Exception {
         doThrow(new PersonNotFoundException(1L)).when(service).editPerson(1L, person);
 
-        mockMvc.perform(put("/people/{id}/edit", 1L)
+        mockMvc.perform(put("/people/{id}/editUser", 1L)
                 .content(json(personDTO))
                 .contentType(contentType))
                 .andExpect(status().isNotFound());

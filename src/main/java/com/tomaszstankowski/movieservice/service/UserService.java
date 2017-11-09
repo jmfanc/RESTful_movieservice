@@ -15,16 +15,14 @@ import com.tomaszstankowski.movieservice.service.exception.not_found.UserNotFoun
 import com.tomaszstankowski.movieservice.service.exception.unproccessable.ImmutableAdministratorException;
 import com.tomaszstankowski.movieservice.service.exception.unproccessable.InvalidUserException;
 import com.tomaszstankowski.movieservice.service.exception.unproccessable.SingleAdministratorException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -55,15 +53,15 @@ public class UserService {
             userRepo.save(admin);
     }
 
-    public User findOne(String login) {
+    public User findUser(String login) {
         return userRepo.findOne(login);
     }
 
-    public Page<User> findAll(int page, Sort sort) {
+    public Page<User> findAllUsers(int page, Sort sort) {
         return userRepo.findAll(createPageable(page, sort));
     }
 
-    public Page<User> findByName(String name, int page, Sort sort) {
+    public Page<User> findUsersByName(String name, int page, Sort sort) {
         return userRepo.findUsersByNameContains(name, createPageable(page, sort));
     }
 
@@ -72,7 +70,7 @@ public class UserService {
         return ratingRepo.findAll(specs, pageable);
     }
 
-    public void add(User body) {
+    public void addUser(User body) {
         validateUser(body);
         if (userRepo.findOne(body.getLogin()) != null)
             throw new UserAlreadyExistsException(body.getLogin());
@@ -88,7 +86,7 @@ public class UserService {
         userRepo.save(user);
     }
 
-    public void edit(User body) {
+    public void editUser(User body) {
         validateUser(body);
         User user = userRepo.findOne(body.getLogin());
         if (user == null)
@@ -102,21 +100,21 @@ public class UserService {
         userRepo.save(user);
     }
 
-    public List<User> getFollowers(String username) {
+    public List<User> getUserFollowers(String username) {
         User user = userRepo.findOne(username);
         if (user == null)
             throw new UserNotFoundException(username);
         return user.getFollowers();
     }
 
-    public List<User> getFollowed(String username) {
+    public List<User> getUserFollowed(String username) {
         User user = userRepo.findOne(username);
         if (user == null)
             throw new UserNotFoundException(username);
         return user.getFollowed();
     }
 
-    public void addFollower(String followedName, String followerName) {
+    public void addUserFollower(String followedName, String followerName) {
         if (followedName.equals(followerName))
             throw new SelfFollowException();
         User followed = userRepo.findOne(followedName);
@@ -132,7 +130,7 @@ public class UserService {
         userRepo.save(followed);
     }
 
-    public void removeFollower(String followedName, String followerName) {
+    public void removeUserFollower(String followedName, String followerName) {
         User followed = userRepo.findOne(followedName);
         if (followed == null)
             throw new UserNotFoundException(followedName);
@@ -146,7 +144,7 @@ public class UserService {
         userRepo.save(followed);
     }
 
-    public void changeRole(String login, UserRole role) {
+    public void changeUserRole(String login, UserRole role) {
         User user = userRepo.findOne(login);
         if (user == null)
             throw new UserNotFoundException(login);
@@ -158,11 +156,22 @@ public class UserService {
         userRepo.save(user);
     }
 
-    public void remove(String login) {
+    public void removeUser(String login) {
         User user = userRepo.findOne(login);
         if (user == null)
             throw new UserNotFoundException(login);
         userRepo.delete(login);
+    }
+
+    public Page<Rating> findUserFollowersRatings(String login, int page) {
+        User user = userRepo.findOne(login);
+        if (user == null)
+            throw new UserNotFoundException(login);
+        Pageable pageable = createPageable(page, new Sort(Sort.Direction.DESC, "date"));
+        //must return empty page, because repository throws exception when 'followed' collection empty
+        if (user.getFollowed().isEmpty())
+            return new PageImpl<>(new ArrayList<>());
+        return ratingRepo.findUserFollowersRatings(user, pageable);
     }
 
     private Pageable createPageable(int page, Sort sort) {

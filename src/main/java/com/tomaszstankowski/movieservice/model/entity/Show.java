@@ -26,7 +26,7 @@ public abstract class Show {
 
     private String location;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(cascade = {CascadeType.MERGE})
     @JoinTable(name = "shows_genres",
             joinColumns = @JoinColumn(name = "show_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "genre_name", referencedColumnName = "name"))
