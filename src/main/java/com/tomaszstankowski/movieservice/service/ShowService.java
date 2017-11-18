@@ -103,23 +103,39 @@ public class ShowService {
         return participationRepo.save(participation);
     }
 
-    public void editParticipation(long id, Participation body) {
-        Participation participation = participationRepo.findOne(id);
-        if (participation == null)
-            throw new ParticipationNotFoundException(id);
+    public Participation getParticipation(long showId, long participationId) {
+        Show show = showRepo.findOne(showId);
+        if (show == null)
+            throw new ShowNotFoundException(showId);
+        Participation participation = participationRepo.findOne(participationId);
+        if (participation == null || !show.getParticipations().contains(participation))
+            throw new ParticipationNotFoundException(participationId);
+        return participation;
+    }
+
+    public Participation editParticipation(long showId, long participationId, Participation body) {
+        Show show = showRepo.findOne(showId);
+        if (show == null)
+            throw new ShowNotFoundException(showId);
+        Participation participation = participationRepo.findOne(participationId);
+        if (participation == null || !show.getParticipations().contains(participation))
+            throw new ParticipationNotFoundException(participationId);
         participation.setRole(body.getRole());
         participation.setInfo(body.getInfo());
-        participationRepo.save(participation);
+        return participationRepo.save(participation);
     }
 
-    public void removeParticipation(long id) {
-        Participation participation = participationRepo.findOne(id);
-        if (participation == null)
-            throw new ParticipationNotFoundException(id);
-        participationRepo.delete(id);
+    public void removeParticipation(long showId, long participationId) {
+        Show show = showRepo.findOne(showId);
+        if (show == null)
+            throw new ShowNotFoundException(showId);
+        Participation participation = participationRepo.findOne(participationId);
+        if (participation == null || !show.getParticipations().contains(participation))
+            throw new ParticipationNotFoundException(participationId);
+        participationRepo.delete(participationId);
     }
 
-    public Rating rate(long showId, String login, short rating) {
+    public Rating addRating(long showId, String login, short rating) {
         validateRating(rating);
         Show show = showRepo.findOne(showId);
         if (show == null)
@@ -139,6 +155,16 @@ public class ShowService {
         return ratingRepo.save(newRating);
     }
 
+    public Rating getRating(long showId, long ratingId) {
+        Show show = showRepo.findOne(showId);
+        if (show == null)
+            throw new ShowNotFoundException(showId);
+        Rating rating = ratingRepo.findOne(ratingId);
+        if (rating == null || !show.getRatings().contains(rating))
+            throw new RatingNotFoundException(show, ratingId);
+        return rating;
+    }
+
     public void removeRating(long showId, String login) {
         Show show = showRepo.findOne(showId);
         if (show == null)
@@ -152,7 +178,7 @@ public class ShowService {
         ratingRepo.delete(rating);
     }
 
-    public void editShow(long id, Show body) {
+    public Show editShow(long id, Show body) {
         validateShow(body);
         Show show = showRepo.findOne(id);
         if (show == null)
@@ -179,7 +205,7 @@ public class ShowService {
             show.clearGenres();
             for (Genre g : body.getGenres())
                 show.addGenre(g);
-            showRepo.save(show);
+            return showRepo.save(show);
         } else {
             throw new UnknownTypeException(Show.class);
         }

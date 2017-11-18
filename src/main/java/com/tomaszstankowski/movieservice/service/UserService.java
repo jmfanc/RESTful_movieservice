@@ -70,7 +70,7 @@ public class UserService {
         return ratingRepo.findAll(specs, pageable);
     }
 
-    public void addUser(User body) {
+    public User addUser(User body) {
         validateUser(body);
         if (userRepo.findOne(body.getLogin()) != null)
             throw new UserAlreadyExistsException(body.getLogin());
@@ -83,10 +83,10 @@ public class UserService {
                 body.getEmail(),
                 body.getSex()
         );
-        userRepo.save(user);
+        return userRepo.save(user);
     }
 
-    public void editUser(User body) {
+    public User editUser(User body) {
         validateUser(body);
         User user = userRepo.findOne(body.getLogin());
         if (user == null)
@@ -97,7 +97,7 @@ public class UserService {
         user.setName(body.getName());
         user.setEmail(body.getEmail());
         user.setSex(body.getSex());
-        userRepo.save(user);
+        return userRepo.save(user);
     }
 
     public List<User> getUserFollowers(String username) {
@@ -107,6 +107,18 @@ public class UserService {
         return user.getFollowers();
     }
 
+    public User getUserFollower(String followedName, String followerName) {
+        User followed = userRepo.findOne(followedName);
+        if (followed == null)
+            throw new UserNotFoundException(followedName);
+        User follower = userRepo.findOne(followerName);
+        if (follower == null)
+            throw new UserNotFoundException(followerName);
+        if (followed.getFollowers().contains(follower))
+            return follower;
+        return null;
+    }
+
     public List<User> getUserFollowed(String username) {
         User user = userRepo.findOne(username);
         if (user == null)
@@ -114,7 +126,7 @@ public class UserService {
         return user.getFollowed();
     }
 
-    public void addUserFollower(String followedName, String followerName) {
+    public User addUserFollower(String followedName, String followerName) {
         if (followedName.equals(followerName))
             throw new SelfFollowException();
         User followed = userRepo.findOne(followedName);
@@ -128,6 +140,7 @@ public class UserService {
         followed.getFollowers().add(follower);
         follower.getFollowed().add(followed);
         userRepo.save(followed);
+        return follower;
     }
 
     public void removeUserFollower(String followedName, String followerName) {

@@ -6,8 +6,8 @@ import com.tomaszstankowski.movieservice.model.dto.UserDTO;
 import com.tomaszstankowski.movieservice.model.entity.Rating;
 import com.tomaszstankowski.movieservice.model.entity.User;
 import com.tomaszstankowski.movieservice.model.enums.UserRole;
-import com.tomaszstankowski.movieservice.service.ShowService;
 import com.tomaszstankowski.movieservice.service.UserService;
+import com.tomaszstankowski.movieservice.service.exception.not_found.FollowerNotFoundException;
 import com.tomaszstankowski.movieservice.service.exception.not_found.PageNotFoundException;
 import com.tomaszstankowski.movieservice.service.exception.not_found.UserNotFoundException;
 import org.springframework.data.domain.Page;
@@ -36,12 +36,10 @@ import static org.springframework.data.jpa.domain.Specifications.where;
 @EnableSpringDataWebSupport
 public class UserController {
     private final UserService service;
-    private final ShowService showService;
     private final ModelMapper mapper;
 
-    public UserController(UserService service, ShowService showService, ModelMapper mapper) {
+    public UserController(UserService service, ModelMapper mapper) {
         this.service = service;
-        this.showService = showService;
         this.mapper = mapper;
     }
 
@@ -93,23 +91,23 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addUser(@RequestBody UserDTO body) {
-        User user = mapper.fromDTO(body);
-        service.addUser(user);
+    public ResponseEntity<UserDTO> addUser(@RequestBody UserDTO body) {
+        User user = service.addUser(mapper.fromDTO(body));
         URI location = ServletUriComponentsBuilder
                 .fromPath("/users/{login}")
-                .buildAndExpand(body.getLogin())
+                .buildAndExpand(user.getLogin())
                 .toUri();
-        return ResponseEntity.created(location).build();
+        return ResponseEntity
+                .created(location)
+                .body(mapper.fromEntity(user));
     }
 
     @PutMapping(path = "/{login}")
-    @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("(hasRole('ROLE_USER') AND principal.username == #login) OR hasRole('ROLE_ADMIN')")
-    public void editUser(@PathVariable String login, @RequestBody UserDTO body) {
+    public UserDTO editUser(@PathVariable String login, @RequestBody UserDTO body) {
         body.setLogin(login);
-        User user = mapper.fromDTO(body);
-        service.editUser(user);
+        User user = service.editUser(mapper.fromDTO(body));
+        return mapper.fromEntity(user);
     }
 
     @PutMapping(path = "/{login}/role")
@@ -121,7 +119,7 @@ public class UserController {
 
     @DeleteMapping(path = "/{login}")
     @PreAuthorize("(hasRole('ROLE_USER') AND principal.username == #login) OR hasRole('ROLE_ADMIN')")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable String login) {
         service.removeUser(login);
     }
@@ -140,15 +138,30 @@ public class UserController {
                 .collect(Collectors.toList());
     }
 
+    @GetMapping(path = "/{login}/followers/{follower}")
+    public UserDTO getFollower(@PathVariable String login, @PathVariable String follower) {
+        User user = service.getUserFollower(login, follower);
+        if (user == null)
+            throw new FollowerNotFoundException(login, follower);
+        return mapper.fromEntity(user);
+    }
+
     @PostMapping(path = "/{login}/followers")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MOD')")
-    public void followUser(@PathVariable String login, Principal principal) {
-        service.addUserFollower(login, principal.getName());
+    public ResponseEntity<UserDTO> followUser(@PathVariable String login, Principal principal) {
+        User follower = service.addUserFollower(login, principal.getName());
+        URI location = ServletUriComponentsBuilder
+                .fromPath("/users/{login}/followers/{follower}")
+                .buildAndExpand(login, follower.getLogin())
+                .toUri();
+        return ResponseEntity
+                .created(location)
+                .body(mapper.fromEntity(follower));
     }
 
     @DeleteMapping(path = "/{login}/followers")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MOD')")
     public void unfollowUser(@PathVariable String login, Principal principal) {
         service.removeUserFollower(login, principal.getName());

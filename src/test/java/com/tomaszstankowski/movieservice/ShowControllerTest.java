@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.security.Principal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -54,6 +55,9 @@ public class ShowControllerTest {
 
     @Mock
     private ShowService service;
+
+    @Mock
+    private Principal principal;
 
     private ModelMapper modelMapper = new ModelMapper();
 
@@ -195,19 +199,20 @@ public class ShowControllerTest {
 
     @Test
     public void post_whenRated_statusCreated() throws Exception {
-        mockMvc.perform(post("/shows/{id}/rate", 1L)
-                .param("login", "jandaciuk")
+        mockMvc.perform(post("/shows/{id}/addRating", 1L)
+                .principal(principal)
                 .param("rating", "8"))
                 .andExpect(status().isCreated());
     }
 
     @Test
     public void post_whenRatingInvalid_statusUnproccessableEntity() throws Exception {
+        when(principal.getName()).thenReturn("jandaciuk");
         doThrow(InvalidRatingException.class)
-                .when(service).rate(1L, "jandaciuk", (short) 0);
+                .when(service).addRating(1L, "jandaciuk", (short) 0);
 
-        mockMvc.perform(post("/shows/{id}/rate", 1L)
-                .param("login", "jandaciuk")
+        mockMvc.perform(post("/shows/{id}/addRating", 1L)
+                .principal(principal)
                 .param("rating", "0"))
                 .andExpect(status().isUnprocessableEntity());
     }
@@ -392,18 +397,19 @@ public class ShowControllerTest {
 
     @Test
     public void delete_whenRatingNotExists_statusNotFound() throws Exception {
+        when(principal.getName()).thenReturn("jandaciuk");
         doThrow(RatingNotFoundException.class)
                 .when(service).removeRating(1L, "jandaciuk");
 
-        mockMvc.perform(delete("/shows/{id}/rate", 1L)
-                .param("login", "jandaciuk"))
+        mockMvc.perform(delete("/shows/{id}/addRating", 1L)
+                .principal(principal))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     public void delete_whenRatingDeleted_statusOk() throws Exception {
-        mockMvc.perform(delete("/shows/{id}/rate", 1L)
-                .param("login", "jandaciuk"))
+        mockMvc.perform(delete("/shows/{id}/addRating", 1L)
+                .principal(principal))
                 .andExpect(status().isOk());
     }
 

@@ -102,24 +102,26 @@ public class PersonController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ROLE_MOD', 'ROLE_ADMIN')")
-    public ResponseEntity<?> addPerson(@RequestBody PersonDTO body) {
+    public ResponseEntity<PersonDTO> addPerson(@RequestBody PersonDTO body) {
         Person person = service.addPerson(mapper.fromDTO(body));
         URI location = ServletUriComponentsBuilder
                 .fromPath("/people/{id}")
                 .buildAndExpand(person.getId())
                 .toUri();
-        return ResponseEntity.created(location).build();
+        return ResponseEntity
+                .created(location)
+                .body(mapper.fromEntity(person));
     }
 
     @PutMapping(path = "/{id}")
-    @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_MOD', 'ROLE_ADMIN')")
-    public void editPerson(@PathVariable("id") long id, @RequestBody PersonDTO body) {
-        service.editPerson(id, mapper.fromDTO(body));
+    public PersonDTO editPerson(@PathVariable("id") long id, @RequestBody PersonDTO body) {
+        Person person = service.editPerson(id, mapper.fromDTO(body));
+        return mapper.fromEntity(person);
     }
 
     @DeleteMapping(path = "/{id}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ROLE_MOD', 'ROLE_ADMIN')")
     public void deletePerson(@PathVariable("id") long id) {
         service.removePerson(id);

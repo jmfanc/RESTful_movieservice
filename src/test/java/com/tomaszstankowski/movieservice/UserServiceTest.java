@@ -50,6 +50,9 @@ public class UserServiceTest {
                 "jan@usz.pl",
                 Sex.MALE
         );
+        verify(userRepo, times(1)).findOne("admin");
+        verify(userRepo, times(1)).save(new User("admin", "pw", "admin", "admin", Sex.MALE));
+        verifyNoMoreInteractions(userRepo);
     }
 
     @Test

@@ -206,7 +206,7 @@ public class ShowServiceTest {
         when(userRepo.findOne(user.getLogin())).thenReturn(user);
         when(ratingRepo.findByUserAndShow(user, serial)).thenReturn(null);
 
-        service.rate(1L, user.getLogin(), (short) 8);
+        service.addRating(1L, user.getLogin(), (short) 8);
 
         verify(showRepo, times(1)).findOne(1L);
         verify(userRepo, times(1)).findOne(user.getLogin());
@@ -223,7 +223,7 @@ public class ShowServiceTest {
         when(userRepo.findOne(user.getLogin())).thenReturn(user);
         when(ratingRepo.findByUserAndShow(user, serial)).thenReturn(rating);
 
-        service.rate(1L, user.getLogin(), (short) 7);
+        service.addRating(1L, user.getLogin(), (short) 7);
 
         verify(showRepo, times(1)).findOne(1L);
         verify(userRepo, times(1)).findOne(user.getLogin());
@@ -241,7 +241,7 @@ public class ShowServiceTest {
         when(userRepo.findOne(user.getLogin())).thenReturn(user);
         when(ratingRepo.findByUserAndShow(user, serial)).thenReturn(rating);
 
-        service.rate(1L, user.getLogin(), (short) 8);
+        service.addRating(1L, user.getLogin(), (short) 8);
 
         verify(showRepo, times(1)).findOne(1L);
         verify(userRepo, times(1)).findOne(user.getLogin());
@@ -255,7 +255,7 @@ public class ShowServiceTest {
     public void add_whenRatingInvalid_throwExc() {
         exception.expect(InvalidRatingException.class);
 
-        service.rate(1L, user.getLogin(), (short) 11);
+        service.addRating(1L, user.getLogin(), (short) 11);
         verifyZeroInteractions(showRepo);
         verifyZeroInteractions(userRepo);
         verifyZeroInteractions(ratingRepo);
@@ -308,7 +308,6 @@ public class ShowServiceTest {
         assertTrue(drama.getShows().contains(movie));
         assertFalse(sciFi.getShows().contains(movie));
 
-        verify(genreRepo, times(1)).findOne(drama.getName());
         verify(showRepo, times(1)).findOne(1L);
         verify(showRepo, times(1)).save(movie);
         verifyNoMoreInteractions(showRepo);

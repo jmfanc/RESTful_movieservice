@@ -51,7 +51,7 @@ public class PersonService {
         return personRepo.save(person);
     }
 
-    public void editPerson(long id, Person body) {
+    public Person editPerson(long id, Person body) {
         validatePerson(body);
         Person person = personRepo.findOne(id);
         if (person == null)
@@ -61,7 +61,7 @@ public class PersonService {
         person.setBirthPlace(body.getBirthPlace());
         person.getProfessions().clear();
         person.getProfessions().addAll(body.getProfessions());
-        personRepo.save(person);
+        return personRepo.save(person);
     }
 
     public void removePerson(long id) {

@@ -7,7 +7,6 @@ import com.tomaszstankowski.movieservice.model.ModelMapper;
 import com.tomaszstankowski.movieservice.model.dto.UserDTO;
 import com.tomaszstankowski.movieservice.model.entity.User;
 import com.tomaszstankowski.movieservice.model.enums.Sex;
-import com.tomaszstankowski.movieservice.service.ShowService;
 import com.tomaszstankowski.movieservice.service.UserService;
 import com.tomaszstankowski.movieservice.service.exception.not_found.UserNotFoundException;
 import com.tomaszstankowski.movieservice.service.exception.unproccessable.InvalidUserException;
@@ -23,6 +22,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.doThrow;
@@ -43,9 +43,6 @@ public class UserControllerTest {
     @Mock
     private UserService service;
 
-    @Mock
-    private ShowService showService;
-
     private ModelMapper modelMapper = new ModelMapper();
 
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -59,10 +56,11 @@ public class UserControllerTest {
 
     @Before
     public void setup() throws Exception {
-        mockMvc = standaloneSetup(new UserController(service, showService, modelMapper))
+        mockMvc = standaloneSetup(new UserController(service, modelMapper))
                 .setControllerAdvice(new InternalExceptionHandler())
                 .build();
         user = new User("krzysiek21", "password", "Krzysztof Jarzyna", "kj@o2.pl", Sex.MALE);
+        user.setDateJoined(new Date());
         userDTO = modelMapper.fromEntity(user);
 
     }
@@ -80,7 +78,7 @@ public class UserControllerTest {
     public void get_whenUserExists_statusOkJsonCorrect() throws Exception {
         when(service.findUser(user.getLogin()))
                 .thenReturn(user);
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         mockMvc.perform(get("/users/{login}", user.getLogin()))
                 .andExpect(status().isOk())

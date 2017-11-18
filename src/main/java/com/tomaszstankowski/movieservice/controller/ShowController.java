@@ -2,6 +2,7 @@ package com.tomaszstankowski.movieservice.controller;
 
 import com.tomaszstankowski.movieservice.model.ModelMapper;
 import com.tomaszstankowski.movieservice.model.dto.ParticipationDTO;
+import com.tomaszstankowski.movieservice.model.dto.RatingDTO;
 import com.tomaszstankowski.movieservice.model.dto.ShowDTO;
 import com.tomaszstankowski.movieservice.model.entity.*;
 import com.tomaszstankowski.movieservice.model.enums.Profession;
@@ -164,24 +165,26 @@ public class ShowController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ROLE_MOD', 'ROLE_ADMIN')")
-    public ResponseEntity<?> addShow(@RequestBody ShowDTO body) {
+    public ResponseEntity<ShowDTO> addShow(@RequestBody ShowDTO body) {
         Show show = service.addShow(mapper.fromDTO(body));
         URI location = ServletUriComponentsBuilder
                 .fromPath("/shows/{id}")
                 .buildAndExpand(show.getId())
                 .toUri();
-        return ResponseEntity.created(location).build();
+        return ResponseEntity
+                .created(location)
+                .body(mapper.fromEntity(show));
     }
 
     @PutMapping(path = "/{id}")
-    @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_MOD', 'ROLE_ADMIN')")
-    public void editShow(@PathVariable("id") long id, @RequestBody ShowDTO body) {
-        service.editShow(id, mapper.fromDTO(body));
+    public ShowDTO editShow(@PathVariable("id") long id, @RequestBody ShowDTO body) {
+        Show show = service.editShow(id, mapper.fromDTO(body));
+        return mapper.fromEntity(show);
     }
 
     @DeleteMapping(path = "/{id}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ROLE_MOD', 'ROLE_ADMIN')")
     public void deleteShow(@PathVariable("id") long id) {
         service.removeShow(id);
@@ -197,38 +200,34 @@ public class ShowController {
 
     @PostMapping(path = "/{id}/participations")
     @PreAuthorize("hasAnyRole('ROLE_MOD', 'ROLE_ADMIN')")
-    public ResponseEntity<?> addParticipation(@PathVariable("id") long showId,
-                                              @RequestParam("person") long personId,
-                                              @RequestBody ParticipationDTO body) {
+    public ResponseEntity<ParticipationDTO> addParticipation(@PathVariable("id") long showId,
+                                                             @RequestParam("person") long personId,
+                                                             @RequestBody ParticipationDTO body) {
         Participation participation = service.addParticipation(showId, personId, mapper.fromDTO(body));
         URI location = ServletUriComponentsBuilder
                 .fromPath("/shows/{showId}/participations/{participationId}")
                 .buildAndExpand(showId, participation.getId())
                 .toUri();
-        return ResponseEntity.created(location).build();
+        return ResponseEntity
+                .created(location)
+                .body(mapper.fromEntity(participation));
     }
 
     @PutMapping(path = "/{showId}/participations/{participationId}")
-    @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_MOD', 'ROLE_ADMIN')")
-    public void editParticipation(@PathVariable("showId") long showId,
-                                  @PathVariable("participationId") long participationId,
-                                  @RequestBody ParticipationDTO body) {
-        Show show = service.findShow(showId);
-        if (show == null)
-            throw new ShowNotFoundException(showId);
-        service.editParticipation(participationId, mapper.fromDTO(body));
+    public ParticipationDTO editParticipation(@PathVariable("showId") long showId,
+                                              @PathVariable("participationId") long participationId,
+                                              @RequestBody ParticipationDTO body) {
+        Participation participation = service.editParticipation(showId, participationId, mapper.fromDTO(body));
+        return mapper.fromEntity(participation);
     }
 
     @DeleteMapping(path = "/{showId}/participations/{participationId}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ROLE_MOD', 'ROLE_ADMIN')")
     public void deleteParticipation(@PathVariable("showId") long showId,
                                     @PathVariable("participationId") long participationId) {
-        Show show = service.findShow(showId);
-        if (show == null)
-            throw new ShowNotFoundException(showId);
-        service.removeParticipation(participationId);
+        service.removeParticipation(showId, participationId);
     }
 
     @GetMapping(path = "/{id}/participations")
@@ -240,17 +239,34 @@ public class ShowController {
                 .collect(Collectors.toList());
     }
 
-    @PostMapping(path = "/{id}/rate")
-    @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MOD')")
-    public void rateShow(@PathVariable("id") long id,
-                         Principal principal,
-                         @RequestParam("rating") short rating) {
-        service.rate(id, principal.getName(), rating);
+    @GetMapping(path = "/{showId}/participations/{participationId}")
+    public ParticipationDTO getParticipation(@PathVariable long showId, @PathVariable long participationId) {
+        Participation participation = service.getParticipation(showId, participationId);
+        return mapper.fromEntity(participation);
     }
 
-    @DeleteMapping(path = "/{id}/rate")
-    @ResponseStatus(HttpStatus.OK)
+    @PostMapping(path = "/{showId}/ratings")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MOD')")
+    public ResponseEntity<RatingDTO> rateShow(@PathVariable("showId") long showId,
+                                              Principal principal,
+                                              @RequestParam("rating") short value) {
+        Rating rating = service.addRating(showId, principal.getName(), value);
+        URI location = ServletUriComponentsBuilder
+                .fromPath("/shows/{showId}/ratings/{ratingId}")
+                .buildAndExpand(showId, rating.getId())
+                .toUri();
+        return ResponseEntity.created(location).body(mapper.fromEntity(rating));
+    }
+
+    @GetMapping(path = "/{showId}/ratings/{ratingId}")
+    public RatingDTO getShowRating(@PathVariable long showId, @PathVariable long ratingId) {
+        Rating rating = service.getRating(showId, ratingId);
+        return mapper.fromEntity(rating);
+    }
+
+    @DeleteMapping(path = "/{id}/ratings")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MOD')")
     public void deleteShowRating(@PathVariable("id") long id,
                                  Principal principal) {
