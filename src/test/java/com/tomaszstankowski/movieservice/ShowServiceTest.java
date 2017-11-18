@@ -101,7 +101,9 @@ public class ShowServiceTest {
                 Sex.MALE
         );
 
-        participation = new Participation(Profession.ACTOR, "as Batman", null, null);
+        participation = new Participation(Profession.ACTOR, "as Batman", actor, movie);
+        actor.getParticipations().add(participation);
+        movie.getParticipations().add(participation);
 
         rating = new Rating((short) 8, serial, user);
 
@@ -317,10 +319,16 @@ public class ShowServiceTest {
     @Test
     public void edit_participationEditedSuccessful() {
         when(participationRepo.findOne(1L)).thenReturn(participation);
-        Participation body = new Participation(Profession.DIRECTOR, "", null, null);
+        when(showRepo.findOne(1L)).thenReturn(movie);
+        Participation body = new Participation(Profession.DIRECTOR,
+                "",
+                participation.getPerson(),
+                participation.getShow());
 
-        service.editParticipation(1L, body);
+        service.editParticipation(1L, 1L, body);
 
+        verify(showRepo, times(1)).findOne(1L);
+        verifyNoMoreInteractions(showRepo);
         verify(participationRepo, times(1)).findOne(1L);
         verify(participationRepo, times(1)).save(participation);
         verifyNoMoreInteractions(participationRepo);
@@ -330,11 +338,17 @@ public class ShowServiceTest {
 
     @Test
     public void edit_whenParticipationNotExists_throwExc() {
+        when(showRepo.findOne(1L)).thenReturn(movie);
         when(participationRepo.findOne(1L)).thenReturn(null);
-        Participation body = new Participation(Profession.DIRECTOR, "", null, null);
+        Participation body = new Participation(Profession.DIRECTOR,
+                "",
+                participation.getPerson(),
+                participation.getShow());
         exception.expect(ParticipationNotFoundException.class);
 
-        service.editParticipation(1L, body);
+        service.editParticipation(1L, 1L, body);
+        verify(showRepo, times(1)).findOne(1L);
+        verifyNoMoreInteractions(showRepo);
         verify(participationRepo, times(1)).findOne(1L);
         verifyNoMoreInteractions(participationRepo);
     }
@@ -397,21 +411,27 @@ public class ShowServiceTest {
 
     @Test
     public void remove_whenParticipationNotExists_throwExc() {
+        when(showRepo.findOne(1L)).thenReturn(movie);
         when(participationRepo.findOne(1L)).thenReturn(null);
         exception.expect(ParticipationNotFoundException.class);
 
-        service.removeParticipation(1L);
+        service.removeParticipation(1L, 1L);
 
+        verify(showRepo, times(1)).findOne(1L);
+        verifyNoMoreInteractions(showRepo);
         verify(participationRepo, times(1)).findOne(1L);
         verifyNoMoreInteractions(participationRepo);
     }
 
     @Test
     public void remove_participationRemovedSuccessful() {
+        when(showRepo.findOne(1L)).thenReturn(movie);
         when(participationRepo.findOne(1L)).thenReturn(participation);
 
-        service.removeParticipation(1L);
+        service.removeParticipation(1L, 1L);
 
+        verify(showRepo, times(1)).findOne(1L);
+        verifyNoMoreInteractions(showRepo);
         verify(participationRepo, times(1)).findOne(1L);
         verify(participationRepo, times(1)).delete(1L);
         verifyNoMoreInteractions(participationRepo);

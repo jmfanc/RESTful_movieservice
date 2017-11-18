@@ -221,7 +221,7 @@ public class PersonControllerTest {
     @Test
     public void delete_whenPersonRemoved_statusOk() throws Exception {
         mockMvc.perform(delete("/people/{id}", 1L))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test

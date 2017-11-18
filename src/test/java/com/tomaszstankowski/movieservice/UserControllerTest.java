@@ -92,6 +92,7 @@ public class UserControllerTest {
 
     @Test
     public void post_whenUserAdded_statusCreated() throws Exception {
+        when(service.addUser(user)).thenReturn(user);
         mockMvc.perform(post("/users")
                 .content(json(userDTO))
                 .contentType(contentType))
@@ -135,9 +136,9 @@ public class UserControllerTest {
     }
 
     @Test
-    public void delete_whenMovieRemoved_statusOk() throws Exception {
+    public void delete_whenMovieRemoved_statusNoContent() throws Exception {
         mockMvc.perform(delete("/users/{login}", user.getLogin()))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
