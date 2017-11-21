@@ -167,17 +167,27 @@ public class UserController {
         service.removeUserFollower(login, principal.getName());
     }
 
-    @GetMapping(path = "/{login}/followers/ratings")
-    @PreAuthorize("(hasAnyRole('ROLE_USER', 'ROLE_ADMIN') AND principal.username == #login) OR hasRole('ROLE_ADMIN')")
-    public List<RatingDTO> getUserFollowersRatings(@PathVariable String login,
-                                                   @RequestParam("page") int page) {
-        Page<Rating> result = service.findUserFollowersRatings(login, page);
-        if (page >= result.getTotalPages() && page > 0)
-            throw new PageNotFoundException(page);
-        return result
-                .getContent()
+    @GetMapping(path = "/{login}/followed/ratings")
+    @PreAuthorize("(hasRole('ROLE_USER') AND principal.username == #login) OR hasRole('ROLE_ADMIN')")
+    public List<RatingDTO> getUserFollowedRatings(@PathVariable String login,
+                                                  @RequestParam(value = "page", required = false) Integer page,
+                                                  @RequestParam(value = "show", required = false) Long showId) {
+        List<Rating> ratings;
+        if (showId == null) {
+            if (page == null)
+                page = 0;
+            Page<Rating> pages = service.findUserFollowersRatings(login, page);
+            if (page >= pages.getTotalPages() && page > 0)
+                throw new PageNotFoundException(page);
+            ratings = pages.getContent();
+        } else {
+            ratings = service.findUserFollowersRatings(login, showId);
+        }
+        return ratings
                 .stream()
                 .map(mapper::fromEntity)
                 .collect(Collectors.toList());
     }
+
+
 }

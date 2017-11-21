@@ -1,16 +1,19 @@
 package com.tomaszstankowski.movieservice.service;
 
 import com.tomaszstankowski.movieservice.model.entity.Rating;
+import com.tomaszstankowski.movieservice.model.entity.Show;
 import com.tomaszstankowski.movieservice.model.entity.User;
 import com.tomaszstankowski.movieservice.model.enums.Sex;
 import com.tomaszstankowski.movieservice.model.enums.UserRole;
 import com.tomaszstankowski.movieservice.repository.RatingRepository;
+import com.tomaszstankowski.movieservice.repository.ShowRepository;
 import com.tomaszstankowski.movieservice.repository.UserRepository;
 import com.tomaszstankowski.movieservice.service.exception.conflict.EmailAlreadyExistsException;
 import com.tomaszstankowski.movieservice.service.exception.conflict.SelfFollowException;
 import com.tomaszstankowski.movieservice.service.exception.conflict.UserAlreadyExistsException;
 import com.tomaszstankowski.movieservice.service.exception.conflict.UserAlreadyFollowedException;
 import com.tomaszstankowski.movieservice.service.exception.not_found.FollowerNotFoundException;
+import com.tomaszstankowski.movieservice.service.exception.not_found.ShowNotFoundException;
 import com.tomaszstankowski.movieservice.service.exception.not_found.UserNotFoundException;
 import com.tomaszstankowski.movieservice.service.exception.unproccessable.ImmutableAdministratorException;
 import com.tomaszstankowski.movieservice.service.exception.unproccessable.InvalidUserException;
@@ -31,11 +34,16 @@ import java.util.regex.Pattern;
 public class UserService {
     private final UserRepository userRepo;
     private final RatingRepository ratingRepo;
+    private final ShowRepository showRepo;
     private final PasswordEncoder encoder;
 
-    public UserService(UserRepository userRepo, RatingRepository ratingRepo, PasswordEncoder encoder) {
+    public UserService(UserRepository userRepo,
+                       RatingRepository ratingRepo,
+                       ShowRepository showRepo,
+                       PasswordEncoder encoder) {
         this.userRepo = userRepo;
         this.ratingRepo = ratingRepo;
+        this.showRepo = showRepo;
         this.encoder = encoder;
         setAdmin();
     }
@@ -184,7 +192,20 @@ public class UserService {
         //must return empty page, because repository throws exception when 'followed' collection empty
         if (user.getFollowed().isEmpty())
             return new PageImpl<>(new ArrayList<>());
-        return ratingRepo.findUserFollowersRatings(user, pageable);
+        return ratingRepo.findUserFollowedRatings(user, pageable);
+    }
+
+    public List<Rating> findUserFollowersRatings(String login, long showId) {
+        User user = userRepo.findOne(login);
+        if (user == null)
+            throw new UserNotFoundException(login);
+        Show show = showRepo.findOne(showId);
+        if (show == null)
+            throw new ShowNotFoundException(showId);
+        //must return empty list, because repository throws exception when 'followed' collection empty
+        if (user.getFollowed().isEmpty())
+            return new ArrayList<>();
+        return ratingRepo.findUserFollowedRatings(user, show);
     }
 
     private Pageable createPageable(int page, Sort sort) {

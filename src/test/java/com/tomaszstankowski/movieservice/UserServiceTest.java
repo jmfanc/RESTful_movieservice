@@ -3,6 +3,7 @@ package com.tomaszstankowski.movieservice;
 import com.tomaszstankowski.movieservice.model.entity.User;
 import com.tomaszstankowski.movieservice.model.enums.Sex;
 import com.tomaszstankowski.movieservice.repository.RatingRepository;
+import com.tomaszstankowski.movieservice.repository.ShowRepository;
 import com.tomaszstankowski.movieservice.repository.UserRepository;
 import com.tomaszstankowski.movieservice.service.UserService;
 import com.tomaszstankowski.movieservice.service.exception.conflict.EmailAlreadyExistsException;
@@ -30,6 +31,8 @@ public class UserServiceTest {
     private UserRepository userRepo;
     @Mock
     private RatingRepository ratingRepo;
+    @Mock
+    private ShowRepository showRepo;
 
     private PasswordEncoder encoder = new BCryptPasswordEncoder();
 
@@ -42,7 +45,7 @@ public class UserServiceTest {
 
     @Before
     public void setup() {
-        service = new UserService(userRepo, ratingRepo, encoder);
+        service = new UserService(userRepo, ratingRepo, showRepo, encoder);
         user = new User(
                 "janusz111",
                 "password",

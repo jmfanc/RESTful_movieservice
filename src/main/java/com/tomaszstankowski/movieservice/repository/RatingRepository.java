@@ -10,10 +10,15 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface RatingRepository extends JpaRepository<Rating, Long>, JpaSpecificationExecutor<Rating> {
 
     Rating findByUserAndShow(User user, Show show);
 
-    @Query("select distinct r from ratings r where r.user in :#{#user.followed}")
-    Page<Rating> findUserFollowersRatings(@Param("user") User user, Pageable pageable);
+    @Query("select distinct r from ratings r where r.user in :#{#user.followed} order by r.date desc")
+    Page<Rating> findUserFollowedRatings(@Param("user") User user, Pageable pageable);
+
+    @Query("select distinct r from ratings r where r.show = :#{#show} and r.user in :#{#user.followed} order by r.date desc")
+    List<Rating> findUserFollowedRatings(@Param("user") User user, @Param("show") Show show);
 }
