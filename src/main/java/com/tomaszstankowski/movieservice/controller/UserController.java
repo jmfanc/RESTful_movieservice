@@ -44,11 +44,14 @@ public class UserController {
     }
 
     @GetMapping(path = "/{login}")
-    public UserDTO getUser(@PathVariable String login) {
+    public UserDTO getUser(@PathVariable String login, Principal principal) {
         User user = service.findUser(login);
         if (user == null)
             throw new UserNotFoundException(login);
-        return mapper.fromEntity(user);
+        UserDTO body = mapper.fromEntity(user);
+        if (principal.getName().equals(login))
+            body.setEmail(user.getEmail());
+        return body;
     }
 
     @GetMapping

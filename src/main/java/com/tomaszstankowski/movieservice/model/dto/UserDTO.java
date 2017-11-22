@@ -2,6 +2,7 @@ package com.tomaszstankowski.movieservice.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tomaszstankowski.movieservice.model.enums.Sex;
 import lombok.Data;
@@ -12,13 +13,13 @@ import java.util.Date;
 
 @Data
 @EqualsAndHashCode(of = "login")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDTO implements Serializable {
 
     private String login;
 
     private String name;
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String email;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
