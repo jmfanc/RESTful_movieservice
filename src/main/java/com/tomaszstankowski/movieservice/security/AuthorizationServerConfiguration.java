@@ -40,7 +40,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
                 .secret("secret")
                 .scopes("read", "write")
                 .authorities("ROLE_TRUSTED_CLIENT")
-                .authorizedGrantTypes("password", "refresh_token")
+                .authorizedGrantTypes("password", "refresh_token", "client_credentials")
                 .accessTokenValiditySeconds(3600);
     }
 
